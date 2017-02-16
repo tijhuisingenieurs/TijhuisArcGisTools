@@ -1,3 +1,8 @@
+import sys
+import os.path
+
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
+
 import arcpy
 from collections import OrderedDict
 from gistools.utils.collection import MemCollection
@@ -32,14 +37,14 @@ output_name = arcpy.GetParameterAsText(6)
 # Print ontvangen input naar console
 print 'Ontvangen parameters:'
 print 'Lijnenbestand = ', input_fl
-print 'Gebruik selectie = ', selectie
-print 'Afstand uit veld = ', distance_veld
-print 'Afstand vaste waarde = ', default_afstand
-print 'Over te nemen velden = ', copy_velden
-print 'Bestandslocatie voor output = ', output_dir
-print 'Bestandsnaam voor output = ', output_name
+print 'Gebruik selectie = ', str(selectie)
+print 'Afstand uit veld = ', str(distance_veld)
+print 'Afstand vaste waarde = ', str(default_afstand)
+print 'Over te nemen velden = ', str(copy_velden)
+print 'Bestandslocatie voor output = ', str(output_dir)
+print 'Bestandsnaam voor output = ', str(output_name)
 
-if distance_veld == None and default_afstand == None:
+if distance_veld is None and default_afstand is None:
     raise ValueError('Geen afstand opgegeven')
   
 # voorbereiden data typen en inlezen data
@@ -60,9 +65,9 @@ for row in rows:
             properties[field.baseName] = row.getValue(field.baseName)
           
     records.append({'geometry': {'type': 'MultiLineString',
-                                'coordinates': [[(point.X, point.Y) for 
+                                 'coordinates': [[(point.X, point.Y) for
                                                  point in line] for line in geom]},
-                   'properties': properties })
+                   'properties': properties})
 
 collection.writerecords(records)
 
@@ -70,18 +75,18 @@ collection.writerecords(records)
 print 'Bezig met uitvoeren van get_points_on_line...'
 
 point_col = get_points_on_line(collection, copy_velden, 
-                               distance_field = distance_veld, 
-                               default_distance = default_afstand)
+                               distance_field=distance_veld,
+                               default_distance=default_afstand)
 
 # wegschrijven tool resultaat
 print 'Bezig met het genereren van het doelbestand...'
 spatial_reference = arcpy.Describe(input_fl).spatialReference
 
 output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POINT', 
-                                                spatial_reference = spatial_reference  )
+                                                spatial_reference=spatial_reference)
 
 #
-# To Do: velden ophalen uit output collecion op basis van copy_fields
+# ToDo: velden ophalen uit output collection op basis van copy_fields
 #
 for field in fields:
     if field.name.lower() not in ['shape', 'fid', 'id']:
@@ -89,7 +94,6 @@ for field in fields:
                                   field.length, field.aliasName, field.isNullable, field.required, field.domain)
 
 dataset = arcpy.InsertCursor(output_fl)
-
 
 for p in point_col.filter():
     row = dataset.newRow()
