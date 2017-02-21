@@ -1,5 +1,7 @@
 import sys
 import os.path
+import tempfile
+import shutil
 from collections import OrderedDict
 
 import arcpy
@@ -16,26 +18,31 @@ from gistools.tools.dwp_tools import flip_lines
 # Read the parameter values
 # 0: lijnenbestand
 # 1: gebruik alleen geselecteerde features (boolean)
-# 3: Doelmap voor doelbestand
-# 4: Doelbestand voor punten
+# 2: Doelbestand voor punten
 
 # input_fl = arcpy.GetParameterAsText(0)
 # selectie = arcpy.GetParameter(1)
-# output_dir = arcpy.GetParameterAsText(2)
-# output_name = arcpy.GetParameterAsText(3)
+# output_file = arcpy.GetParameterAsText(2)
+
 
 # Testwaarden voor test zonder GUI:
-input_fl = 'C:\\Users\\annemieke\\Desktop\\TIJDELIJK\\1. GIS zaken\\Test_kwaliteit.shp'
+input_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'Test_kwaliteit.shp')
 selectie = 'FALSE'
-output_dir = 'C:\\Users\\annemieke\\Desktop\\TIJDELIJK\\1. GIS zaken\\'
-output_name = 'test_flipped_line'
+test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
+if os.path.exists(test_dir):
+    # empty test directory
+    shutil.rmtree(test_dir)
+os.mkdir(test_dir)
+
+output_file_points = os.path.join(test_dir, 'test_punten.shp')
+
 
 # Print ontvangen input naar console
 print 'Ontvangen parameters:'
 print 'Lijnenbestand = ', input_fl
 print 'Gebruik selectie = ', str(selectie)
-print 'Bestandslocatie voor output = ', str(output_dir)
-print 'Bestandsnaam voor output = ', str(output_name)
+print 'Bestand voor output = ', str(output_file)
+
 
 
 # voorbereiden data typen en inlezen data
@@ -70,6 +77,10 @@ flipped_line = flip_lines(collection)
 # wegschrijven tool resultaat
 print 'Bezig met het genereren van het doelbestand...'
 spatial_reference = arcpy.Describe(input_fl).spatialReference
+
+output_name = os.path.basename(output_file).split('.')[0]
+output_dir = os.path.dirname(output_file)
+
 
 output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POLYLINE', 
                                                 spatial_reference=spatial_reference)

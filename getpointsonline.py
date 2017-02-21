@@ -1,5 +1,7 @@
 import sys
 import os.path
+import tempfile
+import shutil
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
 
@@ -15,8 +17,7 @@ from addresulttodisplay import add_result_to_display
 # 2: Veld met afstand (distance_field)
 # 3: Vaste waarde voor afstand (default_distance)
 # 4: Lijst met velden (copy_fields)
-# 5: Doelmap voor doelbestand
-# 6: Doelbestand voor punten
+# 5: Doelbestand voor punten
 
 input_fl = arcpy.GetParameterAsText(0)
 selectie = arcpy.GetParameter(1)
@@ -26,12 +27,19 @@ copy_velden = arcpy.GetParameterAsText(4)
 output_file = arcpy.GetParameterAsText(5)
 
 # Testwaarden voor test zonder GUI:
-# input_fl = 'C:\\Users\\annemieke\\Desktop\\TIJDELIJK\\1. GIS zaken\\Test_kwaliteit.shp'
+# input_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'Test_kwaliteit.shp')
 # selectie = 'FALSE'
 # distance_veld = None
 # default_afstand = 10.0
 # copy_velden = ['HYDRO_CODE', 'DATUM_KM', '[VER_EIND]']
-# output_file = 'C:\\Users\\annemieke\\Desktop\\TIJDELIJK\\1. GIS zaken\\test_punten'
+# 
+# test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
+# if os.path.exists(test_dir):
+#     # empty test directory
+#     shutil.rmtree(test_dir)
+# os.mkdir(test_dir)
+#  
+# output_file = os.path.join(test_dir, 'test_punten.shp')
 
 # Print ontvangen input naar console
 print 'Ontvangen parameters:'
@@ -86,6 +94,9 @@ spatial_reference = arcpy.Describe(input_fl).spatialReference
 
 output_name = os.path.basename(output_file).split('.')[0]
 output_dir = os.path.dirname(output_file)
+
+print 'output_name = ', output_name 
+print 'output_dir = ', output_dir
 
 output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POINT',
                                                 spatial_reference=spatial_reference)
