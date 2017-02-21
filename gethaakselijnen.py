@@ -103,19 +103,17 @@ point_col = get_points_on_line(collection, copy_velden,
                                default_distance=default_afstand)
 
 haakselijn_col = get_haakselijnen_on_points_on_line(collection, point_col, copy_velden,
-                                      length_field = lengte_veld, 
-                                      default_length = default_lengte)
+                                                    length_field=lengte_veld,
+                                                    default_length=default_lengte)
 
 # wegschrijven tool resultaat pointsonline
 print 'Bezig met het genereren van het doelbestand met punten...'
 spatial_reference = arcpy.Describe(input_fl).spatialReference
 
 output_fl_points = arcpy.CreateFeatureclass_management(output_dir, output_name_points, 'POINT', 
-                                                spatial_reference=spatial_reference)
+                                                       spatial_reference=spatial_reference)
 
-#
 # ToDo: velden ophalen uit output collection op basis van copy_fields
-#
 for field in fields:
     if field.name.lower() not in ['shape', 'fid', 'id']:
         arcpy.AddField_management(output_fl_points, field.name, field.type, field.precision, field.scale,
@@ -128,9 +126,6 @@ for p in point_col.filter():
     point = arcpy.Point()
     point.X = p['geometry']['coordinates'][0]
     point.Y = p['geometry']['coordinates'][1]
-#     print p
-#     print point.X
-#     print point.Y
     row.Shape = point
         
     for field in fields:
@@ -139,15 +134,12 @@ for p in point_col.filter():
 
     dataset.insertRow(row)
 
-
 # wegschrijven tool resultaat haakselijnen
 print 'Bezig met het genereren van het doelbestand met haakse lijnen...'
 output_fl_haakselijnen = arcpy.CreateFeatureclass_management(output_dir, output_name_haakselijn, 'POLYLINE', 
-                                                    spatial_reference=spatial_reference)
-    
-#
+                                                             spatial_reference=spatial_reference)
+
 # ToDo: velden ophalen uit output collection op basis van copy_fields
-#
 for field in fields:
     if field.name.lower() not in ['shape', 'fid', 'id']:
         arcpy.AddField_management(output_fl_haakselijnen, field.name, field.type, field.precision, field.scale,
@@ -155,8 +147,7 @@ for field in fields:
 
 dataset = arcpy.InsertCursor(output_fl_haakselijnen)
 
-# Haakselijn_col bevat enkel LineStrings, geen MultiLineStrings
-# nalopen line_parts is dus niet nodig...
+# Haakselijn_col bevat enkel LineStrings, geen MultiLineStrings, nalopen line_parts is dus niet nodig...
 
 for l in haakselijn_col.filter():
     row = dataset.newRow()
@@ -170,7 +161,6 @@ for l in haakselijn_col.filter():
     mline.add(array)
 
     row.Shape = mline
-    # arcpy.geometries.Polyline(line, spatial_reference)
 
     for field in fields:
         if field.name.lower() not in ['shape', 'fid', 'id']:
