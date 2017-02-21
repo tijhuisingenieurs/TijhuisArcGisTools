@@ -12,29 +12,26 @@ from gistools.tools.clean import get_end_points
 # 0: lijnenbestand
 # 1: Id veld van lijnenbestand
 # 2: Marge waarbinnen lijnen gecombineerd zijn
-# 3: Doelmap voor doelbestand
-# 4: Doelbestand voor punten
+# 3: Uitvoerbestand
 
 input_fl = arcpy.GetParameterAsText(0)
 tolerance = arcpy.GetParameter(1)
 id_field = arcpy.GetParameterAsText(2)
-output_dir = arcpy.GetParameterAsText(3)
-output_name = arcpy.GetParameterAsText(4)
+output_file = arcpy.GetParameterAsText(3)
 
 # Testwaarden voor test zonder GUI:
 # input_fl = 'C:\\tmp\\rd_line.shp'
 # tolerance = 0.001
 # id_field = 'id'
-# output_dir = 'C:\\tmp\\'
-# output_name = 'end_points'
+# output_file = 'C:\\tmp\\end_points.shp'
+
 
 # Print ontvangen input naar console
 print 'Ontvangen parameters:'
 print 'Lijnenbestand = ', input_fl
 print 'Tolerantie = ', tolerance
 print 'Id veld = ', id_field
-print 'Bestandslocatie voor output = ', str(output_dir)
-print 'Bestandsnaam voor output = ', str(output_name)
+print 'Bestand voor output = ', str(output_file)
 
 # voorbereiden data typen en inlezen data
 print 'Bezig met voorbereiden van de data...'
@@ -68,6 +65,10 @@ point_col = get_end_points(collection, id_field, tolerance)
 # wegschrijven tool resultaat
 print 'Bezig met het genereren van het doelbestand...'
 spatial_reference = arcpy.Describe(input_fl).spatialReference
+
+
+output_name = os.path.basename(output_file).split('.')[0]
+output_dir = os.path.dirname(output_file)
 
 output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POINT',
                                                 spatial_reference=spatial_reference)
