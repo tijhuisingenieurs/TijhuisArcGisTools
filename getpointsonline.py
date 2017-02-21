@@ -22,8 +22,7 @@ selectie = arcpy.GetParameter(1)
 distance_veld = arcpy.GetParameterAsText(2)
 default_afstand = arcpy.GetParameter(3)
 copy_velden = arcpy.GetParameterAsText(4)
-output_dir = arcpy.GetParameterAsText(5)
-output_name = arcpy.GetParameterAsText(6)
+output_file = arcpy.GetParameterAsText(5)
 
 # Testwaarden voor test zonder GUI:
 # input_fl = 'C:\\Users\\annemieke\\Desktop\\TIJDELIJK\\1. GIS zaken\\Test_kwaliteit.shp'
@@ -31,8 +30,7 @@ output_name = arcpy.GetParameterAsText(6)
 # distance_veld = None
 # default_afstand = 10.0
 # copy_velden = ['HYDRO_CODE', 'DATUM_KM', '[VER_EIND]']
-# output_dir = 'C:\\Users\\annemieke\\Desktop\\TIJDELIJK\\1. GIS zaken\\'
-# output_name = 'test_punten'
+# output_file = 'C:\\Users\\annemieke\\Desktop\\TIJDELIJK\\1. GIS zaken\\test_punten'
 
 # Print ontvangen input naar console
 print 'Ontvangen parameters:'
@@ -41,8 +39,7 @@ print 'Gebruik selectie = ', str(selectie)
 print 'Afstand uit veld = ', str(distance_veld)
 print 'Afstand vaste waarde = ', str(default_afstand)
 print 'Over te nemen velden = ', str(copy_velden)
-print 'Bestandslocatie voor output = ', str(output_dir)
-print 'Bestandsnaam voor output = ', str(output_name)
+print 'Bestand voor output = ', str(output_file)
 
 if distance_veld is None and default_afstand is None:
     raise ValueError('Geen afstand opgegeven')
@@ -82,7 +79,10 @@ point_col = get_points_on_line(collection, copy_velden,
 print 'Bezig met het genereren van het doelbestand...'
 spatial_reference = arcpy.Describe(input_fl).spatialReference
 
-output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POINT', 
+output_name = os.path.basename(output_file).split('.')[0]
+output_dir = os.path.dirname(output_file)
+
+output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POINT',
                                                 spatial_reference=spatial_reference)
 
 #
