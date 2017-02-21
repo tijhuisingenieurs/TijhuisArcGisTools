@@ -7,6 +7,7 @@ import arcpy
 from collections import OrderedDict
 from gistools.utils.collection import MemCollection
 from gistools.tools.connect_start_end_points import get_points_on_line
+from addresulttodisplay import add_result_to_display
 
 # Read the parameter values
 # 0: lijnenbestand
@@ -114,5 +115,8 @@ for p in point_col.filter():
             row.setValue(field.name, p['properties'].get(field.name, None))        
 
     dataset.insertRow(row)
-    
+
+display_name = output_name
+add_result_to_display(output_fl, display_name)
+
 print 'Gereed'
