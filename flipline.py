@@ -1,13 +1,17 @@
 import sys
 import os.path
+from collections import OrderedDict
+
+import arcpy
+from .addresulttodisplay import add_result_to_display
+
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
 
-import arcpy
-from collections import OrderedDict
+
 from gistools.utils.collection import MemCollection
 from gistools.tools.dwp_tools import flip_lines
-from addresulttodisplay import add_result_to_display
+
     
 # Read the parameter values
 # 0: lijnenbestand
@@ -34,7 +38,6 @@ print 'Bestandslocatie voor output = ', str(output_dir)
 print 'Bestandsnaam voor output = ', str(output_name)
 
 
-  
 # voorbereiden data typen en inlezen data
 print 'Bezig met voorbereiden van de data...'
 
@@ -71,9 +74,7 @@ spatial_reference = arcpy.Describe(input_fl).spatialReference
 output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POLYLINE', 
                                                 spatial_reference=spatial_reference)
 
-#
 # ToDo: velden ophalen uit output collection op basis van copy_fields
-#
 for field in fields:
     if field.name.lower() not in ['shape', 'fid', 'id']:
         arcpy.AddField_management(output_fl, field.name, field.type, field.precision, field.scale,
