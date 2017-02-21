@@ -8,6 +8,7 @@ from collections import OrderedDict
 from gistools.utils.collection import MemCollection
 from gistools.tools.connect_start_end_points import get_points_on_line
 from gistools.tools.dwp_tools import get_haakselijnen_on_points_on_line
+from addresulttodisplay import add_result_to_display
 
 # Read the parameter values
 # 0: lijnenbestand
@@ -39,10 +40,10 @@ output_name_haakselijn = arcpy.GetParameterAsText(9)
 # default_afstand = 10.0
 # lengte_veld = None
 # default_lengte = 15
-# copy_velden = ['HYDRO_CODE', 'DATUM_KM', '[VER_EIND]']
+# copy_velden = ['HYDRO_CODE', 'DATUM_KM', 'VER_EIND']
 # output_dir = 'C:\\Users\\annemieke\\Desktop\\TIJDELIJK\\1. GIS zaken\\'
-# output_name_points = 'test_punten'
-# output_name_haakselijn = 'test_DWP'
+# output_name_points = 'test_punten1'
+# output_name_haakselijn = 'test_DWP1'
 
 # Print ontvangen input naar console
 print 'Ontvangen parameters:'
@@ -101,15 +102,15 @@ point_col = get_points_on_line(collection, copy_velden,
                                distance_field=distance_veld,
                                default_distance=default_afstand)
 
-haakselijn_col = get_haakselijnen_on_points_on_line(collection, copy_velden, point_col, 
-                                      lenghtfield= lengte_veld, 
+haakselijn_col = get_haakselijnen_on_points_on_line(collection, point_col, copy_velden,
+                                      length_field = lengte_veld, 
                                       default_length = default_lengte)
 
 # wegschrijven tool resultaat pointsonline
 print 'Bezig met het genereren van het doelbestand met punten...'
 spatial_reference = arcpy.Describe(input_fl).spatialReference
 
-output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name_points, 'POINT', 
+output_fl_points = arcpy.CreateFeatureclass_management(output_dir, output_name_points, 'POINT', 
                                                 spatial_reference=spatial_reference)
 
 #
@@ -117,10 +118,10 @@ output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name_points, 
 #
 for field in fields:
     if field.name.lower() not in ['shape', 'fid', 'id']:
-        arcpy.AddField_management(output_fl, field.name, field.type, field.precision, field.scale,
+        arcpy.AddField_management(output_fl_points, field.name, field.type, field.precision, field.scale,
                                   field.length, field.aliasName, field.isNullable, field.required, field.domain)
 
-dataset = arcpy.InsertCursor(output_fl)
+dataset = arcpy.InsertCursor(output_fl_points)
 
 for p in point_col.filter():
     row = dataset.newRow()
@@ -141,7 +142,7 @@ for p in point_col.filter():
 
 # wegschrijven tool resultaat haakselijnen
 print 'Bezig met het genereren van het doelbestand met haakse lijnen...'
-output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name_haakselijn, 'POLYLINE', 
+output_fl_haakselijnen = arcpy.CreateFeatureclass_management(output_dir, output_name_haakselijn, 'POLYLINE', 
                                                     spatial_reference=spatial_reference)
     
 #
@@ -149,30 +150,37 @@ output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name_haakseli
 #
 for field in fields:
     if field.name.lower() not in ['shape', 'fid', 'id']:
-        arcpy.AddField_management(output_fl, field.name, field.type, field.precision, field.scale,
+        arcpy.AddField_management(output_fl_haakselijnen, field.name, field.type, field.precision, field.scale,
                                   field.length, field.aliasName, field.isNullable, field.required, field.domain)
 
-dataset = arcpy.InsertCursor(output_fl)
+dataset = arcpy.InsertCursor(output_fl_haakselijnen)
 
-for record in records:
+# Haakselijn_col bevat enkel LineStrings, geen MultiLineStrings
+# nalopen line_parts is dus niet nodig...
+
+for l in haakselijn_col.filter():
     row = dataset.newRow()
     mline = arcpy.Array()
-    for line_part in record['geometry']['coordinates']:
-        array = arcpy.Array()
-        for p in line_part:
-            point.X = p[0]
-            point.Y = p[1]
-            array.add(point)
+    array = arcpy.Array()
+    for p in l['geometry']['coordinates']:
+        point.X = p[0]
+        point.Y = p[1]
+        array.add(point)
 
-        mline.add(array)
+    mline.add(array)
 
     row.Shape = mline
     # arcpy.geometries.Polyline(line, spatial_reference)
 
     for field in fields:
         if field.name.lower() not in ['shape', 'fid', 'id']:
-            row.setValue(field.name, record['properties'].get(field.name, None))
+            row.setValue(field.name, l['properties'].get(field.name, None))
 
     dataset.insertRow(row)
-    
+
+display_name = output_name_points
+add_result_to_display(output_fl_points, display_name) 
+display_name = output_name_haakselijn
+add_result_to_display(output_fl_haakselijnen, display_name) 
+
 print 'Gereed'
