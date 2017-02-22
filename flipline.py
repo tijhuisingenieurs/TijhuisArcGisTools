@@ -5,7 +5,7 @@ import shutil
 from collections import OrderedDict
 
 import arcpy
-from .addresulttodisplay import add_result_to_display
+from addresulttodisplay import add_result_to_display
 
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
@@ -20,10 +20,10 @@ from gistools.tools.dwp_tools import flip_lines
 # 1: gebruik alleen geselecteerde features (boolean)
 # 2: Doelbestand voor punten
 
+
 # input_fl = arcpy.GetParameterAsText(0)
 # selectie = arcpy.GetParameter(1)
 # output_file = arcpy.GetParameterAsText(2)
-
 
 # Testwaarden voor test zonder GUI:
 input_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'Test_kwaliteit.shp')
@@ -34,7 +34,7 @@ if os.path.exists(test_dir):
     shutil.rmtree(test_dir)
 os.mkdir(test_dir)
 
-output_file_points = os.path.join(test_dir, 'test_punten.shp')
+output_file = os.path.join(test_dir, 'test_punten.shp')
 
 
 # Print ontvangen input naar console
@@ -72,7 +72,7 @@ collection.writerecords(records)
 # aanroepen tool
 print 'Bezig met uitvoeren van get_flipped_line...'
 
-flipped_line = flip_lines(collection)
+flipped_line_col = flip_lines(collection)
 
 # wegschrijven tool resultaat
 print 'Bezig met het genereren van het doelbestand...'
@@ -93,10 +93,10 @@ for field in fields:
 
 dataset = arcpy.InsertCursor(output_fl)
 
-for record in records:
+for l in flipped_line_col:
     row = dataset.newRow()
     mline = arcpy.Array()
-    for line_part in record['geometry']['coordinates']:
+    for line_part in l['geometry']['coordinates']:
         array = arcpy.Array()
         for p in line_part:
             point.X = p[0]
@@ -110,7 +110,7 @@ for record in records:
 
     for field in fields:
         if field.name.lower() not in ['shape', 'fid', 'id']:
-            row.setValue(field.name, record['properties'].get(field.name, None))
+            row.setValue(field.name, l['properties'].get(field.name, None))
 
     dataset.insertRow(row)       
 
