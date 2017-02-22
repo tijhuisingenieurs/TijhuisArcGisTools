@@ -17,30 +17,27 @@ from gistools.tools.dwp_tools import flip_lines
     
 # Read the parameter values
 # 0: lijnenbestand
-# 1: gebruik alleen geselecteerde features (boolean)
 # 2: Doelbestand voor punten
 
-
-# input_fl = arcpy.GetParameterAsText(0)
-# selectie = arcpy.GetParameter(1)
-# output_file = arcpy.GetParameterAsText(2)
+ 
+input_fl = arcpy.GetParameterAsText(0)
+output_file = arcpy.GetParameterAsText(1)
 
 # Testwaarden voor test zonder GUI:
-input_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'Test_kwaliteit.shp')
-selectie = 'FALSE'
-test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
-if os.path.exists(test_dir):
-    # empty test directory
-    shutil.rmtree(test_dir)
-os.mkdir(test_dir)
-
-output_file = os.path.join(test_dir, 'test_punten.shp')
+# input_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'Test_kwaliteit.shp')
+# selectie = 'FALSE'
+# test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
+# if os.path.exists(test_dir):
+#     # empty test directory
+#     shutil.rmtree(test_dir)
+# os.mkdir(test_dir)
+# 
+# output_file = os.path.join(test_dir, 'test_flip.shp')
 
 
 # Print ontvangen input naar console
 print 'Ontvangen parameters:'
 print 'Lijnenbestand = ', input_fl
-print 'Gebruik selectie = ', str(selectie)
 print 'Bestand voor output = ', str(output_file)
 
 

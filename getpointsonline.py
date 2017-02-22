@@ -13,18 +13,16 @@ from addresulttodisplay import add_result_to_display
 
 # Read the parameter values
 # 0: lijnenbestand
-# 1: gebruik alleen geselecteerde features (boolean)
-# 2: Veld met afstand (distance_field)
-# 3: Vaste waarde voor afstand (default_distance)
-# 4: Lijst met velden (copy_fields)
-# 5: Doelbestand voor punten
+# 1: Veld met afstand (distance_field)
+# 2: Vaste waarde voor afstand (default_distance)
+# 3: Lijst met velden (copy_fields)
+# 4: Doelbestand voor punten
 
 input_fl = arcpy.GetParameterAsText(0)
-selectie = arcpy.GetParameter(1)
-distance_veld = arcpy.GetParameterAsText(2)
-default_afstand = arcpy.GetParameter(3)
-copy_velden = arcpy.GetParameterAsText(4)
-output_file = arcpy.GetParameterAsText(5)
+distance_veld = arcpy.GetParameterAsText(1)
+default_afstand = arcpy.GetParameter(2)
+copy_velden = arcpy.GetParameterAsText(3)
+output_file = arcpy.GetParameterAsText(4)
 
 # Testwaarden voor test zonder GUI:
 # input_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'Test_kwaliteit.shp')
@@ -44,7 +42,6 @@ output_file = arcpy.GetParameterAsText(5)
 # Print ontvangen input naar console
 print 'Ontvangen parameters:'
 print 'Lijnenbestand = ', input_fl
-print 'Gebruik selectie = ', str(selectie)
 print 'Afstand uit veld = ', str(distance_veld)
 print 'Afstand vaste waarde = ', str(default_afstand)
 print 'Over te nemen velden = ', str(copy_velden)

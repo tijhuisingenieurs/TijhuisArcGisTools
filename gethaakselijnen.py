@@ -14,25 +14,21 @@ from addresulttodisplay import add_result_to_display
 
 # Read the parameter values
 # 0: lijnenbestand
-# 1: gebruik alleen geselecteerde features (boolean)
-# 2: Veld met afstand (distance_field)
-# 3: Vaste waarde voor afstand (default_distance)
-# 4: Veld met lengte haakselijn (length_field)
-# 5: Vaste waarde voor lengte haakselijn (default_length)
-# 6: Lijst met velden (copy_fields)
-# 7: Doelbestand voor punten
-# 8: Doelbestand voor haakse lijnen
+# 1: Veld met afstand (distance_field)
+# 2: Vaste waarde voor afstand (default_distance)
+# 3: Veld met lengte haakselijn (length_field)
+# 4: Vaste waarde voor lengte haakselijn (default_length)
+# 5: Lijst met velden (copy_fields)
+# 6: Doelbestand voor haakse lijnen
 
 
 input_fl = arcpy.GetParameterAsText(0)
-selectie = arcpy.GetParameter(1)
-distance_veld = arcpy.GetParameterAsText(2)
-default_afstand = arcpy.GetParameter(3)
-lengte_veld = arcpy.GetParameterAsText(2)
-default_lengte = arcpy.GetParameter(3)
-copy_velden = arcpy.GetParameterAsText(6)
-output_file_points = arcpy.GetParameterAsText(7)
-output_file_haakselijn = arcpy.GetParameterAsText(8)
+distance_veld = arcpy.GetParameterAsText(1)
+default_afstand = arcpy.GetParameter(2)
+lengte_veld = arcpy.GetParameterAsText(3)
+default_lengte = arcpy.GetParameter(4)
+copy_velden = arcpy.GetParameterAsText(5)
+output_file_haakselijn = arcpy.GetParameterAsText(6)
 
 
 # Testwaarden voor test zonder GUI:
@@ -49,19 +45,17 @@ output_file_haakselijn = arcpy.GetParameterAsText(8)
 #     shutil.rmtree(test_dir)
 # os.mkdir(test_dir)
 # 
-# output_file_points = os.path.join(test_dir, 'test_intersecties.shp')
+
 # output_file_haakselijn =  os.path.join(test_dir, 'test_haakselijnen.shp')
 
 # Print ontvangen input naar console
 print 'Ontvangen parameters:'
 print 'Lijnenbestand = ', input_fl
-print 'Gebruik selectie = ', str(selectie)
 print 'Afstand uit veld = ', str(distance_veld)
 print 'Afstand vaste waarde = ', str(default_afstand)
 print 'Lengte haakse lijn uit veld = ', str(lengte_veld)
 print 'Lengte haakse lijn vaste waarde = ', str(default_lengte)
 print 'Over te nemen velden = ', str(copy_velden)
-print 'Bestandsnaam voor output punten = ', str(output_file_points)
 print 'Bestandsnaam voor output haakse lijnen = ', str(output_file_haakselijn)
 
 # validatie ontvangen parameters
@@ -116,8 +110,8 @@ haakselijn_col = get_haakselijnen_on_points_on_line(collection, point_col, copy_
 print 'Bezig met het genereren van het doelbestand met punten...'
 spatial_reference = arcpy.Describe(input_fl).spatialReference
 
-output_name_points = os.path.basename(output_file_points).split('.')[0]
-output_dir_points = os.path.dirname(output_file_points)
+output_name_points = os.path.basename(output_file_haakselijn).split('.')[0]+'_intersectiepunten'
+output_dir_points = os.path.dirname(output_file_haakselijn)
 
 output_fl_points = arcpy.CreateFeatureclass_management(output_dir_points, output_name_points, 'POINT', 
                                                        spatial_reference=spatial_reference)
