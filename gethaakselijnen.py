@@ -1,5 +1,7 @@
 import sys
 import os.path
+import tempfile
+import shutil
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
 
@@ -12,51 +14,49 @@ from addresulttodisplay import add_result_to_display
 
 # Read the parameter values
 # 0: lijnenbestand
-# 1: gebruik alleen geselecteerde features (boolean)
-# 2: Veld met afstand (distance_field)
-# 3: Vaste waarde voor afstand (default_distance)
-# 4: Veld met lengte haakselijn (length_field)
-# 5: Vaste waarde voor lengte haakselijn (default_length)
-# 6: Lijst met velden (copy_fields)
-# 7: Doelmap voor doelbestand
-# 8: Doelbestand voor punten
-# 9: Doelbestand voor haakse lijnen
+# 1: Veld met afstand (distance_field)
+# 2: Vaste waarde voor afstand (default_distance)
+# 3: Veld met lengte haakselijn (length_field)
+# 4: Vaste waarde voor lengte haakselijn (default_length)
+# 5: Lijst met velden (copy_fields)
+# 6: Doelbestand voor haakse lijnen
+
 
 input_fl = arcpy.GetParameterAsText(0)
-selectie = arcpy.GetParameter(1)
-distance_veld = arcpy.GetParameterAsText(2)
-default_afstand = arcpy.GetParameter(3)
-lengte_veld = arcpy.GetParameterAsText(2)
-default_lengte = arcpy.GetParameter(3)
-copy_velden = arcpy.GetParameterAsText(6)
-output_dir = arcpy.GetParameterAsText(7)
-output_name_points = arcpy.GetParameterAsText(8)
-output_name_haakselijn = arcpy.GetParameterAsText(9)
+distance_veld = arcpy.GetParameterAsText(1)
+default_afstand = arcpy.GetParameter(2)
+lengte_veld = arcpy.GetParameterAsText(3)
+default_lengte = arcpy.GetParameter(4)
+copy_velden = arcpy.GetParameterAsText(5)
+output_file_haakselijn = arcpy.GetParameterAsText(6)
+
 
 # Testwaarden voor test zonder GUI:
-# input_fl = 'C:\\Users\\annemieke\\Desktop\\TIJDELIJK\\1. GIS zaken\\Test_kwaliteit.shp'
+# input_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'Test_kwaliteit.shp')
 # selectie = 'FALSE'
 # distance_veld = None
 # default_afstand = 10.0
 # lengte_veld = None
 # default_lengte = 15
 # copy_velden = ['HYDRO_CODE', 'DATUM_KM', 'VER_EIND']
-# output_dir = 'C:\\Users\\annemieke\\Desktop\\TIJDELIJK\\1. GIS zaken\\'
-# output_name_points = 'test_punten1'
-# output_name_haakselijn = 'test_DWP1'
+# test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
+# if os.path.exists(test_dir):
+#     # empty test directory
+#     shutil.rmtree(test_dir)
+# os.mkdir(test_dir)
+# 
+
+# output_file_haakselijn =  os.path.join(test_dir, 'test_haakselijnen.shp')
 
 # Print ontvangen input naar console
 print 'Ontvangen parameters:'
 print 'Lijnenbestand = ', input_fl
-print 'Gebruik selectie = ', str(selectie)
 print 'Afstand uit veld = ', str(distance_veld)
 print 'Afstand vaste waarde = ', str(default_afstand)
 print 'Lengte haakse lijn uit veld = ', str(lengte_veld)
 print 'Lengte haakse lijn vaste waarde = ', str(default_lengte)
 print 'Over te nemen velden = ', str(copy_velden)
-print 'Bestandslocatie voor output = ', str(output_dir)
-print 'Bestandsnaam voor output punten = ', str(output_name_points)
-print 'Bestandsnaam voor output haakse lijnen = ', str(output_name_haakselijn)
+print 'Bestandsnaam voor output haakse lijnen = ', str(output_file_haakselijn)
 
 # validatie ontvangen parameters
 if distance_veld is None and default_afstand is None:
@@ -110,7 +110,10 @@ haakselijn_col = get_haakselijnen_on_points_on_line(collection, point_col, copy_
 print 'Bezig met het genereren van het doelbestand met punten...'
 spatial_reference = arcpy.Describe(input_fl).spatialReference
 
-output_fl_points = arcpy.CreateFeatureclass_management(output_dir, output_name_points, 'POINT', 
+output_name_points = os.path.basename(output_file_haakselijn).split('.')[0]+'_intersectiepunten'
+output_dir_points = os.path.dirname(output_file_haakselijn)
+
+output_fl_points = arcpy.CreateFeatureclass_management(output_dir_points, output_name_points, 'POINT', 
                                                        spatial_reference=spatial_reference)
 
 # ToDo: velden ophalen uit output collection op basis van copy_fields
@@ -136,7 +139,11 @@ for p in point_col.filter():
 
 # wegschrijven tool resultaat haakselijnen
 print 'Bezig met het genereren van het doelbestand met haakse lijnen...'
-output_fl_haakselijnen = arcpy.CreateFeatureclass_management(output_dir, output_name_haakselijn, 'POLYLINE', 
+
+output_name_haakselijn = os.path.basename(output_file_haakselijn).split('.')[0]
+output_dir_haakselijn = os.path.dirname(output_file_haakselijn)
+
+output_fl_haakselijnen = arcpy.CreateFeatureclass_management(output_dir_haakselijn, output_name_haakselijn, 'POLYLINE', 
                                                              spatial_reference=spatial_reference)
 
 # ToDo: velden ophalen uit output collection op basis van copy_fields
