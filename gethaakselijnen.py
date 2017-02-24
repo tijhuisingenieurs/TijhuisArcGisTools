@@ -22,7 +22,7 @@ from addresulttodisplay import add_result_to_display
 # 6: Doelbestand voor haakse lijnen
 
 
-input_fl = arcpy.GetParameterAsText(0)
+# input_fl = arcpy.GetParameterAsText(0)
 distance_veld = arcpy.GetParameterAsText(1)
 default_afstand = arcpy.GetParameter(2)
 lengte_veld = arcpy.GetParameterAsText(3)
@@ -33,6 +33,8 @@ output_file_haakselijn = arcpy.GetParameterAsText(6)
 
 # Testwaarden voor test zonder GUI:
 # input_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'Test_kwaliteit.shp')
+# input_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'Lijnen_Bedum_singlepart.shp')
+# input_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'TI17034_Trajectenshape_aaenmaas_2017.shp')
 # selectie = 'FALSE'
 # distance_veld = None
 # default_afstand = 10.0
@@ -44,8 +46,8 @@ output_file_haakselijn = arcpy.GetParameterAsText(6)
 #     # empty test directory
 #     shutil.rmtree(test_dir)
 # os.mkdir(test_dir)
-# 
-
+#  
+#   
 # output_file_haakselijn =  os.path.join(test_dir, 'test_haakselijnen.shp')
 
 # Print ontvangen input naar console
