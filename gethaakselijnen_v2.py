@@ -23,18 +23,20 @@ from addresulttodisplay import add_result_to_display
 
 
 input_fl = arcpy.GetParameterAsText(0)
-distance_veld = arcpy.GetParameterAsText(1)
-default_afstand = arcpy.GetParameter(2)
-lengte_veld = arcpy.GetParameterAsText(3)
-default_lengte = arcpy.GetParameter(4)
-copy_velden = arcpy.GetParameterAsText(5)
-output_file_haakselijn = arcpy.GetParameterAsText(6)
+input_points = arcpy.GetParameterAsText(1)
+distance_veld = arcpy.GetParameterAsText(2)
+default_afstand = arcpy.GetParameter(3)
+lengte_veld = arcpy.GetParameterAsText(4)
+default_lengte = arcpy.GetParameter(5)
+copy_velden = arcpy.GetParameterAsText(6)
+output_file_haakselijn = arcpy.GetParameterAsText(7)
 
 
 # Testwaarden voor test zonder GUI:
 # input_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'Test_kwaliteit.shp')
 # input_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'Lijnen_Bedum_singlepart.shp')
 # input_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'TI17034_Trajectenshape_aaenmaas_2017.shp')
+# input_points = os.path.join(os.path.dirname(__file__),'test', 'data', 'Test_kwaliteit_punten.shp')
 # selectie = 'FALSE'
 # distance_veld = None
 # default_afstand = 10.0
@@ -46,13 +48,14 @@ output_file_haakselijn = arcpy.GetParameterAsText(6)
 #     # empty test directory
 #     shutil.rmtree(test_dir)
 # os.mkdir(test_dir)
-#  
 #   
+#    
 # output_file_haakselijn =  os.path.join(test_dir, 'test_haakselijnen.shp')
 
 # Print ontvangen input naar console
 print 'Ontvangen parameters:'
 print 'Lijnenbestand = ', input_fl
+print 'Puntenbestand = ', input_points
 print 'Afstand uit veld = ', str(distance_veld)
 print 'Afstand vaste waarde = ', str(default_afstand)
 print 'Lengte haakse lijn uit veld = ', str(lengte_veld)
@@ -61,17 +64,19 @@ print 'Over te nemen velden = ', str(copy_velden)
 print 'Bestandsnaam voor output haakse lijnen = ', str(output_file_haakselijn)
 
 # validatie ontvangen parameters
-if distance_veld is None and default_afstand is None:
-    raise ValueError('Geen afstand opgegeven')
-
-if default_afstand < 0 and distance_veld is None:
-    raise ValueError('Geen geldige afstand opgegeven')
-
+if input_points == None:
+    if distance_veld is None and default_afstand is None:
+        raise ValueError('Geen afstand opgegeven')
+    
+    if default_afstand < 0 and distance_veld is None:
+        raise ValueError('Geen geldige afstand opgegeven')
+    
 if lengte_veld is None and default_afstand is None:
     raise ValueError('Geen afstand opgegeven')
 
 if default_lengte < 0 and distance_veld is None:
     raise ValueError('Geen geldige afstand opgegeven')
+
 
 # voorbereiden data typen en inlezen data
 print 'Bezig met voorbereiden van de data...'
@@ -100,9 +105,30 @@ collection.writerecords(records)
 # aanroepen tool
 print 'Bezig met uitvoeren van get_points_on_line...'
 
-point_col = get_points_on_line(collection, copy_velden, 
-                               distance_field=distance_veld,
-                               default_distance=default_afstand)
+if input_points == None:
+    point_col = get_points_on_line(collection, copy_velden, 
+                                   distance_field=distance_veld,
+                                   default_distance=default_afstand)
+else:
+    point_col = MemCollection(geometry_type='MultiLinestring')
+    records = []
+    rows = arcpy.SearchCursor(input_points)
+    fields = arcpy.ListFields(input_points)
+    point = arcpy.Point()
+    
+    # vullen collection
+    for row in rows:
+        geom = row.getValue('SHAPE')
+        properties = OrderedDict()
+        for field in fields:
+            if field.baseName.lower() != 'shape':
+                properties[field.baseName] = row.getValue(field.baseName)
+              
+        records.append({'geometry': {'type': 'Point',
+                                     'coordinates': (geom.firstPoint.X, geom.firstPoint.Y)},
+                       'properties': properties})
+    
+    point_col.writerecords(records)
 
 haakselijn_col = get_haakselijnen_on_points_on_line(collection, point_col, copy_velden,
                                                     length_field=lengte_veld,
