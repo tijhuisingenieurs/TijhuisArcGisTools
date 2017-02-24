@@ -22,7 +22,7 @@ from addresulttodisplay import add_result_to_display
 # 6: Doelbestand voor haakse lijnen
 
 
-# input_fl = arcpy.GetParameterAsText(0)
+input_fl = arcpy.GetParameterAsText(0)
 distance_veld = arcpy.GetParameterAsText(1)
 default_afstand = arcpy.GetParameter(2)
 lengte_veld = arcpy.GetParameterAsText(3)
