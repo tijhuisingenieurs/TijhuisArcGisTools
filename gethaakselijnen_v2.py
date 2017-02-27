@@ -105,7 +105,7 @@ collection.writerecords(records)
 # aanroepen tool
 print 'Bezig met uitvoeren van get_points_on_line...'
 
-if input_points == None:
+if input_points == None or input_points == '':
     point_col = get_points_on_line(collection, copy_velden, 
                                    distance_field=distance_veld,
                                    default_distance=default_afstand)
