@@ -27,11 +27,11 @@ output_file = arcpy.GetParameterAsText(3)
 
 
 # Print ontvangen input naar console
-print 'Ontvangen parameters:'
-print 'Lijnenbestand = ', input_fl
-print 'Tolerantie = ', tolerance
-print 'Id veld = ', id_field
-print 'Bestand voor output = ', str(output_file)
+# print 'Ontvangen parameters:'
+# print 'Lijnenbestand = ', input_fl
+# print 'Tolerantie = ', tolerance
+# print 'Id veld = ', id_field
+# print 'Bestand voor output = ', str(output_file)
 
 # voorbereiden data typen en inlezen data
 print 'Bezig met voorbereiden van de data...'
