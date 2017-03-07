@@ -5,14 +5,15 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'extern
 
 
 import arcpy
+from addresulttodisplay import add_result_to_display
 from collections import OrderedDict
 from gistools.utils.collection import MemCollection
 from gistools.tools.clean import connect_lines
 
 # Read the parameter values
-# 0: invoer lijnenbestand
-# 1: Isplit de lijnen op connecties
-# 2: Uitvoerbestand
+# 0: Lijnenbestand
+# 1: Split de lijnen op connecties
+# 2: Doelbestand
 
 input_line_fl = arcpy.GetParameterAsText(0)
 split_on_connections = arcpy.GetParameter(1)
@@ -65,7 +66,6 @@ connect_lines(line_col,
 print 'Bezig met het genereren van het doelbestand...'
 spatial_reference = arcpy.Describe(input_line_fl).spatialReference
 
-
 output_name = os.path.basename(output_file).split('.')[0]
 output_dir = os.path.dirname(output_file)
 
@@ -78,7 +78,7 @@ for field in fields:
         arcpy.AddField_management(output_fl, field.name, field.type, field.precision, field.scale,
                                   field.length, field.aliasName, field.isNullable, field.required, field.domain)
 
-# add additional fields woth output of tool
+# add additional fields with output of tool
 arcpy.AddField_management(output_fl, 'link_start', 'string', field_is_nullable=True)
 arcpy.AddField_management(output_fl, 'link_end', 'string', field_is_nullable=True)
 arcpy.AddField_management(output_fl, 'link_loc', 'string', field_is_nullable=True)
@@ -115,5 +115,7 @@ for l in line_col.filter():
     row.setValue('part', l['properties'].get('part', None))
 
     dataset.insertRow(row)
+
+add_result_to_display(output_fl, output_name)
 
 print 'Gereed'

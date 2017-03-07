@@ -1,7 +1,5 @@
 import sys
 import os.path
-import tempfile
-import shutil
 from collections import OrderedDict
 
 import arcpy
@@ -16,14 +14,15 @@ from gistools.tools.dwp_tools import flip_lines
 
     
 # Read the parameter values
-# 0: lijnenbestand
-# 2: Doelbestand voor punten
-
- 
+# 0: Lijnenbestand
+# 2: Doelbestand
 input_fl = arcpy.GetParameterAsText(0)
 output_file = arcpy.GetParameterAsText(1)
 
 # Testwaarden voor test zonder GUI:
+# import tempfile
+# import shutil
+#
 # input_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'Test_kwaliteit.shp')
 # selectie = 'FALSE'
 # test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
@@ -38,8 +37,7 @@ output_file = arcpy.GetParameterAsText(1)
 # Print ontvangen input naar console
 print 'Ontvangen parameters:'
 print 'Lijnenbestand = ', input_fl
-print 'Bestand voor output = ', str(output_file)
-
+print 'Doelbestand = ', str(output_file)
 
 
 # voorbereiden data typen en inlezen data
@@ -56,8 +54,8 @@ for row in rows:
     geom = row.getValue('SHAPE')
     properties = OrderedDict()
     for field in fields:
-        if field.baseName.lower() != 'shape':
-            properties[field.baseName] = row.getValue(field.baseName)
+        if field.name.lower() != 'shape':
+            properties[field.name] = row.getValue(field.name)
           
     records.append({'geometry': {'type': 'MultiLineString',
                                  'coordinates': [[(point.X, point.Y) for
@@ -82,7 +80,6 @@ output_dir = os.path.dirname(output_file)
 output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POLYLINE', 
                                                 spatial_reference=spatial_reference)
 
-# ToDo: velden ophalen uit output collection op basis van copy_fields
 for field in fields:
     if field.name.lower() not in ['shape', 'fid', 'id']:
         arcpy.AddField_management(output_fl, field.name, field.type, field.precision, field.scale,
@@ -103,7 +100,6 @@ for l in flipped_line_col:
         mline.add(array)
 
     row.Shape = mline
-    # arcpy.geometries.Polyline(line, spatial_reference)
 
     for field in fields:
         if field.name.lower() not in ['shape', 'fid', 'id']:
@@ -111,7 +107,6 @@ for l in flipped_line_col:
 
     dataset.insertRow(row)       
 
-display_name = output_name
-add_result_to_display(output_fl, display_name)
-    
+add_result_to_display(output_fl, output_name)
+
 print 'Gereed'
