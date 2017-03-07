@@ -46,8 +46,8 @@ for row in rows:
     geom = row.getValue('SHAPE')
     properties = OrderedDict()
     for field in fields:
-        if field.baseName.lower() != 'shape':
-            properties[field.baseName] = row.getValue(field.baseName)
+        if field.name.lower() != 'shape':
+            properties[field.name] = row.getValue(field.name)
 
     records.append({'geometry': {'type': 'MultiLineString',
                                  'coordinates': [[(point.X, point.Y) for
@@ -102,8 +102,8 @@ for l in line_col.filter():
     row.Shape = mline
 
     for field in fields:
-        if field.baseName.lower() not in ['shape', 'fid', 'id']:
-            row.setValue(field.baseName, l['properties'].get(field.baseName, None))
+        if field.name.lower() not in ['shape', 'fid', 'id']:
+            row.setValue(field.name, l['properties'].get(field.name, None))
 
     for extra in ['link_start', 'link_end', 'link_loc']:
         print extra

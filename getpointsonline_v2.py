@@ -1,7 +1,5 @@
 import sys
 import os.path
-import tempfile
-import shutil
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
 
@@ -25,10 +23,13 @@ distance_veld = arcpy.GetParameterAsText(1)
 default_afstand = arcpy.GetParameter(2)
 offset_start_veld = arcpy.GetParameter(3)
 default_offset_start = arcpy.GetParameter(4)
-copy_velden = arcpy.GetParameterAsText(5)
+copy_velden = [str(f) for f in arcpy.GetParameter(5)]
 output_file = arcpy.GetParameterAsText(6)
 
 # Testwaarden voor test zonder GUI:
+# import tempfile
+# import shutil
+# 
 # input_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'Test_kwaliteit.shp')
 # selectie = 'FALSE'
 # distance_veld = None
@@ -36,13 +37,13 @@ output_file = arcpy.GetParameterAsText(6)
 # offset_start_veld = None
 # default_offset_start = 20.0
 # copy_velden = ['HYDRO_CODE', 'DATUM_KM', '[VER_EIND]']
-#  
+#   
 # test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
 # if os.path.exists(test_dir):
 #     # empty test directory
 #     shutil.rmtree(test_dir)
 # os.mkdir(test_dir)
-#   
+#    
 # output_file = os.path.join(test_dir, 'test_punten.shp')
 
 # Print ontvangen input naar console
@@ -52,8 +53,8 @@ print 'Afstand uit veld = ', str(distance_veld)
 print 'Afstand vaste waarde = ', str(default_afstand)
 print 'Offset begin uit veld = ', str(offset_start_veld)
 print 'Offset begin vaste waarde = ', str(default_offset_start)
-print 'Over te nemen velden = ', str(copy_velden)
-print 'Bestand voor output = ', str(output_file)
+arcpy.AddMessage('Over te nemen velden = ' + str(copy_velden))
+print 'Doelbestand = ', str(output_file)
 
 # validatie ontvangen parameters
 if distance_veld is None and default_afstand is None:
@@ -79,8 +80,8 @@ for row in rows:
     geom = row.getValue('SHAPE')
     properties = OrderedDict()
     for field in fields:
-        if field.baseName.lower() != 'shape':
-            properties[field.baseName] = row.getValue(field.baseName)
+        if field.name.lower() != 'shape':
+            properties[field.name] = row.getValue(field.name)
           
     records.append({'geometry': {'type': 'MultiLineString',
                                  'coordinates': [[(point.X, point.Y) for
@@ -92,7 +93,8 @@ collection.writerecords(records)
 # aanroepen tool
 print 'Bezig met uitvoeren van get_points_on_line...'
 
-point_col = get_points_on_line(collection, copy_velden, 
+point_col = get_points_on_line(collection, 
+                               copy_velden, 
                                distance_field=distance_veld,
                                min_default_offset_start=default_offset_start,
                                default_distance=default_afstand,
@@ -111,11 +113,8 @@ print 'output_dir = ', output_dir
 output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POINT',
                                                 spatial_reference=spatial_reference)
 
-#
-# ToDo: velden ophalen uit output collection op basis van copy_fields
-#
 for field in fields:
-    if field.name.lower() not in ['shape', 'fid', 'id']:
+    if field.name.lower() in copy_velden:
         arcpy.AddField_management(output_fl, field.name, field.type, field.precision, field.scale,
                                   field.length, field.aliasName, field.isNullable, field.required, field.domain)
 
@@ -126,18 +125,14 @@ for p in point_col.filter():
     point = arcpy.Point()
     point.X = p['geometry']['coordinates'][0]
     point.Y = p['geometry']['coordinates'][1]
-#     print p
-#     print point.X
-#     print point.Y
     row.Shape = point
         
     for field in fields:
-        if field.name.lower() not in ['shape', 'fid', 'id']:
+        if field.name.lower() in copy_velden:
             row.setValue(field.name, p['properties'].get(field.name, None))        
 
     dataset.insertRow(row)
 
-display_name = output_name
-add_result_to_display(output_fl, display_name)
+add_result_to_display(output_fl, output_name)
 
 print 'Gereed'

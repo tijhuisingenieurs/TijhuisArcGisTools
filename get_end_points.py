@@ -4,15 +4,16 @@ import os.path
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
 
 import arcpy
+from addresulttodisplay import add_result_to_display
 from collections import OrderedDict
 from gistools.utils.collection import MemCollection
 from gistools.tools.clean import get_end_points
 
 # Read the parameter values
-# 0: lijnenbestand
-# 1: Id veld van lijnenbestand
-# 2: Marge waarbinnen lijnen gecombineerd zijn
-# 3: Uitvoerbestand
+# 0: Lijnenbestand
+# 1: Marge waarbinnen lijnen gecombineerd zijn
+# 2: Id veld van lijnenbestand
+# 3: Doelbestand
 
 input_fl = arcpy.GetParameterAsText(0)
 tolerance = arcpy.GetParameter(1)
@@ -90,5 +91,7 @@ for p in point_col.filter():
         row.setValue(field, p['properties'].get(field, None))
 
     dataset.insertRow(row)
+
+add_result_to_display(output_fl, output_name)
 
 print 'Gereed'
