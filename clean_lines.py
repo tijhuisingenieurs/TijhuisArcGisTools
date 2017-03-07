@@ -102,12 +102,10 @@ for l in line_col.filter():
     row.Shape = mline
 
     for field in fields:
-        if field.name.lower() not in ['shape', 'fid', 'id']:
+        if field.name.lower() not in ['shape', 'fid']:
             row.setValue(field.name, l['properties'].get(field.name, None))
 
     for extra in ['link_start', 'link_end', 'link_loc']:
-        print extra
-        print l['properties'].get(extra, [])
         value = ','.join([str(v) for v in l['properties'].get(extra, [])])
 
         row.setValue(extra, value)

@@ -117,7 +117,7 @@ for p in point_col.filter():
     row.Shape = point
 
     for field in fields:
-        if field.name.lower() not in ['shape', 'fid', 'id', point_nr_field]:
+        if field.name.lower() not in ['shape', 'fid', point_nr_field]:
             row.setValue(field.name, p['properties'].get(field.name, None))
             
     row.setValue(point_nr_field, p['properties'].get(point_nr_field, None))

@@ -102,7 +102,7 @@ for l in flipped_line_col:
     row.Shape = mline
 
     for field in fields:
-        if field.name.lower() not in ['shape', 'fid', 'id']:
+        if field.name.lower() not in ['shape', 'fid']:
             row.setValue(field.name, l['properties'].get(field.name, None))
 
     dataset.insertRow(row)       
