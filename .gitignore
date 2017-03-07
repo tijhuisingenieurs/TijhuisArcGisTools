@@ -6,5 +6,5 @@
 .idea
 .project
 .pydevproject
-
+.lock
 external/*
