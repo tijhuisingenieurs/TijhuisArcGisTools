@@ -1,52 +1,44 @@
 import sys
 import os.path
-from collections import OrderedDict
-
-import arcpy
-from addresulttodisplay import add_result_to_display
-
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
 
 
+import arcpy
+from addresulttodisplay import add_result_to_display
+from collections import OrderedDict
 from gistools.utils.collection import MemCollection
-from gistools.tools.dwp_tools import flip_lines
+from gistools.tools.clean import connect_lines
 
-    
 # Read the parameter values
 # 0: Lijnenbestand
+# 1: Split de lijnen op connecties
 # 2: Doelbestand
-input_fl = arcpy.GetParameterAsText(0)
-output_file = arcpy.GetParameterAsText(1)
+
+input_line_fl = arcpy.GetParameterAsText(0)
+split_on_connections = arcpy.GetParameter(1)
+output_file = arcpy.GetParameterAsText(2)
 
 # Testwaarden voor test zonder GUI:
 # import tempfile
 # import shutil
-#
-# input_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'Test_kwaliteit.shp')
-# selectie = 'FALSE'
+# input_line_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'real_line_example.shp')
+# split_on_lines = True
 # test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
 # if os.path.exists(test_dir):
 #     # empty test directory
 #     shutil.rmtree(test_dir)
 # os.mkdir(test_dir)
-# 
-# output_file = os.path.join(test_dir, 'test_flip.shp')
-
-
-# Print ontvangen input naar console
-print 'Ontvangen parameters:'
-print 'Lijnenbestand = ', input_fl
-print 'Doelbestand = ', str(output_file)
+# output_file = os.path.join(test_dir, 'cleaned.shp')
 
 
 # voorbereiden data typen en inlezen data
 print 'Bezig met voorbereiden van de data...'
 
-collection = MemCollection(geometry_type='MultiLinestring')
+line_col = MemCollection(geometry_type='MultiLinestring')
 records = []
-rows = arcpy.SearchCursor(input_fl)
-fields = arcpy.ListFields(input_fl)
+rows = arcpy.SearchCursor(input_line_fl)
+fields = arcpy.ListFields(input_line_fl)
 point = arcpy.Point()
 
 # vullen collection
@@ -56,43 +48,51 @@ for row in rows:
     for field in fields:
         if field.name.lower() != 'shape':
             properties[field.name] = row.getValue(field.name)
-          
+
     records.append({'geometry': {'type': 'MultiLineString',
                                  'coordinates': [[(point.X, point.Y) for
-                                                 point in line] for line in geom]},
-                   'properties': properties})
+                                                  point in line] for line in geom]},
+                    'properties': properties})
 
-collection.writerecords(records)
+line_col.writerecords(records)
 
 # aanroepen tool
-print 'Bezig met uitvoeren van get_flipped_line...'
+print 'Bezig met uitvoeren van cleanen van lijnen'
 
-flipped_line_col = flip_lines(collection)
+connect_lines(line_col,
+              split_line_at_connection=split_on_connections)
 
 # wegschrijven tool resultaat
 print 'Bezig met het genereren van het doelbestand...'
-spatial_reference = arcpy.Describe(input_fl).spatialReference
+spatial_reference = arcpy.Describe(input_line_fl).spatialReference
 
 output_name = os.path.basename(output_file).split('.')[0]
 output_dir = os.path.dirname(output_file)
 
-
-output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POLYLINE', 
+output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POLYLINE',
                                                 spatial_reference=spatial_reference)
 
+# copy fields from input
 for field in fields:
     if field.name.lower() not in ['shape', 'fid', 'id']:
         arcpy.AddField_management(output_fl, field.name, field.type, field.precision, field.scale,
                                   field.length, field.aliasName, field.isNullable, field.required, field.domain)
 
+# add additional fields with output of tool
+arcpy.AddField_management(output_fl, 'link_start', 'string', field_is_nullable=True)
+arcpy.AddField_management(output_fl, 'link_end', 'string', field_is_nullable=True)
+arcpy.AddField_management(output_fl, 'link_loc', 'string', field_is_nullable=True)
+arcpy.AddField_management(output_fl, 'part', 'integer', field_is_nullable=True)
+
 dataset = arcpy.InsertCursor(output_fl)
 
-for l in flipped_line_col:
+for l in line_col.filter():
     row = dataset.newRow()
+
     mline = arcpy.Array()
-    for line_part in l['geometry']['coordinates']:
+    for sub_line in l['geometry']['coordinates']:
         array = arcpy.Array()
-        for p in line_part:
+        for p in sub_line:
             point.X = p[0]
             point.Y = p[1]
             array.add(point)
@@ -105,7 +105,14 @@ for l in flipped_line_col:
         if field.name.lower() not in ['shape', 'fid']:
             row.setValue(field.name, l['properties'].get(field.name, None))
 
-    dataset.insertRow(row)       
+    for extra in ['link_start', 'link_end', 'link_loc']:
+        value = ','.join([str(v) for v in l['properties'].get(extra, [])])
+
+        row.setValue(extra, value)
+
+    row.setValue('part', l['properties'].get('part', None))
+
+    dataset.insertRow(row)
 
 add_result_to_display(output_fl, output_name)
 

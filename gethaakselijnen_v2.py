@@ -1,7 +1,5 @@
 import sys
 import os.path
-import tempfile
-import shutil
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
 
@@ -21,18 +19,19 @@ from addresulttodisplay import add_result_to_display
 # 5: Lijst met velden (copy_fields)
 # 6: Doelbestand voor haakse lijnen
 
-
 input_fl = arcpy.GetParameterAsText(0)
 input_points = arcpy.GetParameterAsText(1)
 distance_veld = arcpy.GetParameterAsText(2)
 default_afstand = arcpy.GetParameter(3)
 lengte_veld = arcpy.GetParameterAsText(4)
 default_lengte = arcpy.GetParameter(5)
-copy_velden = arcpy.GetParameterAsText(6)
+copy_velden = [str(f) for f in arcpy.GetParameter(6)]
 output_file_haakselijn = arcpy.GetParameterAsText(7)
 
-
 # Testwaarden voor test zonder GUI:
+# import tempfile
+# import shutil
+#
 # input_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'Test_kwaliteit.shp')
 # input_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'Lijnen_Bedum_singlepart.shp')
 # input_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'TI17034_Trajectenshape_aaenmaas_2017.shp')
@@ -61,6 +60,7 @@ print 'Afstand vaste waarde = ', str(default_afstand)
 print 'Lengte haakse lijn uit veld = ', str(lengte_veld)
 print 'Lengte haakse lijn vaste waarde = ', str(default_lengte)
 print 'Over te nemen velden = ', str(copy_velden)
+arcpy.AddMessage('Over te nemen velden = ' + str(copy_velden))
 print 'Bestandsnaam voor output haakse lijnen = ', str(output_file_haakselijn)
 
 # validatie ontvangen parameters
@@ -77,7 +77,6 @@ if lengte_veld is None and default_afstand is None:
 if default_lengte < 0 and distance_veld is None:
     raise ValueError('Geen geldige afstand opgegeven')
 
-
 # voorbereiden data typen en inlezen data
 print 'Bezig met voorbereiden van de data...'
 
@@ -92,8 +91,8 @@ for row in rows:
     geom = row.getValue('SHAPE')
     properties = OrderedDict()
     for field in fields:
-        if field.baseName.lower() != 'shape':
-            properties[field.baseName] = row.getValue(field.baseName)
+        if field.name.lower() != 'shape':
+            properties[field.name] = row.getValue(field.name)
           
     records.append({'geometry': {'type': 'MultiLineString',
                                  'coordinates': [[(point.X, point.Y) for
@@ -105,8 +104,9 @@ collection.writerecords(records)
 # aanroepen tool
 print 'Bezig met uitvoeren van get_points_on_line...'
 
-if input_points == None or input_points == '':
-    point_col = get_points_on_line(collection, copy_velden, 
+if input_points is None or input_points == '':
+    point_col = get_points_on_line(collection, 
+                                   copy_velden, 
                                    distance_field=distance_veld,
                                    default_distance=default_afstand)
 else:
@@ -121,8 +121,8 @@ else:
         geom = row.getValue('SHAPE')
         properties = OrderedDict()
         for field in fields:
-            if field.baseName.lower() != 'shape':
-                properties[field.baseName] = row.getValue(field.baseName)
+            if field.name.lower() != 'shape':
+                properties[field.name] = row.getValue(field.name)
               
         records.append({'geometry': {'type': 'Point',
                                      'coordinates': (geom.firstPoint.X, geom.firstPoint.Y)},
@@ -130,7 +130,9 @@ else:
     
     point_col.writerecords(records)
 
-haakselijn_col = get_haakselijnen_on_points_on_line(collection, point_col, copy_velden,
+haakselijn_col = get_haakselijnen_on_points_on_line(collection, 
+                                                    point_col, 
+                                                    copy_velden,
                                                     length_field=lengte_veld,
                                                     default_length=default_lengte)
 
@@ -138,32 +140,36 @@ haakselijn_col = get_haakselijnen_on_points_on_line(collection, point_col, copy_
 print 'Bezig met het genereren van het doelbestand met punten...'
 spatial_reference = arcpy.Describe(input_fl).spatialReference
 
-output_name_points = os.path.basename(output_file_haakselijn).split('.')[0]+'_intersectiepunten'
-output_dir_points = os.path.dirname(output_file_haakselijn)
+if input_points is None or input_points == '':
+    output_name_points = os.path.basename(output_file_haakselijn).split('.')[0] + '_intersectiepunten'
+    output_dir_points = os.path.dirname(output_file_haakselijn)
 
-output_fl_points = arcpy.CreateFeatureclass_management(output_dir_points, output_name_points, 'POINT', 
+    output_fl_points = arcpy.CreateFeatureclass_management(output_dir_points, output_name_points, 'POINT', 
                                                        spatial_reference=spatial_reference)
 
-# ToDo: velden ophalen uit output collection op basis van copy_fields
-for field in fields:
-    if field.name.lower() not in ['shape', 'fid', 'id']:
-        arcpy.AddField_management(output_fl_points, field.name, field.type, field.precision, field.scale,
-                                  field.length, field.aliasName, field.isNullable, field.required, field.domain)
-
-dataset = arcpy.InsertCursor(output_fl_points)
-
-for p in point_col.filter():
-    row = dataset.newRow()
-    point = arcpy.Point()
-    point.X = p['geometry']['coordinates'][0]
-    point.Y = p['geometry']['coordinates'][1]
-    row.Shape = point
-        
     for field in fields:
-        if field.name.lower() not in ['shape', 'fid', 'id']:
-            row.setValue(field.name, p['properties'].get(field.name, None))        
-
-    dataset.insertRow(row)
+        if field.name.lower() in copy_velden:
+            arcpy.AddField_management(output_fl_points, field.name, field.type, 
+                                      field.precision, field.scale,
+                                      field.length, field.aliasName, field.isNullable, 
+                                      field.required, field.domain)
+    
+    dataset = arcpy.InsertCursor(output_fl_points)
+    
+    for p in point_col.filter():
+        row = dataset.newRow()
+        point = arcpy.Point()
+        point.X = p['geometry']['coordinates'][0]
+        point.Y = p['geometry']['coordinates'][1]
+        row.Shape = point
+            
+        for field in fields:
+            if field.name.lower() in copy_velden:
+                row.setValue(field.name, p['properties'].get(field.name, None))        
+    
+        dataset.insertRow(row)
+    
+    add_result_to_display(output_fl_points, output_name_points) 
 
 # wegschrijven tool resultaat haakselijnen
 print 'Bezig met het genereren van het doelbestand met haakse lijnen...'
@@ -171,19 +177,20 @@ print 'Bezig met het genereren van het doelbestand met haakse lijnen...'
 output_name_haakselijn = os.path.basename(output_file_haakselijn).split('.')[0]
 output_dir_haakselijn = os.path.dirname(output_file_haakselijn)
 
-output_fl_haakselijnen = arcpy.CreateFeatureclass_management(output_dir_haakselijn, output_name_haakselijn, 'POLYLINE', 
+output_fl_haakselijnen = arcpy.CreateFeatureclass_management(output_dir_haakselijn, 
+                                                             output_name_haakselijn, 'POLYLINE', 
                                                              spatial_reference=spatial_reference)
 
-# ToDo: velden ophalen uit output collection op basis van copy_fields
 for field in fields:
-    if field.name.lower() not in ['shape', 'fid', 'id']:
-        arcpy.AddField_management(output_fl_haakselijnen, field.name, field.type, field.precision, field.scale,
-                                  field.length, field.aliasName, field.isNullable, field.required, field.domain)
+    if field.name.lower() in copy_velden:
+        arcpy.AddField_management(output_fl_haakselijnen, field.name, field.type, 
+                                  field.precision, field.scale,
+                                  field.length, field.aliasName, field.isNullable, 
+                                  field.required, field.domain)
 
 dataset = arcpy.InsertCursor(output_fl_haakselijnen)
 
 # Haakselijn_col bevat enkel LineStrings, geen MultiLineStrings, nalopen line_parts is dus niet nodig...
-
 for l in haakselijn_col.filter():
     row = dataset.newRow()
     mline = arcpy.Array()
@@ -198,14 +205,11 @@ for l in haakselijn_col.filter():
     row.Shape = mline
 
     for field in fields:
-        if field.name.lower() not in ['shape', 'fid', 'id']:
+        if field.name.lower() in copy_velden:
             row.setValue(field.name, l['properties'].get(field.name, None))
 
     dataset.insertRow(row)
 
-display_name = output_name_points
-add_result_to_display(output_fl_points, display_name) 
-display_name = output_name_haakselijn
-add_result_to_display(output_fl_haakselijnen, display_name) 
+add_result_to_display(output_fl_haakselijnen, output_name_haakselijn) 
 
 print 'Gereed'
