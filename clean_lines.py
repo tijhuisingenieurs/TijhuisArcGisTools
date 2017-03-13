@@ -3,12 +3,19 @@ import os.path
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
 
-
 import arcpy
+import logging
+from utils.arcgis_logging import setup_logging
+
 from addresulttodisplay import add_result_to_display
 from collections import OrderedDict
 from gistools.utils.collection import MemCollection
 from gistools.tools.clean import connect_lines
+
+
+setup_logging(arcpy)
+log = logging.getLogger(__file__)
+log.setLevel(logging.INFO)
 
 # Read the parameter values
 # 0: Lijnenbestand
@@ -33,7 +40,7 @@ output_file = arcpy.GetParameterAsText(2)
 
 
 # voorbereiden data typen en inlezen data
-print 'Bezig met voorbereiden van de data...'
+log.info('Bezig met voorbereiden van de data...')
 
 line_col = MemCollection(geometry_type='MultiLinestring')
 records = []
@@ -57,13 +64,13 @@ for row in rows:
 line_col.writerecords(records)
 
 # aanroepen tool
-print 'Bezig met uitvoeren van cleanen van lijnen'
+log.info('Bezig met uitvoeren van cleanen van lijnen')
 
 connect_lines(line_col,
               split_line_at_connection=split_on_connections)
 
 # wegschrijven tool resultaat
-print 'Bezig met het genereren van het doelbestand...'
+log.info('Bezig met het genereren van het doelbestand...')
 spatial_reference = arcpy.Describe(input_line_fl).spatialReference
 
 output_name = os.path.basename(output_file).split('.')[0]
@@ -108,4 +115,4 @@ for l in line_col.filter():
 
 add_result_to_display(output_fl, output_name)
 
-print 'Gereed'
+log.info('Gereed')
