@@ -15,14 +15,16 @@ from gistools.tools.number_points import number_points_on_line
 # 2: Veld met volgorde nummer van lijn
 # 3: Veld met lijn richting, negatief getal is tegengesteld aan geometrierichting
 # 4: Veld waarin nieuwe volgorde wordt weggeschreven
-# 5: Doelbestand punten
+# 5: Begin nummer voor nummering van punten
+# 6: Doelbestand punten
 
 input_line_fl = arcpy.GetParameterAsText(0)
 input_point_fl = arcpy.GetParameterAsText(1)
 line_nr_field = arcpy.GetParameterAsText(2)
 line_direction_field = arcpy.GetParameterAsText(3)
 point_nr_field = arcpy.GetParameterAsText(4)
-output_file = arcpy.GetParameterAsText(5)
+start_nr = arcpy.GetParameter(5)
+output_file = arcpy.GetParameterAsText(6)
 
 # Testwaarden voor test zonder GUI:
 # import tempfile
@@ -33,6 +35,7 @@ output_file = arcpy.GetParameterAsText(5)
 # line_nr_field = 'nr'
 # line_direction_field = 'direction'
 # point_nr_field = 'nr'
+# start_nr = 1
 # test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
 # if os.path.exists(test_dir):
 #     # empty test directory
@@ -88,7 +91,7 @@ point_col.writerecords(records)
 # aanroepen tool
 print 'Bezig met uitvoeren van tool...'
 
-number_points_on_line(line_col, point_col, line_nr_field, line_direction_field, point_nr_field)
+number_points_on_line(line_col, point_col, line_nr_field, line_direction_field, point_nr_field, start_nr)
 
 # wegschrijven tool resultaat
 print 'Bezig met het genereren van het doelbestand...'
