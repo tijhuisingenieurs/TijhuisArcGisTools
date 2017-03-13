@@ -79,9 +79,6 @@ for field in fields:
                                   field.length, field.aliasName, field.isNullable, field.required, field.domain)
 
 # add additional fields with output of tool
-arcpy.AddField_management(output_fl, 'link_start', 'string', field_is_nullable=True)
-arcpy.AddField_management(output_fl, 'link_end', 'string', field_is_nullable=True)
-arcpy.AddField_management(output_fl, 'link_loc', 'string', field_is_nullable=True)
 arcpy.AddField_management(output_fl, 'part', 'integer', field_is_nullable=True)
 
 dataset = arcpy.InsertCursor(output_fl)
@@ -104,11 +101,6 @@ for l in line_col.filter():
     for field in fields:
         if field.name.lower() not in ['shape', 'fid']:
             row.setValue(field.name, l['properties'].get(field.name, None))
-
-    for extra in ['link_start', 'link_end', 'link_loc']:
-        value = ','.join([str(v) for v in l['properties'].get(extra, [])])
-
-        row.setValue(extra, value)
 
     row.setValue('part', l['properties'].get('part', None))
 
