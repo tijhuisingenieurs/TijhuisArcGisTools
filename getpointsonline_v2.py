@@ -47,14 +47,14 @@ output_file = arcpy.GetParameterAsText(6)
 # output_file = os.path.join(test_dir, 'test_punten.shp')
 
 # Print ontvangen input naar console
-print 'Ontvangen parameters:'
-print 'Lijnenbestand = ', input_fl
-print 'Afstand uit veld = ', str(distance_veld)
-print 'Afstand vaste waarde = ', str(default_afstand)
-print 'Offset begin uit veld = ', str(offset_start_veld)
-print 'Offset begin vaste waarde = ', str(default_offset_start)
+arcpy.AddMessage('Ontvangen parameters:')
+arcpy.AddMessage('Lijnenbestand = ' + input_fl)
+arcpy.AddMessage('Afstand uit veld = ' + str(distance_veld))
+arcpy.AddMessage('Afstand vaste waarde = ' + str(default_afstand))
+arcpy.AddMessage('Offset begin uit veld = ' + str(offset_start_veld))
+arcpy.AddMessage('Offset begin vaste waarde = ' + str(default_offset_start))
 arcpy.AddMessage('Over te nemen velden = ' + str(copy_velden))
-print 'Doelbestand = ', str(output_file)
+arcpy.AddMessage('Doelbestand = ' + str(output_file))
 
 # validatie ontvangen parameters
 if distance_veld is None and default_afstand is None:
@@ -67,7 +67,7 @@ if default_offset_start < 0 and (offset_start_veld is None or offset_start_veld 
     raise ValueError('Negatieve start offset opgegeven')
 
 # voorbereiden data typen en inlezen data
-print 'Bezig met voorbereiden van de data...'
+arcpy.AddMessage('Bezig met voorbereiden van de data...')
 
 collection = MemCollection(geometry_type='MultiLinestring')
 records = []
@@ -91,7 +91,7 @@ for row in rows:
 collection.writerecords(records)
 
 # aanroepen tool
-print 'Bezig met uitvoeren van get_points_on_line...'
+arcpy.AddMessage('Bezig met uitvoeren van get_points_on_line...')
 
 point_col = get_points_on_line(collection, 
                                copy_velden, 
@@ -101,14 +101,12 @@ point_col = get_points_on_line(collection,
                                min_offset_start_field=offset_start_veld)
 
 # wegschrijven tool resultaat
-print 'Bezig met het genereren van het doelbestand...'
+arcpy.AddMessage('Bezig met het genereren van het doelbestand...')
+
 spatial_reference = arcpy.Describe(input_fl).spatialReference
 
 output_name = os.path.basename(output_file).split('.')[0]
 output_dir = os.path.dirname(output_file)
-
-print 'output_name = ', output_name 
-print 'output_dir = ', output_dir
 
 output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POINT',
                                                 spatial_reference=spatial_reference)
@@ -135,4 +133,4 @@ for p in point_col.filter():
 
 add_result_to_display(output_fl, output_name)
 
-print 'Gereed'
+arcpy.AddMessage('Gereed')
