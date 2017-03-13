@@ -52,16 +52,15 @@ output_file_haakselijn = arcpy.GetParameterAsText(7)
 # output_file_haakselijn =  os.path.join(test_dir, 'test_haakselijnen.shp')
 
 # Print ontvangen input naar console
-print 'Ontvangen parameters:'
-print 'Lijnenbestand = ', input_fl
-print 'Puntenbestand = ', input_points
-print 'Afstand uit veld = ', str(distance_veld)
-print 'Afstand vaste waarde = ', str(default_afstand)
-print 'Lengte haakse lijn uit veld = ', str(lengte_veld)
-print 'Lengte haakse lijn vaste waarde = ', str(default_lengte)
-print 'Over te nemen velden = ', str(copy_velden)
+arcpy.AddMessage('Ontvangen parameters:')
+arcpy.AddMessage('Lijnenbestand = ' + input_fl)
+arcpy.AddMessage('Puntenbestand = ' + input_points)
+arcpy.AddMessage('Afstand uit veld = ' + str(distance_veld))
+arcpy.AddMessage('Afstand vaste waarde = ' + str(default_afstand))
+arcpy.AddMessage('Lengte haakse lijn uit veld = ' + str(lengte_veld))
+arcpy.AddMessage('Lengte haakse lijn vaste waarde = ' + str(default_lengte))
 arcpy.AddMessage('Over te nemen velden = ' + str(copy_velden))
-print 'Bestandsnaam voor output haakse lijnen = ', str(output_file_haakselijn)
+arcpy.AddMessage('Bestandsnaam voor output haakse lijnen = ' + str(output_file_haakselijn))
 
 # validatie ontvangen parameters
 if input_points == None:
@@ -78,7 +77,7 @@ if default_lengte < 0 and distance_veld is None:
     raise ValueError('Geen geldige afstand opgegeven')
 
 # voorbereiden data typen en inlezen data
-print 'Bezig met voorbereiden van de data...'
+arcpy.AddMessage('Bezig met voorbereiden van de data...')
 
 collection = MemCollection(geometry_type='MultiLinestring')
 records = []
@@ -102,7 +101,7 @@ for row in rows:
 collection.writerecords(records)
 
 # aanroepen tool
-print 'Bezig met uitvoeren van get_points_on_line...'
+arcpy.AddMessage('Bezig met uitvoeren van get_points_on_line...')
 
 if input_points is None or input_points == '':
     point_col = get_points_on_line(collection, 
@@ -129,6 +128,13 @@ else:
                        'properties': properties})
     
     point_col.writerecords(records)
+    
+    copy_velden = []
+    
+    for field in fields:
+        if field.name.lower() not in ['fid', 'shape']:
+            copy_velden.append(field.name.lower())
+    
 
 haakselijn_col = get_haakselijnen_on_points_on_line(collection, 
                                                     point_col, 
@@ -137,10 +143,10 @@ haakselijn_col = get_haakselijnen_on_points_on_line(collection,
                                                     default_length=default_lengte)
 
 # wegschrijven tool resultaat pointsonline
-print 'Bezig met het genereren van het doelbestand met punten...'
 spatial_reference = arcpy.Describe(input_fl).spatialReference
 
 if input_points is None or input_points == '':
+    arcpy.AddMessage('Bezig met het genereren van het doelbestand met punten...')
     output_name_points = os.path.basename(output_file_haakselijn).split('.')[0] + '_intersectiepunten'
     output_dir_points = os.path.dirname(output_file_haakselijn)
 
@@ -172,7 +178,7 @@ if input_points is None or input_points == '':
     add_result_to_display(output_fl_points, output_name_points) 
 
 # wegschrijven tool resultaat haakselijnen
-print 'Bezig met het genereren van het doelbestand met haakse lijnen...'
+arcpy.AddMessage('Bezig met het genereren van het doelbestand met haakse lijnen...')
 
 output_name_haakselijn = os.path.basename(output_file_haakselijn).split('.')[0]
 output_dir_haakselijn = os.path.dirname(output_file_haakselijn)
@@ -212,4 +218,4 @@ for l in haakselijn_col.filter():
 
 add_result_to_display(output_fl_haakselijnen, output_name_haakselijn) 
 
-print 'Gereed'
+arcpy.AddMessage('Gereed')

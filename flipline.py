@@ -22,26 +22,25 @@ output_file = arcpy.GetParameterAsText(1)
 # Testwaarden voor test zonder GUI:
 # import tempfile
 # import shutil
-#
+# 
 # input_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'Test_kwaliteit.shp')
-# selectie = 'FALSE'
 # test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
 # if os.path.exists(test_dir):
 #     # empty test directory
 #     shutil.rmtree(test_dir)
 # os.mkdir(test_dir)
-# 
+#  
 # output_file = os.path.join(test_dir, 'test_flip.shp')
 
 
 # Print ontvangen input naar console
-print 'Ontvangen parameters:'
-print 'Lijnenbestand = ', input_fl
-print 'Doelbestand = ', str(output_file)
+arcpy.AddMessage('Ontvangen parameters:')
+arcpy.AddMessage('Lijnenbestand = ' + input_fl)
+arcpy.AddMessage('Doelbestand = ' + str(output_file))
 
 
 # voorbereiden data typen en inlezen data
-print 'Bezig met voorbereiden van de data...'
+arcpy.AddMessage('Bezig met voorbereiden van de data...')
 
 collection = MemCollection(geometry_type='MultiLinestring')
 records = []
@@ -65,12 +64,13 @@ for row in rows:
 collection.writerecords(records)
 
 # aanroepen tool
-print 'Bezig met uitvoeren van get_flipped_line...'
+arcpy.AddMessage('Bezig met uitvoeren van get_flipped_line...')
 
 flipped_line_col = flip_lines(collection)
 
 # wegschrijven tool resultaat
-print 'Bezig met het genereren van het doelbestand...'
+arcpy.AddMessage('Bezig met het genereren van het doelbestand...')
+
 spatial_reference = arcpy.Describe(input_fl).spatialReference
 
 output_name = os.path.basename(output_file).split('.')[0]
@@ -109,4 +109,4 @@ for l in flipped_line_col:
 
 add_result_to_display(output_fl, output_name)
 
-print 'Gereed'
+arcpy.AddMessage('Gereed')
