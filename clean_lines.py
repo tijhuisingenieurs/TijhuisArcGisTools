@@ -1,5 +1,5 @@
-import sys
 import os.path
+import sys
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
 
@@ -12,7 +12,7 @@ from collections import OrderedDict
 from gistools.utils.collection import MemCollection
 from gistools.tools.clean import connect_lines
 
-
+logging.basicConfig(level=logging.INFO)
 setup_logging(arcpy)
 log = logging.getLogger(__file__)
 log.setLevel(logging.INFO)
@@ -66,7 +66,7 @@ line_col.writerecords(records)
 # aanroepen tool
 log.info('Bezig met uitvoeren van cleanen van lijnen')
 
-connect_lines(line_col,
+new_lines = connect_lines(line_col,
               split_line_at_connection=split_on_connections)
 
 # wegschrijven tool resultaat
@@ -81,7 +81,7 @@ output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POLYLI
 
 # copy fields from input
 for field in fields:
-    if field.name.lower() not in ['shape', 'fid', 'id']:
+    if field.editable and field.type.lower() not in ['geometry']:
         arcpy.AddField_management(output_fl, field.name, field.type, field.precision, field.scale,
                                   field.length, field.aliasName, field.isNullable, field.required, field.domain)
 
@@ -90,7 +90,7 @@ arcpy.AddField_management(output_fl, 'part', 'integer', field_is_nullable=True)
 
 dataset = arcpy.InsertCursor(output_fl)
 
-for l in line_col.filter():
+for l in new_lines:
     row = dataset.newRow()
 
     mline = arcpy.Array()
@@ -106,8 +106,13 @@ for l in line_col.filter():
     row.Shape = mline
 
     for field in fields:
-        if field.name.lower() not in ['shape', 'fid']:
-            row.setValue(field.name, l['properties'].get(field.name, None))
+        if field.editable and field.type.lower() not in ['geometry']:
+            log.debug("field: %s, type: %s, editable: %s, value: %s",
+                      field.name,
+                      field.type,
+                      field.editable,
+                      l['properties'].get(field.name, None))
+            row.setValue(field.name, l['properties'].get(field.name, field.defaultValue))
 
     row.setValue('part', l['properties'].get('part', None))
 

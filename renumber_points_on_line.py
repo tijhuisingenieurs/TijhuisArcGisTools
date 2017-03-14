@@ -1,5 +1,5 @@
-import sys
 import os.path
+import sys
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
 
@@ -105,7 +105,7 @@ output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POINT'
 
 # copy fields from input
 for field in fields:
-    if field.name.lower() not in ['shape', 'fid', 'id']:
+    if field.editable and field.type.lower() not in ['geometry']:
         arcpy.AddField_management(output_fl, field.name, field.type, field.precision, field.scale,
                                   field.length, field.aliasName, field.isNullable, field.required, field.domain)
 
@@ -120,7 +120,7 @@ for p in point_col.filter():
     row.Shape = point
 
     for field in fields:
-        if field.name.lower() not in ['shape', 'fid', point_nr_field]:
+        if field.editable and field.type.lower() not in ['geometry']:
             row.setValue(field.name, p['properties'].get(field.name, None))
             
     row.setValue(point_nr_field, p['properties'].get(point_nr_field, None))
