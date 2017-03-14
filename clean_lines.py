@@ -7,7 +7,7 @@ import arcpy
 import logging
 from utils.arcgis_logging import setup_logging
 
-from addresulttodisplay import add_result_to_display
+from utils.addresulttodisplay import add_result_to_display
 from collections import OrderedDict
 from gistools.utils.collection import MemCollection
 from gistools.tools.clean import connect_lines

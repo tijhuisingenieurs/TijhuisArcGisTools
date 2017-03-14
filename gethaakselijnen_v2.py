@@ -1,5 +1,5 @@
-import sys
 import os.path
+import sys
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
 
@@ -8,7 +8,7 @@ from collections import OrderedDict
 from gistools.utils.collection import MemCollection
 from gistools.tools.connect_start_end_points import get_points_on_line
 from gistools.tools.dwp_tools import get_haakselijnen_on_points_on_line
-from addresulttodisplay import add_result_to_display
+from utils.addresulttodisplay import add_result_to_display
 
 # Read the parameter values
 # 0: lijnenbestand

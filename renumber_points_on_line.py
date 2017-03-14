@@ -4,7 +4,7 @@ import os.path
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
 
 import arcpy
-from addresulttodisplay import add_result_to_display
+from utils.addresulttodisplay import add_result_to_display
 from collections import OrderedDict
 from gistools.utils.collection import MemCollection
 from gistools.tools.number_points import number_points_on_line
