@@ -66,11 +66,15 @@ line_col.writerecords(records)
 # aanroepen tool
 log.info('Bezig met uitvoeren van cleanen van lijnen')
 
+arcpy.AddMessage('Bezig met uitvoeren van cleanen van lijnen')
+
 new_lines = connect_lines(line_col,
               split_line_at_connection=split_on_connections)
 
 # wegschrijven tool resultaat
+
 log.info('Bezig met het genereren van het doelbestand...')
+
 spatial_reference = arcpy.Describe(input_line_fl).spatialReference
 
 output_name = os.path.basename(output_file).split('.')[0]
@@ -121,3 +125,4 @@ for l in new_lines:
 add_result_to_display(output_fl, output_name)
 
 log.info('Gereed')
+

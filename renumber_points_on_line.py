@@ -45,7 +45,7 @@ output_file = arcpy.GetParameterAsText(6)
 
 
 # voorbereiden data typen en inlezen data
-print 'Bezig met voorbereiden van de data...'
+arcpy.AddMessage('Bezig met voorbereiden van de data...')
 
 line_col = MemCollection(geometry_type='MultiLinestring')
 records = []
@@ -89,12 +89,13 @@ for row in rows:
 point_col.writerecords(records)
 
 # aanroepen tool
-print 'Bezig met uitvoeren van tool...'
+arcpy.AddMessage('Bezig met uitvoeren van tool...')
 
 number_points_on_line(line_col, point_col, line_nr_field, line_direction_field, point_nr_field, start_nr)
 
 # wegschrijven tool resultaat
-print 'Bezig met het genereren van het doelbestand...'
+arcpy.AddMessage('Bezig met het genereren van het doelbestand...')
+
 spatial_reference = arcpy.Describe(input_point_fl).spatialReference
 
 output_name = os.path.basename(output_file).split('.')[0]
@@ -129,4 +130,4 @@ for p in point_col.filter():
 
 add_result_to_display(output_fl, output_name)
 
-print 'Gereed'
+arcpy.AddMessage('Gereed')
