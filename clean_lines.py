@@ -1,14 +1,21 @@
-import sys
 import os.path
+import sys
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
 
-
 import arcpy
-from addresulttodisplay import add_result_to_display
+import logging
+from utils.arcgis_logging import setup_logging
+
+from utils.addresulttodisplay import add_result_to_display
 from collections import OrderedDict
 from gistools.utils.collection import MemCollection
 from gistools.tools.clean import connect_lines
+
+logging.basicConfig(level=logging.INFO)
+setup_logging(arcpy)
+log = logging.getLogger(__file__)
+log.setLevel(logging.INFO)
 
 # Read the parameter values
 # 0: Lijnenbestand
@@ -33,7 +40,7 @@ output_file = arcpy.GetParameterAsText(2)
 
 
 # voorbereiden data typen en inlezen data
-arcpy.AddMessage('Bezig met voorbereiden van de data...')
+log.info('Bezig met voorbereiden van de data...')
 
 line_col = MemCollection(geometry_type='MultiLinestring')
 records = []
@@ -57,13 +64,16 @@ for row in rows:
 line_col.writerecords(records)
 
 # aanroepen tool
+log.info('Bezig met uitvoeren van cleanen van lijnen')
+
 arcpy.AddMessage('Bezig met uitvoeren van cleanen van lijnen')
 
-connect_lines(line_col,
+new_lines = connect_lines(line_col,
               split_line_at_connection=split_on_connections)
 
 # wegschrijven tool resultaat
-arcpy.AddMessage('Bezig met het genereren van het doelbestand...')
+
+log.info('Bezig met het genereren van het doelbestand...')
 
 spatial_reference = arcpy.Describe(input_line_fl).spatialReference
 
@@ -75,19 +85,16 @@ output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POLYLI
 
 # copy fields from input
 for field in fields:
-    if field.name.lower() not in ['shape', 'fid', 'id']:
+    if field.editable and field.type.lower() not in ['geometry']:
         arcpy.AddField_management(output_fl, field.name, field.type, field.precision, field.scale,
                                   field.length, field.aliasName, field.isNullable, field.required, field.domain)
 
 # add additional fields with output of tool
-arcpy.AddField_management(output_fl, 'link_start', 'string', field_is_nullable=True)
-arcpy.AddField_management(output_fl, 'link_end', 'string', field_is_nullable=True)
-arcpy.AddField_management(output_fl, 'link_loc', 'string', field_is_nullable=True)
 arcpy.AddField_management(output_fl, 'part', 'integer', field_is_nullable=True)
 
 dataset = arcpy.InsertCursor(output_fl)
 
-for l in line_col.filter():
+for l in new_lines:
     row = dataset.newRow()
 
     mline = arcpy.Array()
@@ -103,13 +110,13 @@ for l in line_col.filter():
     row.Shape = mline
 
     for field in fields:
-        if field.name.lower() not in ['shape', 'fid']:
-            row.setValue(field.name, l['properties'].get(field.name, None))
-
-    for extra in ['link_start', 'link_end', 'link_loc']:
-        value = ','.join([str(v) for v in l['properties'].get(extra, [])])
-
-        row.setValue(extra, value)
+        if field.editable and field.type.lower() not in ['geometry']:
+            log.debug("field: %s, type: %s, editable: %s, value: %s",
+                      field.name,
+                      field.type,
+                      field.editable,
+                      l['properties'].get(field.name, None))
+            row.setValue(field.name, l['properties'].get(field.name, field.defaultValue))
 
     row.setValue('part', l['properties'].get('part', None))
 
@@ -117,4 +124,5 @@ for l in line_col.filter():
 
 add_result_to_display(output_fl, output_name)
 
-arcpy.AddMessage('Gereed')
+log.info('Gereed')
+
