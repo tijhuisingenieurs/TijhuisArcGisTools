@@ -7,7 +7,7 @@ import arcpy
 from collections import OrderedDict
 from gistools.utils.collection import MemCollection
 from gistools.tools.dwp_tools import get_leggerprofiel
-from addresulttodisplay import add_result_to_display
+from utils.addresulttodisplay import add_result_to_display
 
 # Read the parameter values
 # 0: lijnenbestand
@@ -134,6 +134,7 @@ arcpy.AddField_management(output_fl, 'name', 'string', field_is_nullable=True)
 arcpy.AddField_management(output_fl, 'puntcode', 'integer', field_is_nullable=True)
 arcpy.AddField_management(output_fl, 'z_waarde', 'float', field_is_nullable=True)
 arcpy.AddField_management(output_fl, 'volgnr', 'integer', field_is_nullable=True)
+arcpy.AddField_management(output_fl, 'afstand', 'float', field_is_nullable=True)
 arcpy.AddField_management(output_fl, 'peiljaar', 'string', field_is_nullable=True)
 arcpy.AddField_management(output_fl, 'L22', 'string', field_is_nullable=True)
 arcpy.AddField_management(output_fl, 'L22_peil', 'float', field_is_nullable=True)
@@ -154,7 +155,7 @@ for p in legger_point_col.filter():
     point.Y = p['geometry']['coordinates'][0][1]
     row.Shape = point
     
-    for extra in ['name', 'puntcode', 'z_waarde', 'volgnr', 'L22_peil', 'knik_l_dpt',
+    for extra in ['name', 'puntcode', 'z_waarde', 'volgnr', 'afstand', 'L22_peil', 'knik_l_dpt',
                    'knik_r_dpt', 'R22_peil'
                   ]:
 #         print  'waarde ' + extra + ' = ' + str(p['properties'].get(extra, 'faal'))
