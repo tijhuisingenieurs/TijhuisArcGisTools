@@ -7,7 +7,7 @@ import arcpy
 from collections import OrderedDict
 from gistools.utils.collection import MemCollection
 from gistools.tools.dwp_tools import get_leggerprofiel
-from addresulttodisplay import add_result_to_display
+from utils.addresulttodisplay import add_result_to_display
 
 # Read the parameter values
 # 0: lijnenbestand
@@ -58,7 +58,6 @@ output_file = arcpy.GetParameterAsText(11)
 #     # empty test directory
 #     shutil.rmtree(test_dir)
 # os.mkdir(test_dir)
-#    
 #     
 # output_file =  os.path.join(test_dir, 'test_leggerpunten.shp')
 
@@ -127,13 +126,13 @@ output_dir = os.path.dirname(output_file)
 output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POINT',
                                                 spatial_reference=spatial_reference)
 
-
 # add additional fields with output of tool
 arcpy.AddField_management(output_fl, 'line_id', 'string', field_is_nullable=True)
 arcpy.AddField_management(output_fl, 'name', 'string', field_is_nullable=True)
 arcpy.AddField_management(output_fl, 'puntcode', 'integer', field_is_nullable=True)
 arcpy.AddField_management(output_fl, 'z_waarde', 'float', field_is_nullable=True)
 arcpy.AddField_management(output_fl, 'volgnr', 'integer', field_is_nullable=True)
+arcpy.AddField_management(output_fl, 'afstand', 'float', field_is_nullable=True)
 arcpy.AddField_management(output_fl, 'peiljaar', 'string', field_is_nullable=True)
 arcpy.AddField_management(output_fl, 'L22', 'string', field_is_nullable=True)
 arcpy.AddField_management(output_fl, 'L22_peil', 'float', field_is_nullable=True)
@@ -144,7 +143,6 @@ arcpy.AddField_management(output_fl, 'knik_r_dpt', 'float', field_is_nullable=Tr
 arcpy.AddField_management(output_fl, 'R22', 'string', field_is_nullable=True)
 arcpy.AddField_management(output_fl, 'R22_peil', 'float', field_is_nullable=True)
 
-
 dataset = arcpy.InsertCursor(output_fl)
 
 for p in legger_point_col.filter():
@@ -154,16 +152,12 @@ for p in legger_point_col.filter():
     point.Y = p['geometry']['coordinates'][0][1]
     row.Shape = point
     
-    for extra in ['name', 'puntcode', 'z_waarde', 'volgnr', 'L22_peil', 'knik_l_dpt',
-                   'knik_r_dpt', 'R22_peil'
-                  ]:
-#         print  'waarde ' + extra + ' = ' + str(p['properties'].get(extra, 'faal'))
-        row.setValue(extra, p['properties'].get(extra, None))   
+    for extra in ['name', 'puntcode', 'z_waarde', 'volgnr', 'afstand', 'L22_peil', 'knik_l_dpt',
+                  'knik_r_dpt', 'R22_peil']:
+        row.setValue(extra, p['properties'].get(extra, None))
     
-    for extra in ['line_id', 'peiljaar', 'L22', 'knik_l', 'knik_r', 'R22'
-                  ]:
-#         print  'waarde ' + extra + ' = ' + str(p['properties'].get(extra, 'faal'))
-        row.setValue(extra, str(p['properties'].get(extra, None)))        
+    for extra in ['line_id', 'peiljaar', 'L22', 'knik_l', 'knik_r', 'R22']:
+        row.setValue(extra, str(p['properties'].get(extra, None)))
     
     arcpy.AddMessage('Bezig met wegschrijven van profielpunt voor ' + str(p['properties'].get('name', None)))
     

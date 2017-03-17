@@ -154,7 +154,7 @@ if input_points is None or input_points == '':
                                                        spatial_reference=spatial_reference)
 
     for field in fields:
-        if field.name.lower() in copy_velden:
+        if field.name in copy_velden:
             arcpy.AddField_management(output_fl_points, field.name, field.type, 
                                       field.precision, field.scale,
                                       field.length, field.aliasName, field.isNullable, 
@@ -170,7 +170,7 @@ if input_points is None or input_points == '':
         row.Shape = point
             
         for field in fields:
-            if field.name.lower() in copy_velden:
+            if field.name in copy_velden:
                 row.setValue(field.name, p['properties'].get(field.name, None))        
     
         dataset.insertRow(row)
@@ -188,7 +188,7 @@ output_fl_haakselijnen = arcpy.CreateFeatureclass_management(output_dir_haakseli
                                                              spatial_reference=spatial_reference)
 
 for field in fields:
-    if field.name.lower() in copy_velden:
+    if field.name in copy_velden:
         arcpy.AddField_management(output_fl_haakselijnen, field.name, field.type, 
                                   field.precision, field.scale,
                                   field.length, field.aliasName, field.isNullable, 
@@ -211,7 +211,7 @@ for l in haakselijn_col.filter():
     row.Shape = mline
 
     for field in fields:
-        if field.name.lower() in copy_velden:
+        if field.name in copy_velden:
             row.setValue(field.name, l['properties'].get(field.name, None))
 
     dataset.insertRow(row)

@@ -29,21 +29,21 @@ output_file = arcpy.GetParameterAsText(6)
 # Testwaarden voor test zonder GUI:
 # import tempfile
 # import shutil
-# 
+#  
 # input_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'Test_kwaliteit.shp')
 # selectie = 'FALSE'
 # distance_veld = None
 # default_afstand = 100.0
 # offset_start_veld = None
 # default_offset_start = 20.0
-# copy_velden = ['HYDRO_CODE', 'DATUM_KM', '[VER_EIND]']
-#   
+# copy_velden = ['hydro_code', 'datum_km', '[ver_eind]']
+#    
 # test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
 # if os.path.exists(test_dir):
 #     # empty test directory
 #     shutil.rmtree(test_dir)
 # os.mkdir(test_dir)
-#    
+#     
 # output_file = os.path.join(test_dir, 'test_punten.shp')
 
 # Print ontvangen input naar console
@@ -112,7 +112,7 @@ output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POINT'
                                                 spatial_reference=spatial_reference)
 
 for field in fields:
-    if field.name.lower() in copy_velden:
+    if field.name in copy_velden:
         arcpy.AddField_management(output_fl, field.name, field.type, field.precision, field.scale,
                                   field.length, field.aliasName, field.isNullable, field.required, field.domain)
 
@@ -126,11 +126,11 @@ for p in point_col.filter():
     row.Shape = point
         
     for field in fields:
-        if field.name.lower() in copy_velden:
+        if field.name in copy_velden:
             row.setValue(field.name, p['properties'].get(field.name, None))        
 
     dataset.insertRow(row)
-
+ 
 add_result_to_display(output_fl, output_name)
 
 arcpy.AddMessage('Gereed')
