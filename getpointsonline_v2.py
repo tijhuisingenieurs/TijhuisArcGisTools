@@ -26,7 +26,6 @@ default_offset_start = arcpy.GetParameter(4)
 copy_velden = [str(f) for f in arcpy.GetParameter(5)]
 output_file = arcpy.GetParameterAsText(6)
 
-
 # Testwaarden voor test zonder GUI:
 # import tempfile
 # import shutil
@@ -75,7 +74,6 @@ records = []
 rows = arcpy.SearchCursor(input_fl)
 fields = arcpy.ListFields(input_fl)
 point = arcpy.Point()
-
 
 # vullen collection
 for row in rows:
