@@ -1,17 +1,13 @@
 import os.path
 import sys
-from collections import OrderedDict
-
+import logging
 import arcpy
 from utils.addresulttodisplay import add_result_to_display
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
 
-import logging
 from utils.arcgis_logging import setup_logging
-# from gistools.utils.collection import MemCollection
 from gistools.utils.geometry import TMultiLineString
-from gistools.tools.dwp_tools import flip_lines
 
 logging.basicConfig(level=logging.INFO)
 setup_logging(arcpy)
@@ -79,7 +75,7 @@ cursor = arcpy.UpdateCursor(lyr, ['SHAPE'])
 for row in cursor:
     geom = row.getValue('SHAPE')
     line = TMultiLineString([[(point.X, point.Y) for
-                               point in line] for line in geom])
+                              point in line] for line in geom])
     line.get_flipped_line()
 
     mline = arcpy.Array()
