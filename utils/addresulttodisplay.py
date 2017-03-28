@@ -6,7 +6,10 @@ def add_result_to_display(result, display_name):
     df = mxd.activeDataFrame
     arcpy.env.overwriteOutput = True
     temp_layer = display_name
-    arcpy.MakeFeatureLayer_management(result, temp_layer)
-    add_layer = arcpy.mapping.Layer(temp_layer)
+    if type(result) != arcpy.mapping.Layer:
+        # arcpy.MakeFeatureLayer_management(result, temp_layer)
+        add_layer = arcpy.mapping.Layer(str(result))
+    else:
+        add_layer = result
     arcpy.mapping.AddLayer(df, add_layer, "AUTO_ARRANGE")
     arcpy.RefreshTOC()
