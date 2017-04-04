@@ -15,16 +15,19 @@ from utils.addresulttodisplay import add_result_to_display
 # 2: Vaste waarde voor afstand (default_distance)
 # 3: Veld met offset afstand aan het begin (min_offset_start_field)
 # 4: Vaste waarde voor offset afstand aan het begin (min_default_offset_start)
-# 5: Lijst met velden (copy_fields)
-# 6: Doelbestand voor punten
+# 5: Extra punt in restlengte zetten (restlength)
+# 6: Lijst met velden (copy_fields)
+# 7: Doelbestand voor punten
 
 input_fl = arcpy.GetParameterAsText(0)
 distance_veld = arcpy.GetParameterAsText(1)
 default_afstand = arcpy.GetParameter(2)
 offset_start_veld = arcpy.GetParameter(3)
 default_offset_start = arcpy.GetParameter(4)
-copy_velden = [str(f) for f in arcpy.GetParameter(5)]
-output_file = arcpy.GetParameterAsText(6)
+restlength = arcpy.GetParameter(5)
+copy_velden = [str(f) for f in arcpy.GetParameter(6)]
+output_file = arcpy.GetParameterAsText(7)
+
 
 # Testwaarden voor test zonder GUI:
 # import tempfile
@@ -36,6 +39,7 @@ output_file = arcpy.GetParameterAsText(6)
 # default_afstand = 100.0
 # offset_start_veld = None
 # default_offset_start = 20.0
+# restlength = True
 # copy_velden = ['hydro_code', 'datum_km', '[ver_eind]']
 #    
 # test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
@@ -53,6 +57,7 @@ arcpy.AddMessage('Afstand uit veld = ' + str(distance_veld))
 arcpy.AddMessage('Afstand vaste waarde = ' + str(default_afstand))
 arcpy.AddMessage('Offset begin uit veld = ' + str(offset_start_veld))
 arcpy.AddMessage('Offset begin vaste waarde = ' + str(default_offset_start))
+arcpy.AddMessage('Restlengte extra punt geven = ' + str(restlength))
 arcpy.AddMessage('Over te nemen velden = ' + str(copy_velden))
 arcpy.AddMessage('Doelbestand = ' + str(output_file))
 
@@ -98,7 +103,8 @@ point_col = get_points_on_line(collection,
                                distance_field=distance_veld,
                                min_default_offset_start=default_offset_start,
                                default_distance=default_afstand,
-                               min_offset_start_field=offset_start_veld)
+                               min_offset_start_field=offset_start_veld,
+                               use_rest = restlength)
 
 # wegschrijven tool resultaat
 arcpy.AddMessage('Bezig met het genereren van het doelbestand...')
