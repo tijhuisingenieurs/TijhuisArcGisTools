@@ -1,5 +1,7 @@
 import os.path
 import sys
+import logging
+from utils.arcgis_logging import setup_logging
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
 
@@ -9,6 +11,11 @@ from gistools.utils.collection import MemCollection
 from gistools.tools.connect_start_end_points import get_points_on_line
 from gistools.tools.dwp_tools import get_haakselijnen_on_points_on_line
 from utils.addresulttodisplay import add_result_to_display
+
+logging.basicConfig(level=logging.INFO)
+setup_logging(arcpy)
+log = logging.getLogger(__file__)
+log.setLevel(logging.INFO)
 
 # Read the parameter values
 # 0: lijnenbestand
