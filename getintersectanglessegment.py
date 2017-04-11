@@ -8,7 +8,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'extern
 import arcpy
 from collections import OrderedDict
 from gistools.utils.collection import MemCollection
-from gistools.tools.dwp_tools import get_global_intersect_angles
+from gistools.tools.dwp_tools import get_local_intersect_angles
 from utils.addresulttodisplay import add_result_to_display
 
 logging.basicConfig(level=logging.INFO)
@@ -94,9 +94,9 @@ for row in rows2:
 collection2.writerecords(records2)
 
 # aanroepen tool
-arcpy.AddMessage('Bezig met uitvoeren van get_points_on_perc...')
+arcpy.AddMessage('Bezig met uitvoeren van get_local_intersect_angles...')
 
-point_col = get_global_intersect_angles(collection1, collection2)
+point_col = get_local_intersect_angles(collection1, collection2)
 
 # wegschrijven tool resultaat
 arcpy.AddMessage('Bezig met het genereren van het doelbestand...')
