@@ -6,27 +6,21 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'extern
 import arcpy
 from collections import OrderedDict
 from gistools.utils.collection import MemCollection
-from gistools.tools.connect_start_end_points import get_points_on_line
+from gistools.tools.connect_start_end_points import get_points_on_perc
 from utils.addresulttodisplay import add_result_to_display
 
 # Read the parameter values
 # 0: lijnenbestand
-# 1: Veld met afstand (distance_field)
-# 2: Vaste waarde voor afstand (default_distance)
-# 3: Veld met offset afstand aan het begin (min_offset_start_field)
-# 4: Vaste waarde voor offset afstand aan het begin (min_default_offset_start)
-# 5: Extra punt in restlengte zetten (restlength)
-# 6: Lijst met velden (copy_fields)
-# 7: Doelbestand voor punten
+# 1: Veld met percentage (perc_field)
+# 2: Vaste waarde voor percentage (default_perc)
+# 3: Lijst met velden (copy_fields)
+# 4: Doelbestand voor punten
 
 input_fl = arcpy.GetParameterAsText(0)
-distance_veld = arcpy.GetParameterAsText(1)
-default_afstand = arcpy.GetParameter(2)
-offset_start_veld = arcpy.GetParameter(3)
-default_offset_start = arcpy.GetParameter(4)
-restlength = arcpy.GetParameter(5)
-copy_velden = [str(f) for f in arcpy.GetParameter(6)]
-output_file = arcpy.GetParameterAsText(7)
+percentage_veld = arcpy.GetParameterAsText(1)
+default_percentage = arcpy.GetParameter(2)
+copy_velden = [str(f) for f in arcpy.GetParameter(3)]
+output_file = arcpy.GetParameterAsText(4)
 
 
 # Testwaarden voor test zonder GUI:
@@ -35,11 +29,8 @@ output_file = arcpy.GetParameterAsText(7)
 #  
 # input_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'Test_kwaliteit.shp')
 # selectie = 'FALSE'
-# distance_veld = None
-# default_afstand = 100.0
-# offset_start_veld = None
-# default_offset_start = 20.0
-# restlength = True
+# percentage_veld = None
+# default_percentage = 10.0
 # copy_velden = ['hydro_code', 'datum_km', '[ver_eind]']
 #    
 # test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
@@ -53,23 +44,17 @@ output_file = arcpy.GetParameterAsText(7)
 # Print ontvangen input naar console
 arcpy.AddMessage('Ontvangen parameters:')
 arcpy.AddMessage('Lijnenbestand = ' + input_fl)
-arcpy.AddMessage('Afstand uit veld = ' + str(distance_veld))
-arcpy.AddMessage('Afstand vaste waarde = ' + str(default_afstand))
-arcpy.AddMessage('Offset begin uit veld = ' + str(offset_start_veld))
-arcpy.AddMessage('Offset begin vaste waarde = ' + str(default_offset_start))
-arcpy.AddMessage('Restlengte extra punt geven = ' + str(restlength))
+arcpy.AddMessage('Percentage uit veld = ' + str(percentage_veld))
+arcpy.AddMessage('Percentage vaste waarde = ' + str(default_percentage))
 arcpy.AddMessage('Over te nemen velden = ' + str(copy_velden))
 arcpy.AddMessage('Doelbestand = ' + str(output_file))
 
 # validatie ontvangen parameters
-if distance_veld is None and default_afstand is None:
+if percentage_veld is None and default_percentage is None:
     raise ValueError('Geen afstand opgegeven')
 
-if default_afstand < 0 and (distance_veld is None or distance_veld == ''):
+if default_percentage < 0 and (percentage_veld is None or percentage_veld == ''):
     raise ValueError('Geen geldige afstand opgegeven')
-
-if default_offset_start < 0 and (offset_start_veld is None or offset_start_veld == ''):
-    raise ValueError('Negatieve start offset opgegeven')
 
 # voorbereiden data typen en inlezen data
 arcpy.AddMessage('Bezig met voorbereiden van de data...')
@@ -96,15 +81,12 @@ for row in rows:
 collection.writerecords(records)
 
 # aanroepen tool
-arcpy.AddMessage('Bezig met uitvoeren van get_points_on_line...')
+arcpy.AddMessage('Bezig met uitvoeren van get_points_on_perc...')
 
-point_col = get_points_on_line(collection, 
+point_col = get_points_on_perc(collection, 
                                copy_velden, 
-                               distance_field=distance_veld,
-                               min_default_offset_start=default_offset_start,
-                               default_distance=default_afstand,
-                               min_offset_start_field=offset_start_veld,
-                               use_rest = restlength)
+                               perc_field=percentage_veld,
+                               default_perc=default_percentage)
 
 # wegschrijven tool resultaat
 arcpy.AddMessage('Bezig met het genereren van het doelbestand...')

@@ -1,5 +1,7 @@
 import os.path
 import sys
+import logging
+from utils.arcgis_logging import setup_logging
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
 
@@ -10,14 +12,21 @@ from gistools.tools.connect_start_end_points import get_points_on_line
 from gistools.tools.dwp_tools import get_haakselijnen_on_points_on_line
 from utils.addresulttodisplay import add_result_to_display
 
+logging.basicConfig(level=logging.INFO)
+setup_logging(arcpy)
+log = logging.getLogger(__file__)
+log.setLevel(logging.INFO)
+
 # Read the parameter values
 # 0: lijnenbestand
-# 1: Veld met afstand (distance_field)
-# 2: Vaste waarde voor afstand (default_distance)
-# 3: Veld met lengte haakselijn (length_field)
-# 4: Vaste waarde voor lengte haakselijn (default_length)
-# 5: Lijst met velden (copy_fields)
-# 6: Doelbestand voor haakse lijnen
+# 1: puntenbestand
+# 2: Veld met afstand (distance_field)
+# 3: Vaste waarde voor afstand (default_distance)
+# 4: Veld met lengte haakselijn (length_field)
+# 5: Vaste waarde voor lengte haakselijn (default_length)
+# 6: Extra punt in restlengte zetten (restlength)
+# 7: Lijst met velden (copy_fields)
+# 8: Doelbestand voor haakse lijnen
 
 input_fl = arcpy.GetParameterAsText(0)
 input_points = arcpy.GetParameterAsText(1)
@@ -25,8 +34,9 @@ distance_veld = arcpy.GetParameterAsText(2)
 default_afstand = arcpy.GetParameter(3)
 lengte_veld = arcpy.GetParameterAsText(4)
 default_lengte = arcpy.GetParameter(5)
-copy_velden = [str(f) for f in arcpy.GetParameter(6)]
-output_file_haakselijn = arcpy.GetParameterAsText(7)
+restlength = arcpy.GetParameter(6)
+copy_velden = [str(f) for f in arcpy.GetParameter(7)]
+output_file_haakselijn = arcpy.GetParameterAsText(8)
 
 # Testwaarden voor test zonder GUI:
 # import tempfile
@@ -41,6 +51,7 @@ output_file_haakselijn = arcpy.GetParameterAsText(7)
 # default_afstand = 10.0
 # lengte_veld = None
 # default_lengte = 15
+# restlength = True
 # copy_velden = ['HYDRO_CODE', 'DATUM_KM', 'VER_EIND']
 # test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
 # if os.path.exists(test_dir):
@@ -59,6 +70,7 @@ arcpy.AddMessage('Afstand uit veld = ' + str(distance_veld))
 arcpy.AddMessage('Afstand vaste waarde = ' + str(default_afstand))
 arcpy.AddMessage('Lengte haakse lijn uit veld = ' + str(lengte_veld))
 arcpy.AddMessage('Lengte haakse lijn vaste waarde = ' + str(default_lengte))
+arcpy.AddMessage('Restlengte extra haakse lijn geven = ' + str(restlength))
 arcpy.AddMessage('Over te nemen velden = ' + str(copy_velden))
 arcpy.AddMessage('Bestandsnaam voor output haakse lijnen = ' + str(output_file_haakselijn))
 
@@ -107,7 +119,8 @@ if input_points is None or input_points == '':
     point_col = get_points_on_line(collection, 
                                    copy_velden, 
                                    distance_field=distance_veld,
-                                   default_distance=default_afstand)
+                                   default_distance=default_afstand,
+                                   use_rest = restlength)
 else:
     point_col = MemCollection(geometry_type='MultiLinestring')
     records = []
