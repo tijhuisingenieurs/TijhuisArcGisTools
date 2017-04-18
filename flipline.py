@@ -1,28 +1,33 @@
 import os.path
 import sys
-from collections import OrderedDict
-
+import logging
 import arcpy
 from utils.addresulttodisplay import add_result_to_display
+from utils.arcgis_logging import setup_logging
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
 
+from gistools.utils.geometry import TMultiLineString
 
-from gistools.utils.collection import MemCollection
-from gistools.tools.dwp_tools import flip_lines
-
+logging.basicConfig(level=logging.INFO)
+setup_logging(arcpy)
+log = logging.getLogger(__file__)
+log.setLevel(logging.INFO)
     
 # Read the parameter values
 # 0: Lijnenbestand
+# 1: Nieuw bestand maken (boolean)
 # 2: Doelbestand
-input_fl = arcpy.GetParameterAsText(0)
-output_file = arcpy.GetParameterAsText(1)
+input_fl = arcpy.GetParameter(0)
+create_new_file = arcpy.GetParameter(1)
+output_file = arcpy.GetParameterAsText(2)
 
 # Testwaarden voor test zonder GUI:
 # import tempfile
 # import shutil
 # 
 # input_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'Test_kwaliteit.shp')
+# create_new_file = True
 # test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
 # if os.path.exists(test_dir):
 #     # empty test directory
@@ -31,65 +36,47 @@ output_file = arcpy.GetParameterAsText(1)
 #  
 # output_file = os.path.join(test_dir, 'test_flip.shp')
 
-
 # Print ontvangen input naar console
-arcpy.AddMessage('Ontvangen parameters:')
-arcpy.AddMessage('Lijnenbestand = ' + input_fl)
-arcpy.AddMessage('Doelbestand = ' + str(output_file))
+log.info('Ontvangen parameters:')
+log.info('Lijnenbestand = %s', str(input_fl))
+log.info('Nieuw bestand maken = %s', str(create_new_file))
+log.info('Doelbestand = %s', str(output_file))
 
+if create_new_file:
+    if output_file == '':
+        log.error('Uitvoerfile is verplicht als er een nieuw bestand moet worden gemaakt')
+        raise arcpy.ExecuteError('Uitvoerfile is verplicht als er een nieuw bestand moet worden gemaakt')
 
 # voorbereiden data typen en inlezen data
-arcpy.AddMessage('Bezig met voorbereiden van de data...')
+log.info('Bezig met voorbereiden van de data...')
 
-collection = MemCollection(geometry_type='MultiLinestring')
-records = []
-rows = arcpy.SearchCursor(input_fl)
-fields = arcpy.ListFields(input_fl)
-point = arcpy.Point()
+if create_new_file:
+    log.info('Bezig met het kopieren naar het doelbestand...')
+    if type(input_fl) == arcpy.mapping.Layer:
+        input_name = input_fl.dataSource
+    else:
+        input_name = input_fl
 
-# vullen collection
-for row in rows:
+    arcpy.CopyFeatures_management(input_name, output_file)
+    lyr = arcpy.mapping.Layer(output_file)
+
+    selection_set = input_fl.getSelectionSet()
+    lyr.setSelectionSet('NEW', selection_set)
+else:
+    lyr = input_fl
+
+log.info('Bezig met uitvoeren van line_flip en update bestand...')
+# only takes selection
+cursor = arcpy.UpdateCursor(lyr, ['SHAPE'])
+
+for row in cursor:
     geom = row.getValue('SHAPE')
-    properties = OrderedDict()
-    for field in fields:
-        if field.name.lower() != 'shape':
-            properties[field.name] = row.getValue(field.name)
-          
-    records.append({'geometry': {'type': 'MultiLineString',
-                                 'coordinates': [[(point.X, point.Y) for
-                                                 point in line] for line in geom]},
-                   'properties': properties})
+    line = TMultiLineString([[(point.X, point.Y) for
+                              point in line] for line in geom])
+    line.get_flipped_line()
 
-collection.writerecords(records)
-
-# aanroepen tool
-arcpy.AddMessage('Bezig met uitvoeren van get_flipped_line...')
-
-flipped_line_col = flip_lines(collection)
-
-# wegschrijven tool resultaat
-arcpy.AddMessage('Bezig met het genereren van het doelbestand...')
-
-spatial_reference = arcpy.Describe(input_fl).spatialReference
-
-output_name = os.path.basename(output_file).split('.')[0]
-output_dir = os.path.dirname(output_file)
-
-
-output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POLYLINE', 
-                                                spatial_reference=spatial_reference)
-
-for field in fields:
-    if field.name.lower() not in ['shape', 'fid', 'id']:
-        arcpy.AddField_management(output_fl, field.name, field.type, field.precision, field.scale,
-                                  field.length, field.aliasName, field.isNullable, field.required, field.domain)
-
-dataset = arcpy.InsertCursor(output_fl)
-
-for l in flipped_line_col:
-    row = dataset.newRow()
     mline = arcpy.Array()
-    for line_part in l['geometry']['coordinates']:
+    for line_part in line.get_flipped_line():
         array = arcpy.Array()
         for p in line_part:
             point.X = p[0]
@@ -97,15 +84,12 @@ for l in flipped_line_col:
             array.add(point)
 
         mline.add(array)
+    row.setValue('SHAPE', mline)
+    cursor.updateRow(row)
 
-    row.Shape = mline
+# nieuwe file of geupdate laag die niet uit layers is geselecteerd toevoegen aan arcgis lagen
+if create_new_file or type(lyr) != arcpy.mapping.Layer:
+    output_name = os.path.basename(output_file).split('.')[0]
+    add_result_to_display(lyr, output_name)
 
-    for field in fields:
-        if field.name.lower() not in ['shape', 'fid']:
-            row.setValue(field.name, l['properties'].get(field.name, None))
-
-    dataset.insertRow(row)       
-
-add_result_to_display(output_fl, output_name)
-
-arcpy.AddMessage('Gereed')
+log.info('Gereed')
