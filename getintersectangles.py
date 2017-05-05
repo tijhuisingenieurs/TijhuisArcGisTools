@@ -8,7 +8,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'extern
 import arcpy
 from collections import OrderedDict
 from gistools.utils.collection import MemCollection
-from gistools.tools.dwp_tools import get_global_intersect_angles
+from gistools.tools.validatie import get_global_intersect_angles
 from utils.addresulttodisplay import add_result_to_display
 
 logging.basicConfig(level=logging.INFO)
