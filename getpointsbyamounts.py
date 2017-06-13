@@ -44,17 +44,17 @@ output_file = arcpy.GetParameterAsText(4)
 # Print ontvangen input naar console
 arcpy.AddMessage('Ontvangen parameters:')
 arcpy.AddMessage('Lijnenbestand = ' + input_fl)
-arcpy.AddMessage('Afstand uit veld = ' + str(aantal_veld))
-arcpy.AddMessage('Afstand vaste waarde = ' + str(default_aantal))
+arcpy.AddMessage('Aantal uit veld = ' + str(aantal_veld))
+arcpy.AddMessage('Aantal vaste waarde = ' + str(default_aantal))
 arcpy.AddMessage('Over te nemen velden = ' + str(copy_velden))
 arcpy.AddMessage('Doelbestand = ' + str(output_file))
 
 # validatie ontvangen parameters
 if aantal_veld is None and default_aantal is None:
-    raise ValueError('Geen afstand opgegeven')
+    raise ValueError('Geen aantal opgegeven')
 
 if default_aantal < 0 and (aantal_veld is None or aantal_veld == ''):
-    raise ValueError('Geen geldige afstand opgegeven')
+    raise ValueError('Geen geldig aantal opgegeven')
 
 # voorbereiden data typen en inlezen data
 arcpy.AddMessage('Bezig met voorbereiden van de data...')
