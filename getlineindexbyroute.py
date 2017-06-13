@@ -25,17 +25,21 @@ output_file_lines = arcpy.GetParameterAsText(4)
 # Testwaarden voor test zonder GUI:
 # import tempfile
 # import shutil
-#   
-# input_fl_route = os.path.join(os.path.dirname(__file__), 'test', 'data', 'Route.shp')
-# id_veld = 'id'
-# input_fl_lijnen = os.path.join(os.path.dirname(__file__), 'test', 'data', 'Test_kwaliteit.shp')
-#     
+#    
+# # input_fl_route = os.path.join(os.path.dirname(__file__), 'test', 'data', 'Route.shp')
+# # id_veld = 'id'
+# # input_fl_lijnen = os.path.join(os.path.dirname(__file__), 'test', 'data', 'Test_kwaliteit.shp')
+# 
+# input_fl_route = os.path.join(os.path.dirname(__file__), 'test', 'data', 'TI16297_Route_Dissolved.shp')
+# id_veld = 'OBJECTID'
+# input_fl_lijnen = os.path.join(os.path.dirname(__file__), 'test', 'data', 'TI16297_hartlijnen_voor_puntpeilingen.shp')
+#      
 # test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
 # if os.path.exists(test_dir):
 #     # empty test directory
 #     shutil.rmtree(test_dir)
 # os.mkdir(test_dir)
-#      
+#       
 # output_file_points = os.path.join(test_dir, 'test_punten.shp')
 # output_file_lines = os.path.join(test_dir, 'test_lijnen.shp')
 
