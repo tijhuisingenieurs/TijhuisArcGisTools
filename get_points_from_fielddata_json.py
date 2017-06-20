@@ -38,13 +38,13 @@ arcpy.AddMessage('Doelbestand = ' + str(output_file))
 
 
 # aanroepen tool
-print 'Bezig met uitvoeren van json_handler..'
+arcpy.AddMessage('Bezig met uitvoeren van json_handler..')
 
-point_col, project_dict, profile_dict = fielddata_to_memcollection(input_fl)
+point_col, project_dict, profile_dict, json_dict = fielddata_to_memcollection(input_fl)
 
 # wegschrijven tool resultaat
 
-print 'Bezig met het genereren van het doelbestand...'
+arcpy.AddMessage('Bezig met het genereren van het doelbestand...')
 # spatial_reference = arcpy.spatialReference(28992)
 
 
@@ -57,12 +57,30 @@ output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POINT'
 
 keys = point_col[0]['properties'].keys()
 
-for key in ['profiel', 'volgnr', 'ids', 'code', 'method']:
+for key in ['pro_id', 'profiel', 'volgnr', 'project', 'datetime', 'code',  'method']:
     arcpy.AddField_management(output_fl, key, "TEXT")
-for key in ['z', 'accuracy'] :
-    arcpy.AddField_management(output_fl, key, "float")
+for key in ['z', 'accuracy', 'distance'] :
+    arcpy.AddField_management(output_fl, key, "DOUBLE")
+
+arcpy.AddField_management(output_fl, 'x_coord', "DOUBLE")
+arcpy.AddField_management(output_fl, 'y_coord', "DOUBLE")
+arcpy.AddField_management(output_fl, 'polelength', "TEXT")  
+arcpy.AddField_management(output_fl, 'lonelength', "TEXT")  
+arcpy.AddField_management(output_fl, 'alt_acc', "TEXT")  
+arcpy.AddField_management(output_fl, 'dis_source', "TEXT") 
+arcpy.AddField_management(output_fl, 'dis_acc', "TEXT")
+arcpy.AddField_management(output_fl, 'lowerlevel', "TEXT")  
+arcpy.AddField_management(output_fl, 'low_lv_src', "TEXT")  
+arcpy.AddField_management(output_fl, 'low_lv_acc', "TEXT")  
+arcpy.AddField_management(output_fl, 'low_lv_unt', "TEXT")  
+arcpy.AddField_management(output_fl, 'upperlevel', "TEXT")  
+arcpy.AddField_management(output_fl, 'upp_lv_src', "TEXT")  
+arcpy.AddField_management(output_fl, 'upp_lv_acc', "TEXT")  
+arcpy.AddField_management(output_fl, 'upp_lv_unt', "TEXT") 
+       
 
 dataset = arcpy.InsertCursor(output_fl)
+
 
 for p in point_col.filter():
     row = dataset.newRow()
@@ -72,35 +90,38 @@ for p in point_col.filter():
 
     row.Shape = point
     
-    for key in ['profiel', 'volgnr', 'ids', 'code', 'method', 'z', 'accuracy']:
+    for key in ['pro_id', 'profiel', 'volgnr', 'project', 'datetime', 'code', 'method', 'distance', 'z', 'accuracy']:
         row.setValue(key, p['properties'].get(key, None))
-                
+    
+    # distance gaat nog niet goed -> komt er als geheel getal uit, ongeacht keuze type veld...
+    
+    x_coord = round(point.X,3)
+    y_coord = round(point.Y,3)
+    
+    arcpy.AddMessage('Coordinates: ' + str(x_coord) + '...' + str(y_coord))
+    
+    row.setValue('x_coord', x_coord)
+    row.setValue('y_coord', y_coord)
+    row.setValue('polelength',p['properties'].get('pole_length', None))
+    row.setValue('lonelength',p['properties'].get('l_one_length', None))    
+    row.setValue('alt_acc',p['properties'].get('altitude_accuracy', None))
+    row.setValue('dis_source',p['properties'].get('distance_source', None))
+    row.setValue('dis_acc',p['properties'].get('distance_accuracy', None))
+    row.setValue('lowerlevel',p['properties'].get('lower_level', None))    
+    row.setValue('low_lv_src',p['properties'].get('lower_level_source', None))
+    row.setValue('low_lv_acc',p['properties'].get('lower_level_accuracy', None))
+    row.setValue('low_lv_unt',p['properties'].get('lower_level_unit', None))
+    row.setValue('upperlevel',p['properties'].get('upper_level', None))
+    row.setValue('upp_lv_src',p['properties'].get('upper_level_source', None))
+    row.setValue('upp_lv_acc',p['properties'].get('upper_level_accuracy', None))
+    row.setValue('upp_lv_unt',p['properties'].get('upper_level_unit', None))
+    
+    
     dataset.insertRow(row)
 
 # add_result_to_display(output_fl, output_name)
 
-# genereren csv data
-print 'Bezig met het genereren van csv bestanden...'
 
-project_csv = os.path.join(output_dir, (output_name +'_project.csv'))
-with open(project_csv, 'wb') as csvfile1:
-    
-    fieldnames = ['project_id', 'project']
-    writer = csv.DictWriter(csvfile1, fieldnames=fieldnames)
-    
-    writer.writeheader()
-    for project_id in project_dict:
-        writer.writerow({'project_id': project_id, 'project': project_dict[project_id]})
-
-
-profiel_csv = os.path.join(output_dir,(output_name + '_profiel.csv'))
-with open(profiel_csv, 'wb') as csvfile2:
-    
-    fieldnames = ['pro_id', 'profiel', 'project']
-    writer = csv.DictWriter(csvfile2, fieldnames=fieldnames)
-    
-    writer.writeheader()
-    for row in profile_dict:
-        writer.writerow({'pro_id': row ,'profiel': profile_dict[row]['profiel'], 'project': profile_dict[row]['project']})
+        
 
 print 'Gereed'
