@@ -130,7 +130,8 @@ output_fl_ttlr = arcpy.CreateFeatureclass_management(output_dir, output_name_ttl
 fields_ttlr = next(ttlr_col.filter())['properties'].keys()
 
 # op volgorde toevoegen en typeren
-arcpy.AddField_management(output_fl_lines, 'prof_pk', "INTEGER")
+arcpy.AddField_management(output_fl_ttlr, 'prof_pk', "INTEGER")
+
 
 dataset = arcpy.InsertCursor(output_fl_ttlr)
 
