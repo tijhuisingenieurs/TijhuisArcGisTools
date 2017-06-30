@@ -8,41 +8,73 @@ import arcpy
 from utils.addresulttodisplay import add_result_to_display
 from collections import OrderedDict
 from gistools.utils.collection import MemCollection
-from gistools.utils.json_handler import fielddata_to_memcollections
+from gistools.tools.load_veldwerk_json import fielddata_to_memcollections
 from gistools.utils.csv_generator import export_memcollection_to_csv
 
 # Read the parameter values
 # 0: JSON bestand met velddata
 # 1: Doelbestand voor lijnen
+# 2: Meetplan profiel locatielijnen
+# 3: Veld met profiel identificatie
  
 input_fl = arcpy.GetParameterAsText(0)
 output_file = arcpy.GetParameterAsText(1)
-
+profile_plan_fl = arcpy.GetParameterAsText(2)
+profile_id_field = [str(f) for f in arcpy.GetParameter(3)]
 
 
 # Testwaarden voor test zonder GUI:
 # import tempfile
 # import shutil
-#   
+#    
 # input_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'projectdata_20170621.json')
 # test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
 # if os.path.exists(test_dir):
 #     # empty test directory
 #     shutil.rmtree(test_dir)
 # os.mkdir(test_dir)
-#        
+#         
 # output_file = os.path.join(test_dir, 'test_json.shp')
+# profile_plan_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'Test_sjon_meetplan.shp')
+# profile_id_field = ['DWPcode']
 
 # Print ontvangen input naar console
 arcpy.AddMessage('Ontvangen parameters:')
 arcpy.AddMessage('JSON-bestand = ' + input_fl)
 arcpy.AddMessage('Doelbestand = ' + str(output_file))
+arcpy.AddMessage('Meetplan profielen = ' + str(profile_plan_fl))
+arcpy.AddMessage('Identificatieveld profielen = ' + str(profile_id_field))
+
+# voorbereiden data typen en inlezen data
+arcpy.AddMessage('Bezig met voorbereiden van de data...')
+
+profile_plan_col = MemCollection(geometry_type='MultiLinestring')
+records = []
+rows = arcpy.SearchCursor(profile_plan_fl)
+fields = arcpy.ListFields(profile_plan_fl)
+
+point = arcpy.Point()
+
+# vullen collection 
+for row in rows:
+    geom = row.getValue('SHAPE')
+    properties = OrderedDict()
+    for field in fields:
+        if field.name.lower() != 'shape':
+            properties[field.name] = row.getValue(field.name)
+          
+    records.append({'geometry': {'type': 'MultiLineString',
+                                 'coordinates': [[(point.X, point.Y) for
+                                                 point in line] for line in geom]},
+                   'properties': properties})
+
+profile_plan_col.writerecords(records)
 
 
 # aanroepen tool
 arcpy.AddMessage('Bezig met uitvoeren van json_handler..')
 
-point_col, line_col, ttlr_col = fielddata_to_memcollections(input_fl)
+point_col, line_col, ttlr_col = fielddata_to_memcollections(input_fl, profile_plan_col, profile_id_field[0])
 
 # wegschrijven tool resultaat
 output_name = os.path.basename(output_file).split('.')[0]
@@ -71,8 +103,10 @@ arcpy.AddField_management(output_fl_lines, 'rpeil_afw', "TEXT")
 arcpy.AddField_management(output_fl_lines, 'opm', "TEXT")
 arcpy.AddField_management(output_fl_lines, 'geom_bron', "TEXT")
 
-arcpy.AddField_management(output_fl_lines, 'gps_width ', "TEXT")
-arcpy.AddField_management(output_fl_lines, 'h_width ', "TEXT")
+arcpy.AddField_management(output_fl_lines, 'breedte', "TEXT")
+arcpy.AddField_management(output_fl_lines, 'gps_breed', "TEXT")
+arcpy.AddField_management(output_fl_lines, 'h_breedte', "TEXT")
+arcpy.AddField_management(output_fl_lines, 'm99_breed', "TEXT")
 
 arcpy.AddField_management(output_fl_lines, 'aantal_1', "INTEGER")
 arcpy.AddField_management(output_fl_lines, 'aantal_22L', "INTEGER")
@@ -136,8 +170,12 @@ arcpy.AddField_management(output_fl_ttlr, 'ids', "TEXT")
 arcpy.AddField_management(output_fl_ttlr, 'project_id', "TEXT")
 arcpy.AddField_management(output_fl_ttlr, 'code', "TEXT")
 arcpy.AddField_management(output_fl_ttlr, 'afstand', "DOUBLE")
-arcpy.AddField_management(output_fl_ttlr, 'gps_width', "DOUBLE")
-arcpy.AddField_management(output_fl_ttlr, 'h_width', "DOUBLE")
+
+arcpy.AddField_management(output_fl_ttlr, 'breedte', "DOUBLE")
+arcpy.AddField_management(output_fl_ttlr, 'gps_breed', "DOUBLE")
+arcpy.AddField_management(output_fl_ttlr, 'h_breedte', "DOUBLE")
+arcpy.AddField_management(output_fl_ttlr, 'm99_breed', "DOUBLE")
+
 arcpy.AddField_management(output_fl_ttlr, 'wpeil', "DOUBLE")
 arcpy.AddField_management(output_fl_ttlr, 'wpeil_bron', "TEXT")
 arcpy.AddField_management(output_fl_ttlr, 'datum', "TEXT")
@@ -167,7 +205,7 @@ arcpy.AddMessage('Bezig met het genereren van het csv-bestand met metingen...')
 output_name_meting = os.path.join(output_dir, output_name) + '_metingen.csv'
 csv_metingen = export_memcollection_to_csv(point_col, output_name_meting)
 
- 
+  
 add_result_to_display(output_fl_lines, output_name_lines)
 add_result_to_display(output_fl_ttlr, output_name_ttlr)
 
