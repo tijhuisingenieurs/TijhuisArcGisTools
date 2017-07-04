@@ -122,7 +122,7 @@ if input_points is None or input_points == '':
                                    default_distance=default_afstand,
                                    use_rest = restlength)
 else:
-    point_col = MemCollection(geometry_type='MultiLinestring')
+    point_col = MemCollection(geometry_type='MultiPoint')
     records = []
     rows = arcpy.SearchCursor(input_points)
     fields = arcpy.ListFields(input_points)

@@ -9,7 +9,7 @@ from utils.addresulttodisplay import add_result_to_display
 from collections import OrderedDict
 from gistools.utils.collection import MemCollection
 from gistools.tools.load_veldwerk_json import fielddata_to_memcollections
-from gistools.utils.csv_generator import export_memcollection_to_csv
+from gistools.utils.csv_handler import export_memcollection_to_csv
 
 # Read the parameter values
 # 0: JSON bestand met velddata
@@ -20,20 +20,20 @@ from gistools.utils.csv_generator import export_memcollection_to_csv
 input_fl = arcpy.GetParameterAsText(0)
 output_file = arcpy.GetParameterAsText(1)
 profile_plan_fl = arcpy.GetParameterAsText(2)
-profile_id_field = [str(f) for f in arcpy.GetParameter(3)]
+profile_id_field = arcpy.GetParameterAsText(3)
 
 
 # Testwaarden voor test zonder GUI:
 # import tempfile
 # import shutil
-#    
+#     
 # input_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'projectdata_20170621.json')
 # test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
 # if os.path.exists(test_dir):
 #     # empty test directory
 #     shutil.rmtree(test_dir)
 # os.mkdir(test_dir)
-#         
+#          
 # output_file = os.path.join(test_dir, 'test_json.shp')
 # profile_plan_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'Test_sjon_meetplan.shp')
 # profile_id_field = ['DWPcode']
@@ -44,6 +44,10 @@ arcpy.AddMessage('JSON-bestand = ' + input_fl)
 arcpy.AddMessage('Doelbestand = ' + str(output_file))
 arcpy.AddMessage('Meetplan profielen = ' + str(profile_plan_fl))
 arcpy.AddMessage('Identificatieveld profielen = ' + str(profile_id_field))
+
+# validatie ontvangen parameters
+if isinstance(profile_id_field, unicode):
+    profile_id_field = profile_id_field.encode('utf-8')
 
 # voorbereiden data typen en inlezen data
 arcpy.AddMessage('Bezig met voorbereiden van de data...')
@@ -61,7 +65,16 @@ for row in rows:
     properties = OrderedDict()
     for field in fields:
         if field.name.lower() != 'shape':
-            properties[field.name] = row.getValue(field.name)
+            if field.name.lower() != 'shape':
+                if isinstance(field.name, unicode):
+                    key = field.name.encode('utf-8')
+                else:
+                    key = field.name
+                if isinstance(row.getValue(field.name), unicode):
+                    value = row.getValue(field.name).encode('utf-8')
+                else:
+                    value = row.getValue(field.name)
+            properties[key] = value
           
     records.append({'geometry': {'type': 'MultiLineString',
                                  'coordinates': [[(point.X, point.Y) for
@@ -74,7 +87,7 @@ profile_plan_col.writerecords(records)
 # aanroepen tool
 arcpy.AddMessage('Bezig met uitvoeren van json_handler..')
 
-point_col, line_col, ttlr_col = fielddata_to_memcollections(input_fl, profile_plan_col, profile_id_field[0])
+point_col, line_col, ttlr_col = fielddata_to_memcollections(input_fl, profile_plan_col, profile_id_field)
 
 # wegschrijven tool resultaat
 output_name = os.path.basename(output_file).split('.')[0]
@@ -103,10 +116,10 @@ arcpy.AddField_management(output_fl_lines, 'rpeil_afw', "TEXT")
 arcpy.AddField_management(output_fl_lines, 'opm', "TEXT")
 arcpy.AddField_management(output_fl_lines, 'geom_bron', "TEXT")
 
-arcpy.AddField_management(output_fl_lines, 'breedte', "TEXT")
-arcpy.AddField_management(output_fl_lines, 'gps_breed', "TEXT")
-arcpy.AddField_management(output_fl_lines, 'h_breedte', "TEXT")
-arcpy.AddField_management(output_fl_lines, 'm99_breed', "TEXT")
+arcpy.AddField_management(output_fl_lines, 'breedte', "DOUBLE")
+arcpy.AddField_management(output_fl_lines, 'gps_breed', "DOUBLE")
+arcpy.AddField_management(output_fl_lines, 'h_breedte', "DOUBLE")
+arcpy.AddField_management(output_fl_lines, 'm99_breed', "DOUBLE")
 
 arcpy.AddField_management(output_fl_lines, 'aantal_1', "INTEGER")
 arcpy.AddField_management(output_fl_lines, 'aantal_22L', "INTEGER")
@@ -132,7 +145,6 @@ arcpy.AddField_management(output_fl_lines, 'max_stok', "DOUBLE")
 
 dataset = arcpy.InsertCursor(output_fl_lines)
 fields_lines = next(line_col.filter())['properties'].keys()
-
 
 for l in line_col.filter():
     row = dataset.newRow()
