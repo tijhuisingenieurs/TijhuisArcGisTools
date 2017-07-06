@@ -26,17 +26,17 @@ profile_id_field = arcpy.GetParameterAsText(3)
 # Testwaarden voor test zonder GUI:
 # import tempfile
 # import shutil
-#     
+#       
 # input_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'projectdata_20170621.json')
 # test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
 # if os.path.exists(test_dir):
 #     # empty test directory
 #     shutil.rmtree(test_dir)
 # os.mkdir(test_dir)
-#          
+#            
 # output_file = os.path.join(test_dir, 'test_json.shp')
 # profile_plan_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'Test_sjon_meetplan.shp')
-# profile_id_field = ['DWPcode']
+# profile_id_field = 'DWPcode'
 
 # Print ontvangen input naar console
 arcpy.AddMessage('Ontvangen parameters:')
@@ -53,36 +53,43 @@ if isinstance(profile_id_field, unicode):
 arcpy.AddMessage('Bezig met voorbereiden van de data...')
 
 profile_plan_col = MemCollection(geometry_type='MultiLinestring')
-records = []
-rows = arcpy.SearchCursor(profile_plan_fl)
-fields = arcpy.ListFields(profile_plan_fl)
 
-point = arcpy.Point()
-
-# vullen collection 
-for row in rows:
-    geom = row.getValue('SHAPE')
-    properties = OrderedDict()
-    for field in fields:
-        if field.name.lower() != 'shape':
+if profile_plan_fl <> '':
+    records = []
+    rows = arcpy.SearchCursor(profile_plan_fl)
+    fields = arcpy.ListFields(profile_plan_fl)
+    
+    point = arcpy.Point()
+    
+    # vullen collection 
+    for row in rows:
+        geom = row.getValue('SHAPE')
+        properties = OrderedDict()
+        for field in fields:
             if field.name.lower() != 'shape':
-                if isinstance(field.name, unicode):
-                    key = field.name.encode('utf-8')
-                else:
-                    key = field.name
-                if isinstance(row.getValue(field.name), unicode):
-                    value = row.getValue(field.name).encode('utf-8')
-                else:
-                    value = row.getValue(field.name)
-            properties[key] = value
-          
-    records.append({'geometry': {'type': 'MultiLineString',
-                                 'coordinates': [[(point.X, point.Y) for
-                                                 point in line] for line in geom]},
-                   'properties': properties})
+                if field.name.lower() != 'shape':
+                    if isinstance(field.name, unicode):
+                        key = field.name.encode('utf-8')
+                    else:
+                        key = field.name
+                    if isinstance(row.getValue(field.name), unicode):
+                        value = row.getValue(field.name).encode('utf-8')
+                    else:
+                        value = row.getValue(field.name)
+                properties[key] = value
+              
+        records.append({'geometry': {'type': 'MultiLineString',
+                                     'coordinates': [[(point.X, point.Y) for
+                                                     point in line] for line in geom]},
+                       'properties': properties})
+    
+    profile_plan_col.writerecords(records)
 
-profile_plan_col.writerecords(records)
-
+else:
+    arcpy.AddMessage('Geen meetplan aangeboden') 
+    profile_plan_col = None
+    profile_id_field = None
+    
 
 # aanroepen tool
 arcpy.AddMessage('Bezig met uitvoeren van json_handler..')
