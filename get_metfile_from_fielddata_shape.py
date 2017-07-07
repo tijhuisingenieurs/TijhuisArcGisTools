@@ -12,17 +12,21 @@ from gistools.utils.metfile_generator import export_points_to_metfile
 
 # Read the parameter values
 # 0: shapefile met velddata als punten
-# 1: Doelbestand voor metfile
+# 1: Project naam
+# 2: Doelbestand voor metfile
 
 # input_fl = arcpy.GetParameterAsText(0)
-# output_file = arcpy.GetParameterAsText(1)
+# project = arcpy.GetParameterAsText(1)
+# output_file = arcpy.GetParameterAsText(2)
 
 # Testwaarden voor test zonder GUI:
 import tempfile
 import shutil
  
-input_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'metfile_punten.shp')
-test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
+input_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'test_toolc_metingen.shp')
+project = 'test metfile'
+
+test_dir = os.path.join(tempfile.gettempdir(), 'metfile_test')
 if os.path.exists(test_dir):
     # empty test directory
     shutil.rmtree(test_dir)
@@ -33,7 +37,8 @@ output_file = os.path.join(test_dir, 'test_metfile.csv')
 
 # Print ontvangen input naar console
 arcpy.AddMessage('Ontvangen parameters:')
-arcpy.AddMessage('Shapefile = ' + input_fl)
+arcpy.AddMessage('Shapefile = ' + str(input_fl))
+arcpy.AddMessage('Project = ' + str(project))
 arcpy.AddMessage('Doelbestand metfile = ' + str(output_file))
 
 
@@ -64,6 +69,6 @@ point_col.writerecords(records)
 # Genereren metfile
 arcpy.AddMessage('Bezig met genereren van metfile...')
 
-metfile = export_points_to_metfile(point_col, output_file)
+metfile = export_points_to_metfile(point_col, project, output_file)
 
 arcpy.AddMessage('Gereed')

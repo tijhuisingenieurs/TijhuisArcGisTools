@@ -13,23 +13,26 @@ from gistools.utils.wdb_generator import export_points_to_wdb
 # Read the parameter values
 # 0: shapefile met velddata als punten
 # 1: shapefile met lijnen van profielen
-# 2: Doelmap voor wdb betanden
-# 3: Afstand tussen profielen
+# 2: Project
+# 3: Doelmap voor wdb betanden
+# 4: Afstand tussen profielen
 
 # input_fl_points = arcpy.GetParameterAsText(0)
-# input_fl_lines = arcpy.GetParameterAsText(0)
-# wdb_path = arcpy.GetParameterAsText(2)
-# afstand = arcpy.GetParameter(3)
+# input_fl_lines = arcpy.GetParameterAsText(1)
+# project = arcpy.GetParameterAsText(2)
+# wdb_path = arcpy.GetParameterAsText(3)
+# afstand = arcpy.GetParameter(4)
 
 # Testwaarden voor test zonder GUI:
 import tempfile
 import shutil
  
-input_fl_points = os.path.join(os.path.dirname(__file__), 'test', 'data', 'metfile_punten.shp')
-input_fl_lines = os.path.join(os.path.dirname(__file__), 'test', 'data', 'metfile_lijnen.shp')
+input_fl_points = os.path.join(os.path.dirname(__file__), 'test', 'data', 'test_toolc_metingen.shp')
+input_fl_lines = os.path.join(os.path.dirname(__file__), 'test', 'data', 'test_toolc_profielen.shp')
 
+project = 'test wdb'
 afstand = 50
-wdb_path = os.path.join(tempfile.gettempdir(), 'arcgis_test')
+wdb_path = os.path.join(tempfile.gettempdir(), 'wdb_test')
 if os.path.exists(wdb_path):
     # empty test directory
     shutil.rmtree(wdb_path)
@@ -39,8 +42,9 @@ os.mkdir(wdb_path)
 
 # Print ontvangen input naar console
 arcpy.AddMessage('Ontvangen parameters:')
-arcpy.AddMessage('Shapefile met punten = ' + input_fl_points)
-arcpy.AddMessage('Shapefile met lijnen = ' + input_fl_lines)
+arcpy.AddMessage('Shapefile met punten = ' + str(input_fl_points))
+arcpy.AddMessage('Shapefile met lijnen = ' + str(input_fl_lines))
+arcpy.AddMessage('Project = ' + str(project))
 arcpy.AddMessage('Afstand profielen = ' + str(afstand))
 arcpy.AddMessage('Doelmap wdb bestanden = ' + str(wdb_path))
 
@@ -94,8 +98,8 @@ for row in rows_lines:
 line_col.writerecords(records)
 
 # Genereren metfile
-arcpy.AddMessage('Bezig met genereren van metfile...')
+arcpy.AddMessage('Bezig met genereren van WDB tabellen...')
 
-metfile = export_points_to_wdb(point_col, line_col, wdb_path, afstand)
+metfile = export_points_to_wdb(point_col, line_col, wdb_path, afstand, project)
 
 print 'Gereed'
