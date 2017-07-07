@@ -14,25 +14,25 @@ from gistools.utils.metfile_generator import export_points_to_metfile
 # 0: shapefile met velddata als punten
 # 1: Project naam
 # 2: Doelbestand voor metfile
-
-# input_fl = arcpy.GetParameterAsText(0)
-# project = arcpy.GetParameterAsText(1)
-# output_file = arcpy.GetParameterAsText(2)
+ 
+input_fl = arcpy.GetParameterAsText(0)
+project = arcpy.GetParameterAsText(1)
+output_file = arcpy.GetParameterAsText(2)
 
 # Testwaarden voor test zonder GUI:
-import tempfile
-import shutil
- 
-input_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'test_toolc_metingen.shp')
-project = 'test metfile'
-
-test_dir = os.path.join(tempfile.gettempdir(), 'metfile_test')
-if os.path.exists(test_dir):
-    # empty test directory
-    shutil.rmtree(test_dir)
-os.mkdir(test_dir)
-      
-output_file = os.path.join(test_dir, 'test_metfile.csv')
+# import tempfile
+# import shutil
+#  
+# input_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'test_toolc_metingen.shp')
+# project = 'test metfile'
+# 
+# test_dir = os.path.join(tempfile.gettempdir(), 'metfile_test')
+# if os.path.exists(test_dir):
+#     # empty test directory
+#     shutil.rmtree(test_dir)
+# os.mkdir(test_dir)
+#       
+# output_file = os.path.join(test_dir, 'test_metfile.csv')
 
 
 # Print ontvangen input naar console

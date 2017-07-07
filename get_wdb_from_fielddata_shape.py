@@ -17,26 +17,26 @@ from gistools.utils.wdb_generator import export_points_to_wdb
 # 3: Doelmap voor wdb betanden
 # 4: Afstand tussen profielen
 
-# input_fl_points = arcpy.GetParameterAsText(0)
-# input_fl_lines = arcpy.GetParameterAsText(1)
-# project = arcpy.GetParameterAsText(2)
-# wdb_path = arcpy.GetParameterAsText(3)
-# afstand = arcpy.GetParameter(4)
+input_fl_points = arcpy.GetParameterAsText(0)
+input_fl_lines = arcpy.GetParameterAsText(1)
+project = arcpy.GetParameterAsText(2)
+wdb_path = arcpy.GetParameterAsText(3)
+afstand = arcpy.GetParameter(4)
 
 # Testwaarden voor test zonder GUI:
-import tempfile
-import shutil
- 
-input_fl_points = os.path.join(os.path.dirname(__file__), 'test', 'data', 'test_toolc_metingen.shp')
-input_fl_lines = os.path.join(os.path.dirname(__file__), 'test', 'data', 'test_toolc_profielen.shp')
-
-project = 'test wdb'
-afstand = 50
-wdb_path = os.path.join(tempfile.gettempdir(), 'wdb_test')
-if os.path.exists(wdb_path):
-    # empty test directory
-    shutil.rmtree(wdb_path)
-os.mkdir(wdb_path)
+# import tempfile
+# import shutil
+#   
+# input_fl_points = os.path.join(os.path.dirname(__file__), 'test', 'data', 'test_toolc_metingen.shp')
+# input_fl_lines = os.path.join(os.path.dirname(__file__), 'test', 'data', 'test_toolc_profielen.shp')
+#  
+# project = 'test wdb'
+# afstand = 50
+# wdb_path = os.path.join(tempfile.gettempdir(), 'wdb_test')
+# if os.path.exists(wdb_path):
+#     # empty test directory
+#     shutil.rmtree(wdb_path)
+# os.mkdir(wdb_path)
 
 
 
