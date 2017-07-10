@@ -79,17 +79,34 @@ for row in rows1:
 collection1.writerecords(records1)
 
 
-collection2 = MemCollection(geometry_type='MultiPolygon')
+collection2 = MemCollection(geometry_type='MultiLineString')
 records2 = []
-rows2 = arcpy.da.SearchCursor(input_poly, ["OID@", "SHAPE@"])
+rows2 = arcpy.SearchCursor(input_poly)
 fields2 = arcpy.ListFields(input_poly)
 
 for row in rows2:
-    properties2 = OrderedDict()               
-    records2.append({'geometry': {'type': 'Polygon',
-                                     'coordinates': [[(p.X, p.Y) for
-                                             p in part] for part in row[1]]},
-                     'properties' : properties2})
+    geom = row.getValue('SHAPE')
+    properties2 = OrderedDict()
+    for field in fields2:
+        if field.name.lower() != 'shape':
+            properties2[field.name] = row.getValue(field.name)
+    coordinates = []
+    for part in geom:
+        for p in part:
+            if p:
+                point = (p.X, p.Y)        
+                coordinates.append(point)
+            else:
+                arcpy.AddMessage('interior found')
+
+    arcpy.AddMessage('OBJECTID = ' + str(properties2['OBJECTID']))
+    arcpy.AddMessage('Coordinaten zijn: ' + str(coordinates))    
+    
+    
+    records2.append({'geometry': {'type': 'LineString',
+                                     'coordinates': coordinates},
+                                 'properties' : properties2})
+    arcpy.AddMessage('record bevat nu: ' + str(records2[:1]))
 
 collection2.writerecords(records2)
 
