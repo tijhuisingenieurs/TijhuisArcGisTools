@@ -13,25 +13,25 @@ from utils.addresulttodisplay import add_result_to_display
 # 1: punten bestand
 # 2: Doelbestand voor punten met raster waarde
 
-# input_fl_raster = arcpy.GetParameterAsText(0)
-# input_fl_points = arcpy.GetParameterAsText(1)
-# output_file = arcpy.GetParameterAsText(2)
+input_fl_raster = arcpy.GetParameterAsText(0)
+input_fl_points = arcpy.GetParameterAsText(1)
+output_file = arcpy.GetParameterAsText(2)
 
 
 # Testwaarden voor test zonder GUI:
-import tempfile
-import shutil
- 
-input_fl_raster = os.path.join(os.path.dirname(__file__), 'test', 'data', 'AHN3_maai_clip.tif')  
-input_fl_points = os.path.join(os.path.dirname(__file__), 'test', 'data', 'Profielpunten_AHN3_offset.shp')
-     
-test_dir = os.path.join(tempfile.gettempdir(), 'ahn_test')
-if os.path.exists(test_dir):
-    # empty test directory
-    shutil.rmtree(test_dir)
-os.mkdir(test_dir)
-      
-output_file = os.path.join(test_dir, 'test_AHN_punten.shp')
+# import tempfile
+# import shutil
+#  
+# input_fl_raster = os.path.join(os.path.dirname(__file__), 'test', 'data', 'AHN3_maai_clip.tif')  
+# input_fl_points = os.path.join(os.path.dirname(__file__), 'test', 'data', 'Profielpunten_AHN3_offset.shp')
+#      
+# test_dir = os.path.join(tempfile.gettempdir(), 'ahn_test')
+# if os.path.exists(test_dir):
+#     # empty test directory
+#     shutil.rmtree(test_dir)
+# os.mkdir(test_dir)
+#       
+# output_file = os.path.join(test_dir, 'test_AHN_punten.shp')
 
 # Print ontvangen input naar console
 arcpy.AddMessage('Ontvangen parameters:')
@@ -56,6 +56,7 @@ for row in rows:
         if field.name.lower() not in ['shape', 'id', 'fid']:
             properties[field.name] = row.getValue(field.name)
     
+    object = properties['OBJECTID']
     point_string = (str(geom.firstPoint.X) + ' ' + str(geom.firstPoint.Y))
     raster_value = arcpy.GetCellValue_management(input_fl_raster,point_string,1 )
     
