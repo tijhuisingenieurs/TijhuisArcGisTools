@@ -197,7 +197,7 @@ output_fl_points = arcpy.CreateFeatureclass_management(output_dir_p, output_name
                                                 spatial_reference=28992)
 
 
-dataset = arcpy.InsertCursor(output_fl_points)
+
 fields_points = next(output_point_col.filter())['properties'].keys()
 
 arcpy.AddField_management(output_fl_points, 'prof_ids', "TEXT")
@@ -210,7 +210,9 @@ arcpy.AddField_management(output_fl_points, '_bk_wp', "DOUBLE")
 arcpy.AddField_management(output_fl_points, '_bk_nap', "DOUBLE")
 arcpy.AddField_management(output_fl_points, '_ok_wp', "DOUBLE")
 arcpy.AddField_management(output_fl_points, '_ok_nap', "DOUBLE")
-                    
+
+dataset = arcpy.InsertCursor(output_fl_points)
+                   
 for p in output_point_col.filter():
     row = dataset.newRow()
     point = arcpy.Point()
