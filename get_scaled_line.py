@@ -55,6 +55,8 @@ arcpy.AddMessage('Verlenging ten opzicht van zijde = ' + str(length_field))
 arcpy.AddMessage('Doelbestand verlengde lijnen = ' + str(output_file))
 
 # validatie ontvangen parameters
+target = 'fixed_extension'
+
 if length_m <> 0.0 and ((length_perc <> 0.0 and length_perc is not None) or (length_field <> '' and length_field is not None)):
     raise ValueError('Zowel verlening in meters als, percentage en/of veld opgegeven... Kies 1 methode voor scaling.')
 

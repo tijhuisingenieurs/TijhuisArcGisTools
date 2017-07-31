@@ -99,7 +99,7 @@ for row in rows2:
             else:
                 arcpy.AddMessage('interior found')
 
-    arcpy.AddMessage('OBJECTID = ' + str(properties2['OBJECTID']))
+    arcpy.AddMessage('OBJECTID = ' + str(properties2[poly_id_field]))
     arcpy.AddMessage('Coordinaten zijn: ' + str(coordinates))    
     
     
