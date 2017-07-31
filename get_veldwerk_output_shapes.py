@@ -30,22 +30,23 @@ output_file_points = arcpy.GetParameterAsText(4)
 # Testwaarden voor test zonder GUI:
 # import tempfile
 # import shutil
-#    
+#     
 # input_fl_lines = os.path.join(os.path.dirname(__file__), 'test', 'data', 'test_toolc_profielen.shp')
-#    
-# # input_fl_points_csv = os.path.join(os.path.dirname(__file__), 'test', 'data', 'test_toolc_metingen.csv')
-# # input_fl_points_shape = ''
 #     
-# input_fl_points_csv = ''
-# input_fl_points_shape = os.path.join(os.path.dirname(__file__), 'test', 'data', 'test_toolc_metingen.shp')
-#     
-#     
+# input_fl_points_csv = os.path.join(os.path.dirname(__file__), 'test', 'data', 'test_toolc_metingen.csv')
+# 
+# input_fl_points_shape = ''
+#      
+# # input_fl_points_csv = ''
+# # input_fl_points_shape = os.path.join(os.path.dirname(__file__), 'test', 'data', 'test_toolc_metingen.shp')
+#      
+#      
 # test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
 # if os.path.exists(test_dir):
 #     # empty test directory
 #     shutil.rmtree(test_dir)
 # os.mkdir(test_dir)
-#              
+#               
 # output_file_lines = os.path.join(test_dir, 'corrected_lines_toolc.shp')
 # output_file_points = os.path.join(test_dir, 'corrected_points_toolc.shp')
 
@@ -158,6 +159,7 @@ output_fl_lines = arcpy.CreateFeatureclass_management(output_dir_l, output_name_
 arcpy.AddField_management(output_fl_lines, 'pk', "TEXT")
 arcpy.AddField_management(output_fl_lines, 'ids', "TEXT")
 arcpy.AddField_management(output_fl_lines, 'project_id', "TEXT")
+arcpy.AddField_management(output_fl_lines, 'proj_name', "TEXT")
 arcpy.AddField_management(output_fl_lines, 'opm', "TEXT")
 arcpy.AddField_management(output_fl_lines, 'wpeil', "DOUBLE")
 arcpy.AddField_management(output_fl_lines, 'datum', "TEXT")
