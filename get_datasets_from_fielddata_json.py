@@ -112,7 +112,7 @@ output_fl_lines = arcpy.CreateFeatureclass_management(output_dir, output_name_li
 
 arcpy.AddField_management(output_fl_lines, 'pk', "INTEGER")
 arcpy.AddField_management(output_fl_lines, 'project_id', "TEXT")
-arcpy.AddField_management(output_fl_lines, 'project_name', "TEXT")
+arcpy.AddField_management(output_fl_lines, 'proj_name', "TEXT")
 arcpy.AddField_management(output_fl_lines, 'ids', "TEXT")
 arcpy.AddField_management(output_fl_lines, 'wpeil', "DOUBLE")
 arcpy.AddField_management(output_fl_lines, 'wpeil_bron', "TEXT")
@@ -188,7 +188,7 @@ fields_ttlr = next(ttlr_col.filter())['properties'].keys()
 arcpy.AddField_management(output_fl_ttlr, 'prof_pk', "INTEGER")
 arcpy.AddField_management(output_fl_ttlr, 'ids', "TEXT")
 arcpy.AddField_management(output_fl_ttlr, 'project_id', "TEXT")
-arcpy.AddField_management(output_fl_ttlr, 'project_name', "TEXT")
+arcpy.AddField_management(output_fl_ttlr, 'proj_name', "TEXT")
 arcpy.AddField_management(output_fl_ttlr, 'code', "TEXT")
 arcpy.AddField_management(output_fl_ttlr, 'afstand', "DOUBLE")
 
