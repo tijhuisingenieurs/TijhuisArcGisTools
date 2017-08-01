@@ -26,14 +26,14 @@ profile_id_field = arcpy.GetParameterAsText(3)
 # Testwaarden voor test zonder GUI:
 # import tempfile
 # import shutil
-#       
+#        
 # input_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'projectdata_20170621.json')
 # test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
 # if os.path.exists(test_dir):
 #     # empty test directory
 #     shutil.rmtree(test_dir)
 # os.mkdir(test_dir)
-#            
+#             
 # output_file = os.path.join(test_dir, 'test_json.shp')
 # profile_plan_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'Test_sjon_meetplan.shp')
 # profile_id_field = 'DWPcode'
@@ -168,7 +168,10 @@ for l in line_col.filter():
     row.Shape = mline
     
     for field in fields_lines:
-        row.setValue(field, l['properties'].get(field, '')) 
+        value =  l['properties'].get(field, None)
+        if value is None:
+            value = -9999
+        row.setValue(field, value) 
     
     dataset.insertRow(row)
 
@@ -215,8 +218,10 @@ for p in ttlr_col.filter():
     row.Shape = point
     
     for field in fields_ttlr:
-        row.setValue(field, p['properties'].get(field, '')) 
-    
+        value =  p['properties'].get(field, None)
+        if value is None:
+            value = -9999
+        row.setValue(field, value)    
 
     dataset.insertRow(row)
 
