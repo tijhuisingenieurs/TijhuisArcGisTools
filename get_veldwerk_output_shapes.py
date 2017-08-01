@@ -30,25 +30,34 @@ output_file_points = arcpy.GetParameterAsText(4)
 # Testwaarden voor test zonder GUI:
 # import tempfile
 # import shutil
-#     
-# input_fl_lines = os.path.join(os.path.dirname(__file__), 'test', 'data', 'test_toolc_profielen.shp')
-#     
-# input_fl_points_csv = os.path.join(os.path.dirname(__file__), 'test', 'data', 'test_toolc_metingen.csv')
-# 
-# input_fl_points_shape = ''
 #      
+# input_fl_lines = os.path.join(os.path.dirname(__file__), 'test', 'data', 'test_toolc_profielen.shp')
+#      
+# input_fl_points_csv = os.path.join(os.path.dirname(__file__), 'test', 'data', 'test_toolc_metingen.csv')
+#  
+# input_fl_points_shape = ''
+#       
 # # input_fl_points_csv = ''
 # # input_fl_points_shape = os.path.join(os.path.dirname(__file__), 'test', 'data', 'test_toolc_metingen.shp')
-#      
-#      
+#       
+#       
 # test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
 # if os.path.exists(test_dir):
 #     # empty test directory
 #     shutil.rmtree(test_dir)
 # os.mkdir(test_dir)
-#               
+#                
 # output_file_lines = os.path.join(test_dir, 'corrected_lines_toolc.shp')
 # output_file_points = os.path.join(test_dir, 'corrected_points_toolc.shp')
+# 
+# test_dir_sp = os.path.dirname(input_fl_lines)
+# test_name_sp = os.path.basename(input_fl_lines).split('.')[0]
+# singepartfile = os.path.join(test_dir_sp, test_name_sp + '_sp.shp' )
+# singepartfile_xml = os.path.join(test_dir_sp, test_name_sp + '_sp.shp.xml' )
+# 
+# if os.path.isfile(singepartfile):
+#     os.remove(singepartfile)
+#     os.remove(singepartfile_xml)
 
 # Print ontvangen input naar console
 arcpy.AddMessage('Ontvangen parameters:')
@@ -186,7 +195,10 @@ for l in output_line_col.filter():
     row.Shape = mline
     
     for field in fields_lines:
-        row.setValue(field, l['properties'].get(field, '')) 
+        value =  l['properties'].get(field, None)
+        if value is None:
+            value = -9999
+        row.setValue(field, value) 
     
     dataset.insertRow(row)
 
@@ -227,7 +239,9 @@ for p in output_point_col.filter():
         row.setValue(field, p['properties'].get(field, '')) 
     
     for field in ['afstand', 'x_coord', 'y_coord', '_bk_wp', '_bk_nap', '_ok_wp', '_ok_nap']:
-        value = get_float(p['properties'].get(field, ''))
+        value = get_float(p['properties'].get(field, None))
+        if value is None:
+            value = -9999
         row.setValue(field, value)
 
     dataset.insertRow(row)
