@@ -75,15 +75,15 @@ if input_fl_points_csv == None and input_fl_points_shape == None:
 arcpy.AddMessage('Bezig met voorbereiden van de data...')
 
 arcpy.AddMessage('Omzetten bronbestand profiel lijnen naar singel part shape...')
-input_dir_sp = os.path.dirname(input_fl_lines)
-input_name_sp = os.path.basename(input_fl_lines).split('.')[0]
-input_fl_lines_sp = arcpy.MultipartToSinglepart_management(input_fl_lines, os.path.join(input_dir_sp,input_name_sp + '_sp' ))
+output_dir_sp = os.path.dirname(output_file_lines)
+output_name_sp = os.path.basename(input_fl_lines).split('.')[0]
+output_fl_lines_sp = arcpy.MultipartToSinglepart_management(input_fl_lines, os.path.join(output_dir_sp,output_name_sp + '_sp' ))
 
 
 input_line_col = MemCollection(geometry_type='MultiLineString')
 records1 = []
-rows1 = arcpy.SearchCursor(input_fl_lines_sp)
-fields1 = arcpy.ListFields(input_fl_lines_sp)
+rows1 = arcpy.SearchCursor(output_fl_lines_sp)
+fields1 = arcpy.ListFields(output_fl_lines_sp)
 point = arcpy.Point()
 
 # vullen collection lijnen
@@ -249,7 +249,7 @@ for p in output_point_col.filter():
   
 add_result_to_display(output_fl_lines, output_name_l)
 add_result_to_display(output_fl_points, output_name_p)
-add_result_to_display(input_fl_lines_sp, input_name_sp)
+add_result_to_display(output_fl_lines_sp, output_name_sp)
 
 
 print 'Gereed'
