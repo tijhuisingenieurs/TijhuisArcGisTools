@@ -15,6 +15,7 @@ from gistools.utils.csv_handler import export_memcollection_to_csv
 # 1: Doelbestand voor lijnen
 # 2: Meetplan profiel locatielijnen
 # 3: Veld met profiel identificatie
+# 4: Keuze herberekenen afstanden ja/nee
  
 input_fl = arcpy.GetParameterAsText(0)
 output_file = arcpy.GetParameterAsText(1)
@@ -25,17 +26,18 @@ recalculate_distance = arcpy.GetParameter(4)
 # Testwaarden voor test zonder GUI:
 # import tempfile
 # import shutil
-#        
+#         
 # input_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'projectdata_20170621.json')
 # test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
 # if os.path.exists(test_dir):
 #     # empty test directory
 #     shutil.rmtree(test_dir)
 # os.mkdir(test_dir)
-#             
+#              
 # output_file = os.path.join(test_dir, 'test_json.shp')
 # profile_plan_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'Test_sjon_meetplan.shp')
 # profile_id_field = 'DWPcode'
+# recalculate_distance = 'TRUE'
 
 # Print ontvangen input naar console
 arcpy.AddMessage('Ontvangen parameters:')
@@ -43,7 +45,7 @@ arcpy.AddMessage('JSON-bestand = ' + input_fl)
 arcpy.AddMessage('Doelbestand = ' + str(output_file))
 arcpy.AddMessage('Meetplan profielen = ' + str(profile_plan_fl))
 arcpy.AddMessage('Identificatieveld profielen = ' + str(profile_id_field))
-arcpy.AddMessage('afstand herberekenen = ' + str(recalculate_distance))
+arcpy.AddMessage('Afstand herberekenen = ' + str(recalculate_distance))
 
 # validatie ontvangen parameters
 if isinstance(profile_id_field, unicode):
