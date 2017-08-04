@@ -51,37 +51,36 @@ arcpy.AddMessage('Bronbestand lijnen = ' + str(input_fl))
 arcpy.AddMessage('Verlenging in meters = ' + str(length_m))
 arcpy.AddMessage('Verlenging in percentage tov huidige lengte = ' + str(length_perc))
 arcpy.AddMessage('Verlenging op basis van nieuwe lengte in veld = ' + str(length_field))
-arcpy.AddMessage('Verlenging ten opzicht van zijde = ' + str(length_field))
+arcpy.AddMessage('Verlenging ten opzicht van zijde = ' + str(length_side))
 arcpy.AddMessage('Doelbestand verlengde lijnen = ' + str(output_file))
 
 # validatie ontvangen parameters
 target = 'fixed_extension'
 
-if length_m <> 0.0 and ((length_perc <> 0.0 and length_perc is not None) or (length_field <> '' and length_field is not None)):
+if length_m > 0.0 and ((length_perc > 0.0 and length_perc is not None) or (length_field != '' and length_field is not None)):
     raise ValueError('Zowel verlening in meters als, percentage en/of veld opgegeven... Kies 1 methode voor scaling.')
 
-elif length_m == None or length_m == 0.0:
+if length_m == None or length_m == 0.0:
     if (length_perc is None or length_perc == 0.0) and (length_field is None or length_field == ''):
         raise ValueError('Geen nieuwe lengte opgegeven')
     
-    if length_perc <> 0.0 and length_field is not None and length_field <> '' :
+    if length_perc > 0.0 and length_field is not None and length_field != '' :
         raise ValueError('Zowel percentage als veld opgegeven... Kies 1 methode voor scaling.')
 
-elif length_field <> '' and length_field is not None:
+if length_field != '' and length_field is not None:
     target = 'field'
-elif length_perc <> 0.0 and length_perc is not None:
+if length_perc > 0.0 and length_perc is not None:
     target = 'percentage'
-else:
-    target = 'fixed_extension'
+
 
 # voorbereiden data typen en inlezen data
 arcpy.AddMessage('Bezig met voorbereiden van de data...')
 
 if length_side == 'einde':
     scale_point_perc = 0
-elif length_side == 'begin':
+if length_side == 'begin':
     scale_point_perc = 1
-else:
+if length_side != 'begin' and length_side != 'einde':
     scale_point_perc = 0.5
     
 # arcpy.AddMessage('Omzetten bronbestand lijnen naar singel part shape...')
@@ -125,7 +124,7 @@ input_col.writerecords(records)
 arcpy.AddMessage('Bezig met uitvoeren van get_scaled_line...')
 line_col = get_scaled_line(input_col, target_length_field, scale_point_perc)
 
-# wegschrijven tool resultaat haakselijnen
+# wegschrijven tool resultaat scaled line
 arcpy.AddMessage('Bezig met het genereren van het doelbestand met verlengde lijnen...')
 
 spatial_reference = arcpy.Describe(input_fl).spatialReference
