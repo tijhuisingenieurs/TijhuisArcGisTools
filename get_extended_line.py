@@ -9,7 +9,7 @@ from utils.addresulttodisplay import add_result_to_display
 from utils.arcgis_logging import setup_logging
 from collections import OrderedDict
 from gistools.utils.collection import MemCollection
-from gistools.tools.dwp_tools import get_scaled_line   
+from gistools.tools.dwp_tools import get_extended_line   
 
 # Read the parameter values
 # 0: Lijnenbestand
@@ -29,20 +29,20 @@ output_file = arcpy.GetParameterAsText(5)
 # Testwaarden voor test zonder GUI:
 # import tempfile
 # import shutil
-#     
+#      
 # length_m = 2.0
 # length_perc = None
 # length_field = None
 # length_side = 'einde'
-#    
-# input_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'Test_kwaliteit.shp')
+#     
+# input_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'Hoeken_basislijn.shp')
 # create_new_file = True
 # test_dir = os.path.join(tempfile.gettempdir(), 'lengte_test')
 # if os.path.exists(test_dir):
 #     # empty test directory
 #     shutil.rmtree(test_dir)
 # os.mkdir(test_dir)
-#   
+#    
 # output_file = os.path.join(test_dir, 'test_verlengd.shp')
 
 # Print ontvangen input naar console
@@ -84,11 +84,11 @@ if length_perc > 0.0 and length_perc is not None:
 arcpy.AddMessage('Bezig met voorbereiden van de data...')
 
 if length_side == 'einde':
-    scale_point_perc = 0
+    extend_point = 'end'
 if length_side == 'begin':
-    scale_point_perc = 1
+    extend_point = 'begin'
 if length_side != 'begin' and length_side != 'einde':
-    scale_point_perc = 0.5
+    extend_point = 'both'
     
 # arcpy.AddMessage('Omzetten bronbestand lijnen naar singlepart shape...')
 # input_dir_sp = os.path.dirname(output_file)
@@ -128,8 +128,8 @@ for row in rows:
 
 input_col.writerecords(records)
 
-arcpy.AddMessage('Bezig met uitvoeren van get_scaled_line...')
-line_col = get_scaled_line(input_col, target_length_field, scale_point_perc)
+arcpy.AddMessage('Bezig met uitvoeren van get_extended_line...')
+line_col = get_extended_line(input_col, target_length_field, extend_point)
 
 # wegschrijven tool resultaat scaled line
 arcpy.AddMessage('Bezig met het genereren van het doelbestand met verlengde lijnen...')
