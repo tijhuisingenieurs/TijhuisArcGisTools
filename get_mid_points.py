@@ -11,15 +11,17 @@ from gistools.tools.connect_start_end_points import get_midpoints
 
 # Read the parameter values
 # 0: Lijnenbestand
-# 1: Id veld van lijnenbestand
-# 2: Lijst met velden (copy_fields)
-# 3: Doelbestand
+# 1: Lijst met velden (copy_fields)
+# 2: Doelbestand
 
 input_fl = arcpy.GetParameterAsText(0)
 copy_velden = [str(f) for f in arcpy.GetParameter(1)]
 output_file = arcpy.GetParameterAsText(2)
 
 # Testwaarden voor test zonder GUI:
+# import tempfile
+# import shutil
+#  
 # input_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'Test_kwaliteit.shp')
 # copy_velden = ['hydro_code', 'datum_km', '[ver_eind]']
 # test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
