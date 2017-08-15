@@ -83,7 +83,7 @@ output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POINT'
                                                 spatial_reference=spatial_reference)
 
 for field in fields:
-    if field.name.lower() not in ['shape', 'id', 'fid']:
+    if field.name.lower() not in ['shape', 'id', 'fid', 'objectid']:
         arcpy.AddField_management(output_fl, field.name, field.type, field.precision, field.scale,
                                   field.length, field.aliasName, field.isNullable, field.required, field.domain)
 arcpy.AddField_management(output_fl, 'rast_value', "FLOAT")
@@ -98,7 +98,7 @@ for p in collection.filter():
     row.Shape = point
         
     for field in fields:
-        if field.name.lower() not in ['shape', 'id', 'fid']:
+        if field.name.lower() not in ['shape', 'id', 'fid',  'objectid']:
             row.setValue(field.name, p['properties'].get(field.name, None))        
     row.setValue('rast_value', p['properties'].get('rast_value', None)) 
     
