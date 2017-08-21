@@ -14,10 +14,12 @@ from gistools.utils.metfile_generator import export_points_to_metfile
 # 0: shapefile met velddata als punten
 # 1: Project naam
 # 2: Doelbestand voor metfile
+# 3: Veld voor tekencode
  
 input_fl = arcpy.GetParameterAsText(0)
 project = arcpy.GetParameterAsText(1)
 output_file = arcpy.GetParameterAsText(2)
+tekencode = arcpy.GetParameterAsText(3)
 
 # Testwaarden voor test zonder GUI:
 # import tempfile
@@ -33,6 +35,7 @@ output_file = arcpy.GetParameterAsText(2)
 # os.mkdir(test_dir)
 #       
 # output_file = os.path.join(test_dir, 'test_metfile.csv')
+# tekencode = 'gecombineerde code'
 
 
 # Print ontvangen input naar console
@@ -40,7 +43,7 @@ arcpy.AddMessage('Ontvangen parameters:')
 arcpy.AddMessage('Shapefile = ' + str(input_fl))
 arcpy.AddMessage('Project = ' + str(project))
 arcpy.AddMessage('Doelbestand metfile = ' + str(output_file))
-
+arcpy.AddMessage('Tekencode halen uit = ' + str(tekencode))
 
 # voorbereiden data typen en inlezen data
 arcpy.AddMessage('Bezig met lezen van puntdata...')
@@ -69,6 +72,10 @@ point_col.writerecords(records)
 # Genereren metfile
 arcpy.AddMessage('Bezig met genereren van metfile...')
 
-metfile = export_points_to_metfile(point_col, project, output_file)
-
+if tekencode == 'tekencode':
+    metfile = export_points_to_metfile(point_col, project, output_file, 1)
+else:
+    metfile = export_points_to_metfile(point_col, project, output_file, 2)
+    
+    
 arcpy.AddMessage('Gereed')
