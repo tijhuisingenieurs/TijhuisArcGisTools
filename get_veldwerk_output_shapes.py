@@ -217,6 +217,7 @@ fields_points = next(output_point_col.filter())['properties'].keys()
 arcpy.AddField_management(output_fl_points, 'prof_ids', "TEXT")
 arcpy.AddField_management(output_fl_points, 'datum', "TEXT")
 arcpy.AddField_management(output_fl_points, 'code', "TEXT")              
+arcpy.AddField_management(output_fl_points, 'tekencode', "TEXT") 
 arcpy.AddField_management(output_fl_points, 'afstand', "DOUBLE")
 arcpy.AddField_management(output_fl_points, 'x_coord', "DOUBLE")
 arcpy.AddField_management(output_fl_points, 'y_coord', "DOUBLE")
@@ -235,7 +236,7 @@ for p in output_point_col.filter():
 
     row.Shape = point
     
-    for field in ['prof_ids', 'datum', 'code']:
+    for field in ['prof_ids', 'datum', 'code', 'tekencode']:
         row.setValue(field, p['properties'].get(field, '')) 
     
     for field in ['afstand', 'x_coord', 'y_coord', '_bk_wp', '_bk_nap', '_ok_wp', '_ok_nap']:
