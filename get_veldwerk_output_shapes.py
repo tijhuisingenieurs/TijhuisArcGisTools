@@ -1,12 +1,10 @@
 import os.path
 import sys
-import csv
+import arcpy
+from utils.addresulttodisplay import add_result_to_display
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
 
-import arcpy
-from utils.addresulttodisplay import add_result_to_display
-from collections import OrderedDict
 from gistools.utils.collection import MemCollection
 from gistools.tools.create_veldwerk_output_shapes import create_fieldwork_output_shapes
 from gistools.utils.csv_handler import import_csv_to_memcollection
@@ -19,14 +17,18 @@ from gistools.utils.conversion_tools import get_float
 # 3: Doelbestand voor lijnen
 # 4: Doelbestand voor punten
 
-  
 input_fl_lines = arcpy.GetParameterAsText(0)
 input_fl_points_csv = arcpy.GetParameterAsText(1)
 input_fl_points_shape = arcpy.GetParameterAsText(2)
 output_file_lines = arcpy.GetParameterAsText(3)
 output_file_points = arcpy.GetParameterAsText(4)
 
-
+# input_fl_lines = "C:\\werk\\P2017\\2017.01 - Ondersteuning Tijhuis\\aangeleverd\\invoer bugfix #96\\TI17141_20170831_lines.shp"
+# input_fl_points_csv = "C:\\werk\\P2017\\2017.01 - Ondersteuning Tijhuis\\aangeleverd\\invoer bugfix #96\\TI17141_20170831_metingen_BEWERKT.csv"
+# input_fl_points_shape = ""
+# output_file_lines = "c:\\tmp\\t10.shp"
+# output_file_points = "c:\\tmp\\t11.shp"
+#
 # Testwaarden voor test zonder GUI:
 # import tempfile
 # import shutil
@@ -68,7 +70,7 @@ arcpy.AddMessage('Doelbestand gecorrigeerde profiel lijnen = ' + output_file_lin
 arcpy.AddMessage('Doelbestand gecorrigeerde metingen shape = ' + output_file_points)
 
 # validatie ontvangen parameters
-if input_fl_points_csv == None and input_fl_points_shape == None:
+if input_fl_points_csv is None and input_fl_points_shape is None:
     raise ValueError('Geen brondata met meetpunten opgegeven')
 
 # voorbereiden data typen en inlezen data
@@ -76,9 +78,11 @@ arcpy.AddMessage('Bezig met voorbereiden van de data...')
 
 arcpy.AddMessage('Omzetten bronbestand profiel lijnen naar singel part shape...')
 output_dir_sp = os.path.dirname(output_file_lines)
-output_name_sp = os.path.basename(input_fl_lines).split('.')[0]
-output_fl_lines_sp = arcpy.MultipartToSinglepart_management(input_fl_lines, os.path.join(output_dir_sp,output_name_sp + '_sp' ))
 
+output_name_sp = os.path.basename(output_file_lines).split('.')[0]
+output_fl_lines_sp = arcpy.MultipartToSinglepart_management(
+    input_fl_lines,
+    os.path.join(output_dir_sp, output_name_sp + '_sp'))
 
 input_line_col = MemCollection(geometry_type='MultiLineString')
 records1 = []
@@ -102,20 +106,20 @@ for row in rows1:
             else:
                 value = row.getValue(field.name)
             properties[key] = value
-          
+
     records1.append({'geometry': {'type': 'MultiLineString',
-                                 'coordinates': [[(point.X, point.Y) for
-                                                 point in line] for line in geom]},
-                   'properties': properties})
+                                  'coordinates': [[(point.X, point.Y) for
+                                                   point in line] for line in geom]},
+                     'properties': properties})
 
 input_line_col.writerecords(records1)
 
 # vullen collection punten
 arcpy.AddMessage('Bezig met vullen punten collection...')
-if input_fl_points_csv <> '':
-    input_point_col = import_csv_to_memcollection (input_fl_points_csv)
+if input_fl_points_csv != '':
+    input_point_col = import_csv_to_memcollection(input_fl_points_csv)
     
-if input_fl_points_shape <> '':
+if input_fl_points_shape != '':
     input_point_col = MemCollection(geometry_type='MultiPoint')
     records2 = []
     rows2 = arcpy.SearchCursor(input_fl_points_shape)
@@ -138,13 +142,12 @@ if input_fl_points_shape <> '':
                 else:
                     value = row.getValue(field.name)
                 properties[key] = value
-              
+
         records2.append({'geometry': {'type': 'Point',
-                                     'coordinates': (geom.firstPoint.X, geom.firstPoint.Y)},
-                       'properties': properties})
+                                      'coordinates': (geom.firstPoint.X, geom.firstPoint.Y)},
+                         'properties': properties})
     
     input_point_col.writerecords(records2)
-
 
 # aanroepen tool
 arcpy.AddMessage('Bezig met uitvoeren van get_veldwerk_output_shapes..')
@@ -163,7 +166,7 @@ arcpy.AddMessage('Bezig met het genereren van het doelbestand met gecorrigeerde 
 
 point = arcpy.Point()
 output_fl_lines = arcpy.CreateFeatureclass_management(output_dir_l, output_name_l, 'POLYLINE',
-                                                spatial_reference=28992)
+                                                      spatial_reference=28992)
        
 arcpy.AddField_management(output_fl_lines, 'pk', "TEXT")
 arcpy.AddField_management(output_fl_lines, 'ids', "TEXT")
@@ -195,24 +198,21 @@ for l in output_line_col.filter():
     row.Shape = mline
     
     for field in fields_lines:
-        value =  l['properties'].get(field, None)
+        value = l['properties'].get(field, None)
         if value is None:
             value = -9999
         row.setValue(field, value) 
     
     dataset.insertRow(row)
 
-
 arcpy.AddMessage('Bezig met het genereren van het doelbestand met gecorrigeerde meetpunten...')
 # spatial_reference = arcpy.spatialReference(28992)
 
 #  specific file name and data
 output_fl_points = arcpy.CreateFeatureclass_management(output_dir_p, output_name_p, 'POINT',
-                                                spatial_reference=28992)
+                                                       spatial_reference=28992)
 
-
-
-fields_points = next(output_point_col.filter())['properties'].keys()
+# fields_points = next(output_point_col.filter())['properties'].keys()
 
 arcpy.AddField_management(output_fl_points, 'prof_ids', "TEXT")
 arcpy.AddField_management(output_fl_points, 'datum', "TEXT")
@@ -247,10 +247,8 @@ for p in output_point_col.filter():
 
     dataset.insertRow(row)
 
-  
 add_result_to_display(output_fl_lines, output_name_l)
 add_result_to_display(output_fl_points, output_name_p)
 add_result_to_display(output_fl_lines_sp, output_name_sp)
-
 
 print 'Gereed'
