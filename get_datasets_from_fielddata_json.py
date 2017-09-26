@@ -173,7 +173,7 @@ for l in line_col.filter():
     row.Shape = mline
     
     for field in fields_lines:
-        value =  l['properties'].get(field, None)
+        value = l['properties'].get(field, None)
         if value is None:
             value = -9999
         row.setValue(field, value) 
@@ -223,9 +223,12 @@ for p in ttlr_col.filter():
     row.Shape = point
     
     for field in fields_ttlr:
-        value =  p['properties'].get(field, None)
-        if value is None:
+        value = p['properties'].get(field, None)
+        if value is None or \
+                (value == '' and field in ['afstand', 'breedte', 'gps_breed', 'h_breedte',
+                                           'm99_breed', 'wpeil', 'z', 'x_coord', 'y_coord']):
             value = -9999
+        # arcpy.AddMessage("{0} - {1}".format(type(value), value))
         row.setValue(field, value)    
 
     dataset.insertRow(row)
