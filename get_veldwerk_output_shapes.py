@@ -118,8 +118,7 @@ input_line_col.writerecords(records1)
 arcpy.AddMessage('Bezig met vullen punten collection...')
 if input_fl_points_csv != '':
     input_point_col = import_csv_to_memcollection(input_fl_points_csv)
-    
-if input_fl_points_shape != '':
+elif input_fl_points_shape != '':
     input_point_col = MemCollection(geometry_type='MultiPoint')
     records2 = []
     rows2 = arcpy.SearchCursor(input_fl_points_shape)
@@ -148,6 +147,9 @@ if input_fl_points_shape != '':
                          'properties': properties})
     
     input_point_col.writerecords(records2)
+else:
+    # todo: raise warning
+    exit(-1)
 
 # aanroepen tool
 arcpy.AddMessage('Bezig met uitvoeren van get_veldwerk_output_shapes..')
