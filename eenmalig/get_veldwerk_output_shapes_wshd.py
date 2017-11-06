@@ -208,20 +208,20 @@ for i, p in enumerate(org_points):
         point['pnt_nr'] = nr
         hdsr_points.append(point)
         nr += 1
-    elif p['properties']['code'] == '99' and last_code == '22L':
+    elif p['properties']['code'] in ('99', '5') and last_code == '22L':
         point['type'] = 'bagger_en_vastebodem'
         point['z'] = p['properties']['_bk_nap']
         point['pnt_nr'] = nr
         hdsr_points.append(point)
         nxt_bagger_en_vastebodem = False
         nr += 1
-    elif p['properties']['code'] == '99' and org_points[i+1]['properties']['code'] == '22R':
+    elif p['properties']['code'] in ('99', '5') and org_points[i+1]['properties']['code'] == '22R':
         point['type'] = 'bagger_en_vastebodem'
         point['z'] = p['properties']['_bk_nap']
         point['pnt_nr'] = nr
         hdsr_points.append(point)
         nr += 1
-    elif p['properties']['code'] == '99':
+    elif p['properties']['code'] in ('99', '5'):
         point['type'] = 'bagger'
         point['z'] = p['properties']['_bk_nap']
         point['pnt_nr'] = nr
@@ -233,7 +233,7 @@ for i, p in enumerate(org_points):
         point['pnt_nr'] = nr
         hdsr_points.append(point)
         nr += 1
-    elif p['properties']['code'] not in ['1', '2', '3']:
+    elif p['properties']['code'] not in ['1', '2', '3', '6']:
         print("skip punt met code %s" % p['properties']['code'])
         # skip
         pass
@@ -244,6 +244,8 @@ for i, p in enumerate(org_points):
             point['type'] = 'Insteek'
         elif p['properties']['code'] == '3':
             point['type'] = 'Beschoeiing'
+        elif p['properties']['code'] == '6':
+            point['type'] = 'Knikpunt'
 
         point['z'] = p['properties']['_ok_nap']
         point['pnt_nr'] = nr
