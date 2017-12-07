@@ -1,15 +1,16 @@
+import logging
 import os.path
 import sys
-import logging
+from collections import OrderedDict
+
+import arcpy
+
+from utils.addresulttodisplay import add_result_to_display
 from utils.arcgis_logging import setup_logging
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
-
-import arcpy
-from collections import OrderedDict
-from gistools.utils.collection import MemCollection
 from gistools.tools.validatie import get_distance_point_to_contour
-from utils.addresulttodisplay import add_result_to_display
+from gistools.utils.collection import MemCollection
 
 logging.basicConfig(level=logging.INFO)
 setup_logging(arcpy)
@@ -22,12 +23,10 @@ log.setLevel(logging.INFO)
 # 2: Doelbestand voor punten me afstanden
 # 3: identificatieveld polygons
 
-
 input_points = arcpy.GetParameterAsText(0)
 input_poly = arcpy.GetParameterAsText(1)
 output_file = arcpy.GetParameterAsText(2)
 poly_id_field = arcpy.GetParameterAsText(3)
-
 
 # Testwaarden voor test zonder GUI:
 # import tempfile
@@ -54,7 +53,6 @@ arcpy.AddMessage('Vlakkenbestand = ' + input_poly)
 arcpy.AddMessage('Identificatieveld vlakken = ' + str(poly_id_field))
 arcpy.AddMessage('Bestandsnaam voor output = ' + str(output_file))
 
-
 # voorbereiden data typen en inlezen data
 arcpy.AddMessage('Bezig met voorbereiden van de data...')
 
@@ -71,13 +69,12 @@ for row in rows1:
     for field in fields1:
         if field.name.lower() != 'shape':
             properties1[field.name] = row.getValue(field.name)
-          
+
     records1.append({'geometry': {'type': 'Point',
-                                 'coordinates': (geom.firstPoint.X, geom.firstPoint.Y)},
-                   'properties': properties1})
+                                  'coordinates': (geom.firstPoint.X, geom.firstPoint.Y)},
+                     'properties': properties1})
 
 collection1.writerecords(records1)
-
 
 collection2 = MemCollection(geometry_type='MultiLineString')
 records2 = []
@@ -100,12 +97,11 @@ for row in rows2:
                 arcpy.AddMessage('interior found')
 
     arcpy.AddMessage('OBJECTID = ' + str(properties2[poly_id_field]))
-    arcpy.AddMessage('Coordinaten zijn: ' + str(coordinates))    
-    
-    
+    arcpy.AddMessage('Coordinaten zijn: ' + str(coordinates))
+
     records2.append({'geometry': {'type': 'LineString',
-                                     'coordinates': coordinates},
-                                 'properties' : properties2})
+                                  'coordinates': coordinates},
+                     'properties': properties2})
     arcpy.AddMessage('record bevat nu: ' + str(records2[:1]))
 
 collection2.writerecords(records2)
@@ -113,9 +109,8 @@ collection2.writerecords(records2)
 # aanroepen tool
 arcpy.AddMessage('Bezig met uitvoeren van get_distance_point_to_contour...')
 
-
 point_col = get_distance_point_to_contour(collection2, collection1,
-                                                    poly_id_field)
+                                          poly_id_field)
 
 # wegschrijven tool resultaat
 spatial_reference = arcpy.Describe(input_points).spatialReference
