@@ -20,6 +20,8 @@ input_fl = arcpy.GetParameterAsText(0)
 project = arcpy.GetParameterAsText(1)
 output_file = arcpy.GetParameterAsText(2)
 tekencode = arcpy.GetParameterAsText(3)
+type_metfile = arcpy.GetParameterAsText(4)
+type_peiling = arcpy.GetParameterAsText(5)
 
 # Testwaarden voor test zonder GUI:
 # import tempfile
@@ -44,6 +46,8 @@ arcpy.AddMessage('Shapefile = ' + str(input_fl))
 arcpy.AddMessage('Project = ' + str(project))
 arcpy.AddMessage('Doelbestand metfile = ' + str(output_file))
 arcpy.AddMessage('Tekencode halen uit = ' + str(tekencode))
+arcpy.AddMessage('Opmaaktype metfile = ' + type_metfile)
+arcpy.AddMessage('Type peiling = ' + type_peiling)
 
 # voorbereiden data typen en inlezen data
 arcpy.AddMessage('Bezig met lezen van puntdata...')
@@ -71,11 +75,16 @@ point_col.writerecords(records)
 
 # Genereren metfile
 arcpy.AddMessage('Bezig met genereren van metfile...')
+code = None
 
 if tekencode == 'tekencode':
-    metfile = export_points_to_metfile(point_col, project, output_file, 1)
+    code = 1
 else:
-    metfile = export_points_to_metfile(point_col, project, output_file, 2)
-    
-    
+    code = 2
+
+if type_peiling != None:
+    metfile = export_points_to_metfile(point_col, project, output_file, code, type_metfile, type_peiling)
+else:
+    metfile = export_points_to_metfile(point_col, project, output_file, code, type_metfile)
+
 arcpy.AddMessage('Gereed')
