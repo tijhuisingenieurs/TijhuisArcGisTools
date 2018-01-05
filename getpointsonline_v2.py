@@ -24,7 +24,7 @@ distance_veld = arcpy.GetParameterAsText(1)
 default_afstand = arcpy.GetParameter(2)
 offset_start_veld = arcpy.GetParameter(3)
 default_offset_start = arcpy.GetParameter(4)
-restlength = arcpy.GetParameter(5)
+representative_length = arcpy.GetParameter(5)
 copy_velden = [str(f) for f in arcpy.GetParameter(6)]
 output_file = arcpy.GetParameterAsText(7)
 
@@ -57,7 +57,7 @@ arcpy.AddMessage('Afstand uit veld = ' + str(distance_veld))
 arcpy.AddMessage('Afstand vaste waarde = ' + str(default_afstand))
 arcpy.AddMessage('Offset begin uit veld = ' + str(offset_start_veld))
 arcpy.AddMessage('Offset begin vaste waarde = ' + str(default_offset_start))
-arcpy.AddMessage('Restlengte extra punt geven = ' + str(restlength))
+arcpy.AddMessage('Maximale representatieve lengte = ' + str(representative_length))
 arcpy.AddMessage('Over te nemen velden = ' + str(copy_velden))
 arcpy.AddMessage('Doelbestand = ' + str(output_file))
 
@@ -98,13 +98,13 @@ collection.writerecords(records)
 # aanroepen tool
 arcpy.AddMessage('Bezig met uitvoeren van get_points_on_line...')
 
-point_col = get_points_on_line(collection, 
-                               copy_velden, 
+point_col = get_points_on_line(collection,
+                               copy_velden,
                                distance_field=distance_veld,
                                min_default_offset_start=default_offset_start,
                                default_distance=default_afstand,
                                min_offset_start_field=offset_start_veld,
-                               use_rest = restlength)
+                               use_rest = representative_length)
 
 # wegschrijven tool resultaat
 arcpy.AddMessage('Bezig met het genereren van het doelbestand...')
