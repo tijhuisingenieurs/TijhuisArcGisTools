@@ -116,11 +116,11 @@ collection.writerecords(records)
 arcpy.AddMessage('Bezig met uitvoeren van get_points_on_line...')
 
 if input_points is None or input_points == '':
-    point_col = get_points_on_line(collection, 
-                                   copy_velden, 
+    point_col = get_points_on_line(collection,
+                                   copy_velden,
                                    distance_field=distance_veld,
-                                   default_distance=default_afstand,
-                                   use_rest = restlength)
+                                   fixed_distance=default_afstand,
+                                   max_repr_length= restlength)
 else:
     point_col = MemCollection(geometry_type='MultiPoint')
     records = []

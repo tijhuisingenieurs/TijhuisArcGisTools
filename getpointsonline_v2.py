@@ -20,12 +20,12 @@ from utils.addresulttodisplay import add_result_to_display
 # 7: Doelbestand voor punten
 
 input_fl = arcpy.GetParameterAsText(0)
-distance_veld = arcpy.GetParameterAsText(1)
-default_afstand = arcpy.GetParameter(2)
-offset_start_veld = arcpy.GetParameter(3)
-default_offset_start = arcpy.GetParameter(4)
+distance_field = arcpy.GetParameterAsText(1)
+fixed_distance = arcpy.GetParameter(2)
+offset_start_field = arcpy.GetParameter(3)
+fixed_offset_start = arcpy.GetParameter(4)
 representative_length = arcpy.GetParameter(5)
-copy_velden = [str(f) for f in arcpy.GetParameter(6)]
+copy_fields = [str(f) for f in arcpy.GetParameter(6)]
 output_file = arcpy.GetParameterAsText(7)
 
 
@@ -35,12 +35,12 @@ output_file = arcpy.GetParameterAsText(7)
 #  
 # input_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'Test_kwaliteit.shp')
 # selectie = 'FALSE'
-# distance_veld = None
-# default_afstand = 100.0
-# offset_start_veld = None
-# default_offset_start = 20.0
+# distance_field = None
+# fixed_distance = 100.0
+# offset_start_field = None
+# fixed_offset_start = 20.0
 # restlength = True
-# copy_velden = ['hydro_code', 'datum_km', '[ver_eind]']
+# copy_fields = ['hydro_code', 'datum_km', '[ver_eind]']
 #    
 # test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
 # if os.path.exists(test_dir):
@@ -53,22 +53,22 @@ output_file = arcpy.GetParameterAsText(7)
 # Print ontvangen input naar console
 arcpy.AddMessage('Ontvangen parameters:')
 arcpy.AddMessage('Lijnenbestand = ' + input_fl)
-arcpy.AddMessage('Afstand uit veld = ' + str(distance_veld))
-arcpy.AddMessage('Afstand vaste waarde = ' + str(default_afstand))
-arcpy.AddMessage('Offset begin uit veld = ' + str(offset_start_veld))
-arcpy.AddMessage('Offset begin vaste waarde = ' + str(default_offset_start))
+arcpy.AddMessage('Afstand uit veld = ' + str(distance_field))
+arcpy.AddMessage('Afstand vaste waarde = ' + str(fixed_distance))
+arcpy.AddMessage('Offset begin uit veld = ' + str(offset_start_field))
+arcpy.AddMessage('Offset begin vaste waarde = ' + str(fixed_offset_start))
 arcpy.AddMessage('Maximale representatieve lengte = ' + str(representative_length))
-arcpy.AddMessage('Over te nemen velden = ' + str(copy_velden))
+arcpy.AddMessage('Over te nemen velden = ' + str(copy_fields))
 arcpy.AddMessage('Doelbestand = ' + str(output_file))
 
 # validatie ontvangen parameters
-if distance_veld is None and default_afstand is None:
+if distance_field is None and fixed_distance is None:
     raise ValueError('Geen afstand opgegeven')
 
-if default_afstand < 0 and (distance_veld is None or distance_veld == ''):
+if fixed_distance < 0 and (distance_field is None or distance_field == ''):
     raise ValueError('Geen geldige afstand opgegeven')
 
-if default_offset_start < 0 and (offset_start_veld is None or offset_start_veld == ''):
+if fixed_offset_start < 0 and (offset_start_field is None or offset_start_field == ''):
     raise ValueError('Negatieve start offset opgegeven')
 
 # voorbereiden data typen en inlezen data
@@ -99,12 +99,12 @@ collection.writerecords(records)
 arcpy.AddMessage('Bezig met uitvoeren van get_points_on_line...')
 
 point_col = get_points_on_line(collection,
-                               copy_velden,
-                               distance_field=distance_veld,
-                               min_default_offset_start=default_offset_start,
-                               default_distance=default_afstand,
-                               min_offset_start_field=offset_start_veld,
-                               use_rest = representative_length)
+                               copy_fields,
+                               distance_field=distance_field,
+                               min_fixed_offset_start=fixed_offset_start,
+                               fixed_distance=fixed_distance,
+                               min_offset_start_field=offset_start_field,
+                               max_repr_length= representative_length)
 
 # wegschrijven tool resultaat
 arcpy.AddMessage('Bezig met het genereren van het doelbestand...')
@@ -118,7 +118,7 @@ output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POINT'
                                                 spatial_reference=spatial_reference)
 
 for field in fields:
-    if field.name in copy_velden:
+    if field.name in copy_fields:
         arcpy.AddField_management(output_fl, field.name, field.type, field.precision, field.scale,
                                   field.length, field.aliasName, field.isNullable, field.required, field.domain)
 
@@ -132,7 +132,7 @@ for p in point_col.filter():
     row.Shape = point
         
     for field in fields:
-        if field.name in copy_velden:
+        if field.name in copy_fields:
             row.setValue(field.name, p['properties'].get(field.name, None))        
 
     dataset.insertRow(row)
