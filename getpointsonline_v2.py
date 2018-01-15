@@ -11,65 +11,64 @@ from utils.addresulttodisplay import add_result_to_display
 
 # Read the parameter values
 # 0: lijnenbestand
-# 1: Veld met afstand (distance_field)
-# 2: Vaste waarde voor afstand (default_distance)
-# 3: Veld met offset afstand aan het begin (min_offset_start_field)
-# 4: Vaste waarde voor offset afstand aan het begin (min_default_offset_start)
-# 5: Extra punt in restlengte zetten (restlength)
-# 6: Lijst met velden (copy_fields)
-# 7: Doelbestand voor punten
+# 1: Vaste waarde voor afstand (default_distance)
+# 2: Veld met afstand (distance_field)
+# 3: Maximale representative lengte (representative_length)
+# 4: Punt in elk hydrovak (all_lines)
+# 5: Lijst met velden (copy_fields)
+# 6: Doelbestand voor punten
 
 input_fl = arcpy.GetParameterAsText(0)
-distance_veld = arcpy.GetParameterAsText(1)
-default_afstand = arcpy.GetParameter(2)
-offset_start_veld = arcpy.GetParameter(3)
-default_offset_start = arcpy.GetParameter(4)
-restlength = arcpy.GetParameter(5)
-copy_velden = [str(f) for f in arcpy.GetParameter(6)]
-output_file = arcpy.GetParameterAsText(7)
-
+fixed_distance = arcpy.GetParameter(1)
+distance_field = arcpy.GetParameterAsText(2)
+representative_length = arcpy.GetParameter(3)
+all_lines = arcpy.GetParameter(4)
+copy_fields = [str(f) for f in arcpy.GetParameter(5)]
+output_file = arcpy.GetParameterAsText(6)
 
 # Testwaarden voor test zonder GUI:
 # import tempfile
 # import shutil
-#  
+#
 # input_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'Test_kwaliteit.shp')
 # selectie = 'FALSE'
-# distance_veld = None
-# default_afstand = 100.0
-# offset_start_veld = None
-# default_offset_start = 20.0
+# distance_field = None
+# fixed_distance = 100.0
 # restlength = True
-# copy_velden = ['hydro_code', 'datum_km', '[ver_eind]']
-#    
+#
 # test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
 # if os.path.exists(test_dir):
 #     # empty test directory
 #     shutil.rmtree(test_dir)
 # os.mkdir(test_dir)
-#     
+#
+# output_file = os.path.join(test_dir, 'test_punten.shp')
+
+# Testwaarden voor test zonder GUI:
+# input_fl = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\Tool_a3_puntenoplijnenafstand\\test_line.shp"
+# selectie = 'FALSE'
+# distance_field = None
+# fixed_distance = 50
+# representative_length = 75
+#
+# test_dir = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\Tool_a3_puntenoplijnenafstand"
 # output_file = os.path.join(test_dir, 'test_punten.shp')
 
 # Print ontvangen input naar console
 arcpy.AddMessage('Ontvangen parameters:')
 arcpy.AddMessage('Lijnenbestand = ' + input_fl)
-arcpy.AddMessage('Afstand uit veld = ' + str(distance_veld))
-arcpy.AddMessage('Afstand vaste waarde = ' + str(default_afstand))
-arcpy.AddMessage('Offset begin uit veld = ' + str(offset_start_veld))
-arcpy.AddMessage('Offset begin vaste waarde = ' + str(default_offset_start))
-arcpy.AddMessage('Restlengte extra punt geven = ' + str(restlength))
-arcpy.AddMessage('Over te nemen velden = ' + str(copy_velden))
+arcpy.AddMessage('Afstand vaste waarde = ' + str(fixed_distance))
+arcpy.AddMessage('Afstand uit veld = ' + str(distance_field))
+arcpy.AddMessage('Maximale representatieve lengte = ' + str(representative_length))
+arcpy.AddMessage('Over te nemen velden = ' + str(copy_fields))
 arcpy.AddMessage('Doelbestand = ' + str(output_file))
 
 # validatie ontvangen parameters
-if distance_veld is None and default_afstand is None:
+if distance_field is None and fixed_distance is None:
     raise ValueError('Geen afstand opgegeven')
 
-if default_afstand < 0 and (distance_veld is None or distance_veld == ''):
-    raise ValueError('Geen geldige afstand opgegeven')
-
-if default_offset_start < 0 and (offset_start_veld is None or offset_start_veld == ''):
-    raise ValueError('Negatieve start offset opgegeven')
+if fixed_distance <= 0 and (distance_field is None or distance_field == ''):
+    raise ValueError('Geen geldige afstand opgegeven. Afstand: ' + fixed_distance)
 
 # voorbereiden data typen en inlezen data
 arcpy.AddMessage('Bezig met voorbereiden van de data...')
@@ -98,13 +97,12 @@ collection.writerecords(records)
 # aanroepen tool
 arcpy.AddMessage('Bezig met uitvoeren van get_points_on_line...')
 
-point_col = get_points_on_line(collection, 
-                               copy_velden, 
-                               distance_field=distance_veld,
-                               min_default_offset_start=default_offset_start,
-                               default_distance=default_afstand,
-                               min_offset_start_field=offset_start_veld,
-                               use_rest = restlength)
+point_col = get_points_on_line(collection,
+                               copy_fields,
+                               distance_field=distance_field,
+                               fixed_distance=fixed_distance,
+                               max_repr_length= representative_length,
+                               all_lines = all_lines)
 
 # wegschrijven tool resultaat
 arcpy.AddMessage('Bezig met het genereren van het doelbestand...')
@@ -118,7 +116,7 @@ output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POINT'
                                                 spatial_reference=spatial_reference)
 
 for field in fields:
-    if field.name in copy_velden:
+    if field.name in copy_fields:
         arcpy.AddField_management(output_fl, field.name, field.type, field.precision, field.scale,
                                   field.length, field.aliasName, field.isNullable, field.required, field.domain)
 
@@ -132,7 +130,7 @@ for p in point_col.filter():
     row.Shape = point
         
     for field in fields:
-        if field.name in copy_velden:
+        if field.name in copy_fields:
             row.setValue(field.name, p['properties'].get(field.name, None))        
 
     dataset.insertRow(row)
