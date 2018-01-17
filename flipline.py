@@ -46,6 +46,8 @@ if create_new_file:
     if output_file == '':
         log.error('Uitvoerfile is verplicht als er een nieuw bestand moet worden gemaakt')
         raise arcpy.ExecuteError('Uitvoerfile is verplicht als er een nieuw bestand moet worden gemaakt')
+    if output_file[-4:] != ".shp":
+        output_file = output_file + ".shp"
 
 # voorbereiden data typen en inlezen data
 log.info('Bezig met voorbereiden van de data...')
@@ -60,8 +62,10 @@ if create_new_file:
     arcpy.CopyFeatures_management(input_name, output_file)
     lyr = arcpy.mapping.Layer(output_file)
 
-    selection_set = input_fl.getSelectionSet()
-    lyr.setSelectionSet('NEW', selection_set)
+    if type(input_fl) == arcpy.mapping.Layer:
+        selection_set = input_fl.getSelectionSet()
+        if selection_set is not None:
+            lyr.setSelectionSet('NEW', selection_set)
 else:
     lyr = input_fl
 
