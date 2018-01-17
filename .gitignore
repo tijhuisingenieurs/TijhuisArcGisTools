@@ -10,4 +10,5 @@
 test/data/TestData.gdb/*
 test/data/Local_TestData/*
 external/*
+test/data/*
 *.lock
