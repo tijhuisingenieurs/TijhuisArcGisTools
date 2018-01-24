@@ -17,6 +17,11 @@ input_fl_points_shape = arcpy.GetParameterAsText(0)
 output_file_points = arcpy.GetParameterAsText(1)
 method = arcpy.GetParameterAsText(2)
 
+# input_fl_points_shape = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\Tool_3c_correctcodes\Eline\TI17127_Deel1_Aangepast_GIS_points.shp"
+# output_file_points = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\Tool_3c_correctcodes\correctCodes_Testfiles.shp"
+# method = "Waternet"
+#input_fl_points_shape = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\Tool_3c_correctcodes\TI17061_06_Amstelveen\TI17061_06_Amstelveen.shp"
+#output_file_points = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\Tool_3c_correctcodes\correctCodes_Testfiles_Amstelveen.shp"
 # input_fl_points_shape = "c:\\tmp\\t11.shp"
 # output_file_points = "c:\\tmp\\t15.shp"
 
