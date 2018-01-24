@@ -25,7 +25,6 @@ log.setLevel(logging.INFO)
 # 5: Veld waarin nieuwe volgorde wordt weggeschreven
 # 6: Begin nummer voor nummering van punten
 # 7: Doelbestand punten
-# 8: Nummer omgekeerd
 
 input_line_fl = arcpy.GetParameter(0)
 input_point_fl = arcpy.GetParameter(1)
@@ -35,7 +34,6 @@ line_direction_field = arcpy.GetParameterAsText(4)
 point_nr_field = arcpy.GetParameterAsText(5)
 start_nr = arcpy.GetParameter(6)
 output_file = arcpy.GetParameterAsText(7)
-nr_reverse = arcpy.GetParameter(8)
 
 #Testwaarden voor test zonder GUI:
 # import tempfile
@@ -150,7 +148,7 @@ point_col.writerecords(records)
 log.info('Bezig met uitvoeren van tool...')
 
 point_col = number_points_on_line(line_col, point_col, line_nr_field, line_direction_field,
-                                  point_nr_field, start_nr, nr_reverse)
+                                  point_nr_field, start_nr)
 
 # wegschrijven tool resultaat
 log.info('Bezig met updaten van puntbestand...')
