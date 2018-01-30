@@ -252,6 +252,7 @@ if fp_col:
     arcpy.AddField_management(output_fl_fixedpoints, 'ids', "TEXT")
     arcpy.AddField_management(output_fl_fixedpoints, 'project_id', "TEXT")
     arcpy.AddField_management(output_fl_fixedpoints, 'proj_name', "TEXT")
+    arcpy.AddField_management(output_fl_fixedpoints, 'type', "TEXT")
     arcpy.AddField_management(output_fl_fixedpoints, 'opm', "TEXT",field_length=200)
     arcpy.AddField_management(output_fl_fixedpoints, 'fotos', "TEXT", field_length=200)
 
