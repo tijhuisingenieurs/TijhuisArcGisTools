@@ -23,23 +23,20 @@ profile_plan_fl = arcpy.GetParameterAsText(2)
 profile_id_field = arcpy.GetParameterAsText(3)
 recalculate_distance = arcpy.GetParameter(4)
 
-# # Testwaarden voor test zonder GUI:
+# Testwaarden voor test zonder GUI:
 # import tempfile
 # import shutil
-#
-# #input_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'projectdata_20170621.json')
-# input_fl = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\Tool_3a1_fieldworkdatatoshape\proj_TI17279_A'damseBos_testzonderpointnotes.json"
-# test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test2')
+#         
+# input_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'projectdata_20170621.json')
+# test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
 # if os.path.exists(test_dir):
 #     # empty test directory
 #     shutil.rmtree(test_dir)
 # os.mkdir(test_dir)
-#
+#              
 # output_file = os.path.join(test_dir, 'test_json.shp')
-# # profile_plan_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'Test_sjon_meetplan.shp')
-# # profile_id_field = 'DWPcode'
-# profile_plan_fl = ""
-# profile_id_field = ""
+# profile_plan_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'Test_sjon_meetplan.shp')
+# profile_id_field = 'DWPcode'
 # recalculate_distance = 'TRUE'
 
 # Print ontvangen input naar console
@@ -99,7 +96,7 @@ else:
 # aanroepen tool
 arcpy.AddMessage('Bezig met uitvoeren van json_handler..')
 
-point_col, line_col, ttlr_col, fp_col = fielddata_to_memcollections(input_fl,
+point_col, line_col, ttlr_col = fielddata_to_memcollections(input_fl,
                                                             profile_plan_col,
                                                             profile_id_field,
                                                             recalculate_distance)
@@ -231,6 +228,7 @@ for p in ttlr_col.filter():
                 (value == '' and field in ['afstand', 'breedte', 'gps_breed', 'h_breedte',
                                            'm99_breed', 'wpeil', 'z', 'x_coord', 'y_coord']):
             value = -9999
+        # arcpy.AddMessage("{0} - {1}".format(type(value), value))
         row.setValue(field, value)    
 
     dataset.insertRow(row)
