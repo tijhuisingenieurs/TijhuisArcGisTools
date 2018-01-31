@@ -233,6 +233,53 @@ for p in ttlr_col.filter():
 
     dataset.insertRow(row)
 
+if fp_col:
+    # Save fixed points to shapefile
+    arcpy.AddMessage('Bezig met het genereren van het doelbestand met vaste punten...')
+
+    output_name_fixedpoints = output_name + '_vastepunten'
+    output_fl_fixedpoints = arcpy.CreateFeatureclass_management(output_dir,
+                                                            output_name_fixedpoints,
+                                                            'POINT',
+                                                            spatial_reference=28992)
+
+    fields_fixedpoints = next(fp_col.filter())['properties'].keys()
+
+    # op volgorde toevoegen en typeren
+    arcpy.AddField_management(output_fl_fixedpoints, 'vp_pk', "INTEGER")
+    arcpy.AddField_management(output_fl_fixedpoints, 'ids', "TEXT")
+    arcpy.AddField_management(output_fl_fixedpoints, 'project_id', "TEXT")
+    arcpy.AddField_management(output_fl_fixedpoints, 'proj_name', "TEXT")
+    arcpy.AddField_management(output_fl_fixedpoints, 'type', "TEXT")
+    arcpy.AddField_management(output_fl_fixedpoints, 'opm', "TEXT",field_length=200)
+    arcpy.AddField_management(output_fl_fixedpoints, 'fotos', "TEXT", field_length=200)
+
+    arcpy.AddField_management(output_fl_fixedpoints, 'datum', "TEXT")
+    arcpy.AddField_management(output_fl_fixedpoints, 'z', "DOUBLE")
+    arcpy.AddField_management(output_fl_fixedpoints, 'x_coord', "DOUBLE")
+    arcpy.AddField_management(output_fl_fixedpoints, 'y_coord', "DOUBLE")
+
+    dataset = arcpy.InsertCursor(output_fl_fixedpoints)
+
+    for p in fp_col.filter():
+        row = dataset.newRow()
+        point = arcpy.Point()
+        point.X = p['geometry']['coordinates'][0]
+        point.Y = p['geometry']['coordinates'][1]
+
+        row.Shape = point
+
+        for field in fields_fixedpoints:
+            value = p['properties'].get(field, None)
+            if value is None or \
+                    (value == '' and field in ['z', 'x_coord', 'y_coord']):
+                value = -9999
+            row.setValue(field, value)
+
+        dataset.insertRow(row)
+    add_result_to_display(output_fl_fixedpoints, output_name_fixedpoints)
+
+# Generate csv file with profile measurements
 arcpy.AddMessage('Bezig met het genereren van het csv-bestand met metingen...')
 
 output_name_meting = os.path.join(output_dir, output_name) + '_metingen.csv'
