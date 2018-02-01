@@ -29,14 +29,16 @@ fixed_length = arcpy.GetParameter(2)
 length_field = arcpy.GetParameterAsText(3)
 output_file = arcpy.GetParameterAsText(4)
 
-# Testwaarden voor test zonder GUI:
+# # Testwaarden voor test zonder GUI:
 # import tempfile
 # import shutil
 #
-# input_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'Test_kwaliteit.shp')
-# input_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'Lijnen_Bedum_singlepart.shp')
-# input_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'TI17034_Trajectenshape_aaenmaas_2017.shp')
-# input_points = os.path.join(os.path.dirname(__file__),'test', 'data', 'Test_kwaliteit_punten.shp')
+# # input_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'Test_kwaliteit.shp')
+# # input_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'Lijnen_Bedum_singlepart.shp')
+# # input_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'TI17034_Trajectenshape_aaenmaas_2017.shp')
+# # input_points = os.path.join(os.path.dirname(__file__),'test', 'data', 'Test_kwaliteit_punten.shp')
+# input_fl = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\Tool_2c1_haakselijnenfrompoints\TI18035_testlijnen.shp"
+# input_points = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\Tool_2c1_haakselijnenfrompoints\TI18035_testpunten.shp"
 # selectie = 'FALSE'
 # length_field = None
 # fixed_length = 15
@@ -58,7 +60,7 @@ arcpy.AddMessage('Lengte haakse lijn vaste waarde = ' + str(fixed_length))
 arcpy.AddMessage('Bestandsnaam voor output haakse lijnen = ' + str(output_file))
 
 # Validation of received parameters
-if length_field is None and length_field is None:
+if length_field is None and fixed_length is None:
     raise ValueError('Geen lengte opgegeven')
 
 if fixed_length < 0 and length_field is None:
