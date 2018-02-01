@@ -96,7 +96,7 @@ else:
 # aanroepen tool
 arcpy.AddMessage('Bezig met uitvoeren van json_handler..')
 
-point_col, line_col, ttlr_col = fielddata_to_memcollections(input_fl,
+point_col, line_col, ttlr_col, fp_col = fielddata_to_memcollections(input_fl,
                                                             profile_plan_col,
                                                             profile_id_field,
                                                             recalculate_distance)
