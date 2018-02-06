@@ -254,7 +254,7 @@ if fp_col:
     arcpy.AddField_management(output_fl_fixedpoints, 'opm', "TEXT",field_length=200)
     arcpy.AddField_management(output_fl_fixedpoints, 'fotos', "TEXT", field_length=200)
 
-    arcpy.AddField_management(output_fl_fixedpoints, 'datum', "TEXT")
+    arcpy.AddField_management(output_fl_fixedpoints, 'datumtijd', "TEXT")
     arcpy.AddField_management(output_fl_fixedpoints, 'z', "DOUBLE")
     arcpy.AddField_management(output_fl_fixedpoints, 'x_coord', "DOUBLE")
     arcpy.AddField_management(output_fl_fixedpoints, 'y_coord', "DOUBLE")
