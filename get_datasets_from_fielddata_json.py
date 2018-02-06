@@ -96,10 +96,10 @@ else:
 # aanroepen tool
 arcpy.AddMessage('Bezig met uitvoeren van json_handler..')
 
-point_col, line_col, ttlr_col, fp_col = fielddata_to_memcollections(input_fl,
-                                                            profile_plan_col,
-                                                            profile_id_field,
-                                                            recalculate_distance)
+point_col, line_col, ttlr_col, fp_col, boor_col = fielddata_to_memcollections(input_fl,
+                                                                              profile_plan_col,
+                                                                              profile_id_field,
+                                                                              recalculate_distance)
 
 # wegschrijven tool resultaat
 output_name = os.path.basename(output_file).split('.')[0]
@@ -281,9 +281,11 @@ if fp_col:
 
 # Generate csv file with profile measurements
 arcpy.AddMessage('Bezig met het genereren van het csv-bestand met metingen...')
-
 output_name_meting = os.path.join(output_dir, output_name) + '_metingen.csv'
 csv_metingen = export_memcollection_to_csv(point_col, output_name_meting)
+
+output_name_boorpunten = os.path.join(output_dir, output_name) + '_boorpunten.csv'
+csv_boorpunten = export_memcollection_to_csv(boor_col, output_name_boorpunten)
 
 add_result_to_display(output_fl_lines, output_name_lines)
 add_result_to_display(output_fl_ttlr, output_name_ttlr)
