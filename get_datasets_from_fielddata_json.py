@@ -284,8 +284,9 @@ arcpy.AddMessage('Bezig met het genereren van het csv-bestand met metingen...')
 output_name_meting = os.path.join(output_dir, output_name) + '_metingen.csv'
 csv_metingen = export_memcollection_to_csv(point_col, output_name_meting)
 
-output_name_boorpunten = os.path.join(output_dir, output_name) + '_boorpunten.csv'
-csv_boorpunten = export_memcollection_to_csv(boor_col, output_name_boorpunten)
+if boor_col:
+    output_name_boorpunten = os.path.join(output_dir, output_name) + '_boorpunten.csv'
+    csv_boorpunten = export_memcollection_to_csv(boor_col, output_name_boorpunten)
 
 add_result_to_display(output_fl_lines, output_name_lines)
 add_result_to_display(output_fl_ttlr, output_name_ttlr)
