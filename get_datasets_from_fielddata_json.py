@@ -281,11 +281,11 @@ if fp_col:
 
 # Generate csv file with profile measurements
 arcpy.AddMessage('Bezig met het genereren van het csv-bestand met metingen...')
-output_name_meting = os.path.join(output_dir, output_name) + '_metingen.csv'
+output_name_meting = os.path.join(output_dir, '{0}_metingen.csv'.format(output_name))
 csv_metingen = export_memcollection_to_csv(point_col, output_name_meting)
 
 if boor_col:
-    output_name_boorpunten = os.path.join(output_dir, output_name) + '_boorpunten.csv'
+    output_name_boorpunten = os.path.join(output_dir, '{0}_boorpunten.csv'.format(output_name))
     csv_boorpunten = export_memcollection_to_csv(boor_col, output_name_boorpunten)
 
 add_result_to_display(output_fl_lines, output_name_lines)
