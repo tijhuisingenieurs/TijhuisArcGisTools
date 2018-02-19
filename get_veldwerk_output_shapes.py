@@ -228,9 +228,11 @@ output_fl_points = arcpy.CreateFeatureclass_management(output_dir_p, output_name
 
 arcpy.AddField_management(output_fl_points, 'prof_ids', "TEXT")
 arcpy.AddField_management(output_fl_points, 'datum', "TEXT")
-arcpy.AddField_management(output_fl_points, 'code', "TEXT")              
+arcpy.AddField_management(output_fl_points, 'code', "TEXT")
+arcpy.AddField_management(output_fl_points, 'sub_code', "TEXT")
 arcpy.AddField_management(output_fl_points, 'tekencode', "TEXT") 
 arcpy.AddField_management(output_fl_points, 'afstand', "DOUBLE")
+arcpy.AddField_management(output_fl_points, 'fotos', "TEXT", field_length=200)
 arcpy.AddField_management(output_fl_points, 'x_coord', "DOUBLE")
 arcpy.AddField_management(output_fl_points, 'y_coord', "DOUBLE")
 arcpy.AddField_management(output_fl_points, '_bk_wp', "DOUBLE")
@@ -248,7 +250,7 @@ for p in output_point_col.filter():
 
     row.Shape = point
     
-    for field in ['prof_ids', 'datum', 'code', 'tekencode']:
+    for field in ['prof_ids', 'datum', 'code', 'sub_code', 'tekencode', 'fotos']:
         row.setValue(field, p['properties'].get(field, '')) 
     
     for field in ['afstand', 'x_coord', 'y_coord', '_bk_wp', '_bk_nap', '_ok_wp', '_ok_nap']:
