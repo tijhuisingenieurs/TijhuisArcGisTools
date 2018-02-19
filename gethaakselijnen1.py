@@ -58,7 +58,7 @@ arcpy.AddMessage('Lengte haakse lijn vaste waarde = ' + str(fixed_length))
 arcpy.AddMessage('Bestandsnaam voor output haakse lijnen = ' + str(output_file))
 
 # Validation of received parameters
-if length_field is None and length_field is None:
+if length_field is None and fixed_length is None:
     raise ValueError('Geen lengte opgegeven')
 
 if fixed_length < 0 and length_field is None:
