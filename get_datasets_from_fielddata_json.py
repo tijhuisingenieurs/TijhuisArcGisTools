@@ -255,7 +255,7 @@ if fp_col:
     arcpy.AddField_management(output_fl_fixedpoints, 'fotos', "TEXT", field_length=200)
 
     arcpy.AddField_management(output_fl_fixedpoints, 'datumtijd', "TEXT")
-    arcpy.AddField_management(output_fl_fixedpoints, 'z', "DOUBLE")
+    arcpy.AddField_management(output_fl_fixedpoints, 'z_nap', "DOUBLE")
     arcpy.AddField_management(output_fl_fixedpoints, 'x_coord', "DOUBLE")
     arcpy.AddField_management(output_fl_fixedpoints, 'y_coord', "DOUBLE")
 
@@ -272,7 +272,7 @@ if fp_col:
         for field in fields_fixedpoints:
             value = p['properties'].get(field, None)
             if value is None or \
-                    (value == '' and field in ['z', 'x_coord', 'y_coord']):
+                    (value == '' and field in ['z_nap', 'x_coord', 'y_coord']):
                 value = -9999
             row.setValue(field, value)
 
