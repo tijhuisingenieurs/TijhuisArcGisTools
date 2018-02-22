@@ -23,6 +23,12 @@ profile_plan_fl = arcpy.GetParameterAsText(2)
 profile_id_field = arcpy.GetParameterAsText(3)
 recalculate_distance = arcpy.GetParameter(4)
 
+# input_fl = "C:\Users\eline\Documents\GitHub\TijhuisArcGisTools\external\gistools\\test\data\projectdata_2.json"
+# output_file = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\Tool_3a1_fieldworkdatatoshape\meetplan_testen\Test_meetplan"
+# profile_plan_fl = "C:\Users\eline\Documents\GitHub\TijhuisArcGisTools\\test\data\projectdata_meetplan.shp"
+# profile_id_field = "DWPcode"
+# recalculate_distance = False
+
 # Testwaarden voor test zonder GUI:
 # import tempfile
 # import shutil
@@ -255,9 +261,9 @@ if fp_col:
     arcpy.AddField_management(output_fl_fixedpoints, 'fotos', "TEXT", field_length=200)
 
     arcpy.AddField_management(output_fl_fixedpoints, 'datumtijd', "TEXT")
-    arcpy.AddField_management(output_fl_fixedpoints, 'z_nap', "DOUBLE")
     arcpy.AddField_management(output_fl_fixedpoints, 'x_coord', "DOUBLE")
     arcpy.AddField_management(output_fl_fixedpoints, 'y_coord', "DOUBLE")
+    arcpy.AddField_management(output_fl_fixedpoints, 'z_nap', "DOUBLE")
 
     dataset = arcpy.InsertCursor(output_fl_fixedpoints)
 
