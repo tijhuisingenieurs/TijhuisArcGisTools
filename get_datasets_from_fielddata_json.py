@@ -23,6 +23,12 @@ profile_plan_fl = arcpy.GetParameterAsText(2)
 profile_id_field = arcpy.GetParameterAsText(3)
 recalculate_distance = arcpy.GetParameter(4)
 
+# input_fl = "C:\Users\eline\Documents\GitHub\TijhuisArcGisTools\external\gistools\\test\data\projectdata_2.json"
+# output_file = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\Tool_3a1_fieldworkdatatoshape\meetplan_testen\Test_meetplan"
+# profile_plan_fl = "C:\Users\eline\Documents\GitHub\TijhuisArcGisTools\\test\data\projectdata_meetplan.shp"
+# profile_id_field = "DWPcode"
+# recalculate_distance = False
+
 # Testwaarden voor test zonder GUI:
 # import tempfile
 # import shutil
@@ -96,10 +102,10 @@ else:
 # aanroepen tool
 arcpy.AddMessage('Bezig met uitvoeren van json_handler..')
 
-point_col, line_col, ttlr_col, fp_col = fielddata_to_memcollections(input_fl,
-                                                            profile_plan_col,
-                                                            profile_id_field,
-                                                            recalculate_distance)
+point_col, line_col, ttlr_col, fp_col, boor_col = fielddata_to_memcollections(input_fl,
+                                                                              profile_plan_col,
+                                                                              profile_id_field,
+                                                                              recalculate_distance)
 
 # wegschrijven tool resultaat
 output_name = os.path.basename(output_file).split('.')[0]
@@ -254,10 +260,10 @@ if fp_col:
     arcpy.AddField_management(output_fl_fixedpoints, 'opm', "TEXT",field_length=200)
     arcpy.AddField_management(output_fl_fixedpoints, 'fotos', "TEXT", field_length=200)
 
-    arcpy.AddField_management(output_fl_fixedpoints, 'datum', "TEXT")
-    arcpy.AddField_management(output_fl_fixedpoints, 'z', "DOUBLE")
+    arcpy.AddField_management(output_fl_fixedpoints, 'datumtijd', "TEXT")
     arcpy.AddField_management(output_fl_fixedpoints, 'x_coord', "DOUBLE")
     arcpy.AddField_management(output_fl_fixedpoints, 'y_coord', "DOUBLE")
+    arcpy.AddField_management(output_fl_fixedpoints, 'z_nap', "DOUBLE")
 
     dataset = arcpy.InsertCursor(output_fl_fixedpoints)
 
@@ -272,7 +278,7 @@ if fp_col:
         for field in fields_fixedpoints:
             value = p['properties'].get(field, None)
             if value is None or \
-                    (value == '' and field in ['z', 'x_coord', 'y_coord']):
+                    (value == '' and field in ['z_nap', 'x_coord', 'y_coord']):
                 value = -9999
             row.setValue(field, value)
 
@@ -281,9 +287,12 @@ if fp_col:
 
 # Generate csv file with profile measurements
 arcpy.AddMessage('Bezig met het genereren van het csv-bestand met metingen...')
-
-output_name_meting = os.path.join(output_dir, output_name) + '_metingen.csv'
+output_name_meting = os.path.join(output_dir, '{0}_metingen.csv'.format(output_name))
 csv_metingen = export_memcollection_to_csv(point_col, output_name_meting)
+
+if boor_col:
+    output_name_boorpunten = os.path.join(output_dir, '{0}_boorpunten.csv'.format(output_name))
+    csv_boorpunten = export_memcollection_to_csv(boor_col, output_name_boorpunten)
 
 add_result_to_display(output_fl_lines, output_name_lines)
 add_result_to_display(output_fl_ttlr, output_name_ttlr)

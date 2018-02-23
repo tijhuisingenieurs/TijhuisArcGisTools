@@ -29,6 +29,7 @@ method = arcpy.GetParameterAsText(2)
 #     os.remove(singepartfile)
 #     os.remove(singepartfile_xml)
 
+
 # Print ontvangen input naar console
 arcpy.AddMessage('Ontvangen parameters:')
 arcpy.AddMessage('Bronbestand metingen in shape = ' + input_fl_points_shape)
@@ -93,6 +94,7 @@ output_fl_points = arcpy.CreateFeatureclass_management(output_dir_p, output_name
 arcpy.AddField_management(output_fl_points, 'prof_ids', "TEXT")
 arcpy.AddField_management(output_fl_points, 'datum', "TEXT")
 arcpy.AddField_management(output_fl_points, 'code', "TEXT")
+arcpy.AddField_management(output_fl_points, 'sub_code', "TEXT")
 arcpy.AddField_management(output_fl_points, 'code_oud', "TEXT")
 arcpy.AddField_management(output_fl_points, 'tekencode', "TEXT") 
 arcpy.AddField_management(output_fl_points, 'afstand', "DOUBLE")
@@ -113,7 +115,7 @@ for p in output_point_col.filter():
 
     row.Shape = point
     
-    for field in ['prof_ids', 'datum', 'code', 'code_oud', 'tekencode']:
+    for field in ['prof_ids', 'datum', 'code', 'sub_code', 'code_oud', 'tekencode']:
         row.setValue(field, p['properties'].get(field, '')) 
     
     for field in ['afstand', 'x_coord', 'y_coord', '_bk_wp', '_bk_nap', '_ok_wp', '_ok_nap']:

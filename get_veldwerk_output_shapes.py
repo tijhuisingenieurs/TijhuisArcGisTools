@@ -14,14 +14,16 @@ from gistools.utils.conversion_tools import get_float
 # 0: Bronbestand lijnen
 # 1: Bronbestand puntdata (csv)
 # 2: Bronbestand puntdata (shape)
-# 3: Doelbestand voor lijnen
-# 4: Doelbestand voor punten
+# 3: Bronbestand boorpunten (csv)
+# 4: Doelbestand voor lijnen
+# 5: Doelbestand voor punten
 
 input_fl_lines = arcpy.GetParameterAsText(0)
 input_fl_points_csv = arcpy.GetParameterAsText(1)
 input_fl_points_shape = arcpy.GetParameterAsText(2)
-output_file_lines = arcpy.GetParameterAsText(3)
-output_file_points = arcpy.GetParameterAsText(4)
+input_fl_boringen_csv = arcpy.GetParameterAsText(3)
+output_file_lines = arcpy.GetParameterAsText(4)
+output_file_points = arcpy.GetParameterAsText(5)
 
 # input_fl_lines = "C:\\werk\\P2017\\2017.01 - Ondersteuning Tijhuis\\aangeleverd\\invoer bugfix #96\\TI17141_20170831_lines.shp"
 # input_fl_points_csv = "C:\\werk\\P2017\\2017.01 - Ondersteuning Tijhuis\\aangeleverd\\invoer bugfix #96\\TI17141_20170831_metingen_BEWERKT.csv"
@@ -66,6 +68,7 @@ arcpy.AddMessage('Ontvangen parameters:')
 arcpy.AddMessage('Bronbestand profiel lijnen = ' + input_fl_lines)
 arcpy.AddMessage('Bronbestand metingen in csv = ' + input_fl_points_csv)
 arcpy.AddMessage('Bronbestand metingen in shape = ' + input_fl_points_shape)
+arcpy.AddMessage('Bronbestand boringen in csv = ' + input_fl_boringen_csv)
 arcpy.AddMessage('Doelbestand gecorrigeerde profiel lijnen = ' + output_file_lines)
 arcpy.AddMessage('Doelbestand gecorrigeerde metingen shape = ' + output_file_points)
 
@@ -151,10 +154,17 @@ else:
     # todo: raise warning
     exit(-1)
 
+if input_fl_boringen_csv != "":
+    input_boringen_col = import_csv_to_memcollection(input_fl_boringen_csv)
+    arcpy.AddMessage("boringen aanwezig:" + str(type(input_boringen_col)))
+else:
+    input_boringen_col = None
+
 # aanroepen tool
 arcpy.AddMessage('Bezig met uitvoeren van get_veldwerk_output_shapes..')
 
-output_line_col, output_point_col = create_fieldwork_output_shapes(input_line_col, input_point_col)
+output_line_col, output_point_col, boor_col = create_fieldwork_output_shapes(input_line_col, input_point_col,
+                                                                             input_boringen_col)
 
 # wegschrijven tool resultaat
 output_name_l = os.path.basename(output_file_lines).split('.')[0]
@@ -218,9 +228,11 @@ output_fl_points = arcpy.CreateFeatureclass_management(output_dir_p, output_name
 
 arcpy.AddField_management(output_fl_points, 'prof_ids', "TEXT")
 arcpy.AddField_management(output_fl_points, 'datum', "TEXT")
-arcpy.AddField_management(output_fl_points, 'code', "TEXT")              
+arcpy.AddField_management(output_fl_points, 'code', "TEXT")
+arcpy.AddField_management(output_fl_points, 'sub_code', "TEXT")
 arcpy.AddField_management(output_fl_points, 'tekencode', "TEXT") 
 arcpy.AddField_management(output_fl_points, 'afstand', "DOUBLE")
+arcpy.AddField_management(output_fl_points, 'fotos', "TEXT", field_length=200)
 arcpy.AddField_management(output_fl_points, 'x_coord', "DOUBLE")
 arcpy.AddField_management(output_fl_points, 'y_coord', "DOUBLE")
 arcpy.AddField_management(output_fl_points, '_bk_wp', "DOUBLE")
@@ -238,7 +250,7 @@ for p in output_point_col.filter():
 
     row.Shape = point
     
-    for field in ['prof_ids', 'datum', 'code', 'tekencode']:
+    for field in ['prof_ids', 'datum', 'code', 'sub_code', 'tekencode', 'fotos']:
         row.setValue(field, p['properties'].get(field, '')) 
     
     for field in ['afstand', 'x_coord', 'y_coord', '_bk_wp', '_bk_nap', '_ok_wp', '_ok_nap']:
@@ -248,6 +260,52 @@ for p in output_point_col.filter():
         row.setValue(field, value)
 
     dataset.insertRow(row)
+
+# In case of controle boringen
+if boor_col:
+    # Save boringen points to shapefile
+    arcpy.AddMessage('Bezig met het genereren van het doelbestand met controle boringen...')
+
+    output_name_boringen = output_name_p + '_controleboringen'
+    output_fl_boringen = arcpy.CreateFeatureclass_management(output_dir_p,
+                                                            output_name_boringen,
+                                                            'POINT',
+                                                            spatial_reference=28992)
+
+    fields_boringen = next(boor_col.filter())['properties'].keys()
+
+    # op volgorde toevoegen en typeren
+    arcpy.AddField_management(output_fl_boringen, 'project_id', "TEXT")
+    arcpy.AddField_management(output_fl_boringen, 'proj_name', "TEXT")
+    arcpy.AddField_management(output_fl_boringen, 'prof_ids', "TEXT")
+    arcpy.AddField_management(output_fl_boringen, 'boring_nr', "TEXT")
+    arcpy.AddField_management(output_fl_boringen, 'afstand', "DOUBLE")
+    arcpy.AddField_management(output_fl_boringen, 'opm', "TEXT",field_length=200)
+    arcpy.AddField_management(output_fl_boringen, 'fotos', "TEXT", field_length=200)
+
+    arcpy.AddField_management(output_fl_boringen, 'datumtijd', "TEXT")
+    arcpy.AddField_management(output_fl_boringen, 'x_coord', "DOUBLE")
+    arcpy.AddField_management(output_fl_boringen, 'y_coord', "DOUBLE")
+
+    dataset = arcpy.InsertCursor(output_fl_boringen)
+
+    for p in boor_col.filter():
+        row = dataset.newRow()
+        point = arcpy.Point()
+        point.X = p['geometry']['coordinates'][0]
+        point.Y = p['geometry']['coordinates'][1]
+
+        row.Shape = point
+
+        for field in fields_boringen:
+            value = p['properties'].get(field, None)
+            if value is None or \
+                    (value == '' and field in ['afstand', 'z', 'x_coord', 'y_coord']):
+                value = -9999
+            row.setValue(field, value)
+
+        dataset.insertRow(row)
+    add_result_to_display(output_fl_boringen, output_name_boringen)
 
 add_result_to_display(output_fl_lines, output_name_l)
 add_result_to_display(output_fl_points, output_name_p)
