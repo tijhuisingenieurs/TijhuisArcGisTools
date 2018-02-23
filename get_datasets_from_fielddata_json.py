@@ -23,12 +23,6 @@ profile_plan_fl = arcpy.GetParameterAsText(2)
 profile_id_field = arcpy.GetParameterAsText(3)
 recalculate_distance = arcpy.GetParameter(4)
 
-# input_fl = "C:\Users\eline\Documents\GitHub\TijhuisArcGisTools\external\gistools\\test\data\projectdata_2.json"
-# output_file = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\Tool_3a1_fieldworkdatatoshape\meetplan_testen\Test_meetplan"
-# profile_plan_fl = "C:\Users\eline\Documents\GitHub\TijhuisArcGisTools\\test\data\projectdata_meetplan.shp"
-# profile_id_field = "DWPcode"
-# recalculate_distance = False
-
 # Testwaarden voor test zonder GUI:
 # import tempfile
 # import shutil
