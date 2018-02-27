@@ -136,7 +136,7 @@ output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POINT'
 
 # Add the fields from the input points to the new shapefile (excluding ID and geometry fields)
 for field in fields2:
-    if field.editable and field.baseName.lower() != 'shape':
+    if field.editable and field.baseName.lower() not in ['shape', 'id', 'fid']:
         arcpy.AddField_management(output_fl, field.name, field.type, field.precision, field.scale,
                                   field.length, field.aliasName, field.isNullable, field.required,
                                   field.domain)
@@ -152,7 +152,7 @@ for p in snapped_points_col.filter():
     row.Shape = point
 
     for field in fields2:
-        if field.editable and field.baseName.lower() != 'shape':
+        if field.editable and field.baseName.lower() not in ['shape', 'fid']:
             row.setValue(field.name, p['properties'].get(field.name, None))
 
     dataset.insertRow(row)
