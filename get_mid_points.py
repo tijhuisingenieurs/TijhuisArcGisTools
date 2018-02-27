@@ -80,7 +80,7 @@ output_fl = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POINT'
                                                 spatial_reference=spatial_reference)
 
 for field in fields:
-    if field.name in copy_velden:
+    if field.name in copy_velden and field.name.lower() not in ['shape', 'id', 'fid']:
         arcpy.AddField_management(output_fl, field.name, field.type, 
                                   field.precision, field.scale,
                                   field.length, field.aliasName, field.isNullable, 
@@ -97,7 +97,7 @@ for p in point_col.filter():
     row.Shape = point
     
     for field in fields:
-        if field.name in copy_velden:
+        if field.name in copy_velden and field.name.lower() not in ['shape', 'fid']:
             row.setValue(field.name, p['properties'].get(field.name, None))
             
     dataset.insertRow(row)
