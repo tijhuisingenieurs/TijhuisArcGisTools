@@ -113,7 +113,7 @@ point_col.writerecords(records)
 copy_fields = []
 for field in fields:
     if field.name.lower() not in ['fid', 'shape']:
-        copy_fields.append(field.name.lower())
+        copy_fields.append(field.name)
 
 # Perform tool
 haakselijn_col = get_haakselijnen_on_points_on_line(collection,
