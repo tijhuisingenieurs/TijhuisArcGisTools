@@ -163,7 +163,8 @@ else:
 # aanroepen tool
 arcpy.AddMessage('Bezig met uitvoeren van get_veldwerk_output_shapes..')
 
-output_line_col, output_point_col, boor_col = create_fieldwork_output_shapes(input_line_col, input_point_col,
+output_line_col, output_point_col, boor_col = create_fieldwork_output_shapes(input_line_col,
+                                                                             input_point_col,
                                                                              input_boringen_col)
 
 # wegschrijven tool resultaat
