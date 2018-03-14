@@ -10,11 +10,9 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'extern
 from gistools.utils.collection import MemCollection, OrderedDict
 from gistools.tools.representative_length import representative_length
 
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
-
 logging.basicConfig(level=logging.INFO)
 setup_logging(arcpy)
-log = logging.getLogger(__file__)
+log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
 
 # Read the parameter values
