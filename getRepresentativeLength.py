@@ -18,8 +18,7 @@ log.setLevel(logging.INFO)
 # Read the parameter values
 # 0: Lijnenbestand hydrovakken
 # 1: Lijnenbestand profielen
-# 2: Nieuw bestand maken (boolean)
-# 3: Doelbestand profiellijnen
+# 2: Doelbestand profiellijnen
 
 input_lines = arcpy.GetParameter(0)
 input_profiles = arcpy.GetParameter(1)
