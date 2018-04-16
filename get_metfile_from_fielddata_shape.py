@@ -82,7 +82,7 @@ if tekencode == 'tekencode':
 else:
     code = 2
 
-if type_peiling != None:
+if type_peiling:
     metfile = export_points_to_metfile(point_col, project, output_file, code, type_metfile, type_peiling)
 else:
     metfile = export_points_to_metfile(point_col, project, output_file, code, type_metfile)
