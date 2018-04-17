@@ -19,10 +19,11 @@ from gistools.utils.conversion_tools import get_float
  
 input_fl = arcpy.GetParameterAsText(0)
 zvalues = arcpy.GetParameterAsText(1)
-output_folder = arcpy.GetParameterAsText(2)
-generate_lines = arcpy.GetParameterAsText(3)
-generate_22points = arcpy.GetParameterAsText(4)
-generate_all_points = arcpy.GetParameterAsText(5)
+id_location = arcpy.GetParameterAsText(2)
+output_folder = arcpy.GetParameterAsText(3)
+generate_lines = arcpy.GetParameterAsText(4)
+generate_22points = arcpy.GetParameterAsText(5)
+generate_all_points = arcpy.GetParameterAsText(6)
 
 
 # Testwaarden voor test zonder GUI:
@@ -49,6 +50,7 @@ generate_all_points = arcpy.GetParameterAsText(5)
 arcpy.AddMessage('Ontvangen parameters:')
 arcpy.AddMessage('Metfile-bestand = ' + input_fl)
 arcpy.AddMessage('Volgorde z-waarden = ' + str(zvalues))
+arcpy.AddMessage('Locatie van profiel ID = ' + str(id_location))
 arcpy.AddMessage('Bestandsmap voor doelbestanden = ' + str(output_folder))
 arcpy.AddMessage('Te genereren bestanden:')
 arcpy.AddMessage( 'Profiellijnen  = ' + str(generate_lines))
@@ -58,7 +60,7 @@ arcpy.AddMessage( 'Alle meetpunten  = ' + str(generate_all_points))
 # aanroepen tool
 arcpy.AddMessage('Bezig met uitvoeren van xml-handler..')
 
-point_col, line_col, ttlr_col, records_errors = import_xml_to_memcollection(input_fl, zvalues)
+point_col, line_col, ttlr_col, records_errors = import_xml_to_memcollection(input_fl, zvalues, id_location)
  
 # wegschrijven tool resultaat
 output_name = os.path.basename(input_fl).split('.')[0]
