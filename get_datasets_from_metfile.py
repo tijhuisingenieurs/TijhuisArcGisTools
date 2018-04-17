@@ -25,14 +25,6 @@ generate_lines = arcpy.GetParameterAsText(4)
 generate_22points = arcpy.GetParameterAsText(5)
 generate_all_points = arcpy.GetParameterAsText(6)
 
-# input_fl = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\Tool_1d_ShapeUitMetfile\iris\Import_PRO_DEEL4_2019_20180413.met"
-# zvalues = "z2z1"
-# id_location = "Eerste plaats"
-# output_folder = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\Tool_1d_ShapeUitMetfile\iris"
-# generate_lines = True
-# generate_22points = True
-# generate_all_points = True
-
 
 # Testwaarden voor test zonder GUI:
 # import tempfile
