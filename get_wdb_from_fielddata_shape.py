@@ -1,11 +1,9 @@
 import os.path
 import sys
-import csv
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
 
 import arcpy
-from utils.addresulttodisplay import add_result_to_display
 from collections import OrderedDict
 from gistools.utils.collection import MemCollection
 from gistools.utils.wdb_generator import export_points_to_wdb
@@ -21,7 +19,8 @@ input_fl_points = arcpy.GetParameterAsText(0)
 input_fl_lines = arcpy.GetParameterAsText(1)
 project = arcpy.GetParameterAsText(2)
 wdb_path = arcpy.GetParameterAsText(3)
-afstand = arcpy.GetParameter(4)
+rep_length = arcpy.GetParameter(4)
+afstand = arcpy.GetParameter(5)
 
 # Testwaarden voor test zonder GUI:
 # import tempfile
@@ -45,6 +44,7 @@ arcpy.AddMessage('Ontvangen parameters:')
 arcpy.AddMessage('Shapefile met punten = ' + str(input_fl_points))
 arcpy.AddMessage('Shapefile met lijnen = ' + str(input_fl_lines))
 arcpy.AddMessage('Project = ' + str(project))
+arcpy.AddMessage('Representatieve lengtes in bestand = ' + str(rep_length))
 arcpy.AddMessage('Afstand profielen = ' + str(afstand))
 arcpy.AddMessage('Doelmap wdb bestanden = ' + str(wdb_path))
 
@@ -100,6 +100,6 @@ line_col.writerecords(records)
 # Genereren metfile
 arcpy.AddMessage('Bezig met genereren van WDB tabellen...')
 
-metfile = export_points_to_wdb(point_col, line_col, wdb_path, afstand, project)
+wdb = export_points_to_wdb(point_col, line_col, wdb_path, afstand, project, rep_length)
 
 print 'Gereed'
