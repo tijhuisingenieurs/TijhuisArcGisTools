@@ -112,7 +112,7 @@ point_col.writerecords(records)
 
 copy_fields = []
 for field in fields:
-    if field.name.lower() not in ['fid', 'shape']:
+    if field.name.lower() not in ['fid', 'shape', 'objectid']:
         copy_fields.append(field.name)
 
 # Perform tool
