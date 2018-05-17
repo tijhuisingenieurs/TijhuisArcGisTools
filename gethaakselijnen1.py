@@ -120,7 +120,8 @@ haakselijn_col = get_haakselijnen_on_points_on_line(collection,
                                                     point_col,
                                                     copy_fields,
                                                     length_field=length_field,
-                                                    default_length=fixed_length)
+                                                    default_length=fixed_length,
+                                                    source="points")
 
 # Write result tool 'haakselijnen'
 arcpy.AddMessage('Bezig met het genereren van het doelbestand met haakse lijnen...')
@@ -134,7 +135,7 @@ output_fl = arcpy.CreateFeatureclass_management(output_dir,
                                                 spatial_reference=spatial_reference)
 
 for field in fields:
-    if field.name in copy_fields:
+    if field.name in copy_fields and field.name.lower() not in ['id']:
         arcpy.AddField_management(output_fl, field.name, field.type,
                                   field.precision, field.scale,
                                   field.length, field.aliasName, field.isNullable,
