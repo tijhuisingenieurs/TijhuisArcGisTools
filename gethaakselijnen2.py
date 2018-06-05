@@ -125,8 +125,7 @@ haakselijn_col = get_haakselijnen_on_points_on_line(collection,
                                                     point_col,
                                                     copy_fields,
                                                     length_field=length_field,
-                                                    default_length=fixed_length,
-                                                    source="lines")
+                                                    default_length=fixed_length)
 
 # Write point results
 arcpy.AddMessage('Bezig met het genereren van het doelbestand met punten...')
@@ -138,7 +137,7 @@ output_fl_points = arcpy.CreateFeatureclass_management(output_dir_points, output
                                                        spatial_reference=spatial_reference)
 
 for field in fields:
-    if field.name in copy_fields and field.name.lower() not in ['id']:
+    if field.name in copy_fields:
         arcpy.AddField_management(output_fl_points, field.name, field.type,
                                   field.precision, field.scale,
                                   field.length, field.aliasName, field.isNullable,
