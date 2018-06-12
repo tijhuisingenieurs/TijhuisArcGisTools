@@ -14,6 +14,7 @@ from utils.addresulttodisplay import add_result_to_display
 # 1: Vaste waarde voor afstand (default_distance)
 # 2: Veld met afstand (distance_field)
 # 3: Maximale representative lengte (representative_length)
+# 4: Veld met maximale representatieve lengte (representative_field)
 # 4: Punt in elk hydrovak (all_lines)
 # 5: Lijst met velden (copy_fields)
 # 6: Doelbestand voor punten
@@ -22,9 +23,10 @@ input_fl = arcpy.GetParameterAsText(0)
 fixed_distance = arcpy.GetParameter(1)
 distance_field = arcpy.GetParameterAsText(2)
 representative_length = arcpy.GetParameter(3)
-all_lines = arcpy.GetParameter(4)
-copy_fields = [str(f) for f in arcpy.GetParameter(5)]
-output_file = arcpy.GetParameterAsText(6)
+representative_field = arcpy.GetParameterAsText(4)
+all_lines = arcpy.GetParameter(5)
+copy_fields = [str(f) for f in arcpy.GetParameter(6)]
+output_file = arcpy.GetParameterAsText(7)
 
 # Testwaarden voor test zonder GUI:
 # import tempfile
@@ -60,6 +62,7 @@ arcpy.AddMessage('Lijnenbestand = ' + input_fl)
 arcpy.AddMessage('Afstand vaste waarde = ' + str(fixed_distance))
 arcpy.AddMessage('Afstand uit veld = ' + str(distance_field))
 arcpy.AddMessage('Maximale representatieve lengte = ' + str(representative_length))
+arcpy.AddMessage('Representatieve lengte uit veld = ' + str(representative_field))
 arcpy.AddMessage('Over te nemen velden = ' + str(copy_fields))
 arcpy.AddMessage('Doelbestand = ' + str(output_file))
 
@@ -101,8 +104,9 @@ point_col = get_points_on_line(collection,
                                copy_fields,
                                distance_field=distance_field,
                                fixed_distance=fixed_distance,
-                               max_repr_length= representative_length,
-                               all_lines = all_lines)
+                               max_repr_length=representative_length,
+                               rep_field=representative_field,
+                               all_lines=all_lines)
 
 # wegschrijven tool resultaat
 arcpy.AddMessage('Bezig met het genereren van het doelbestand...')
