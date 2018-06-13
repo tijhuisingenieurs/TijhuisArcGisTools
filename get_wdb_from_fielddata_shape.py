@@ -22,6 +22,13 @@ wdb_path = arcpy.GetParameterAsText(3)
 rep_length = arcpy.GetParameter(4)
 afstand = arcpy.GetParameter(5)
 
+# input_fl_points = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\Tool_3d2_newWDB\TI18087_resultaten_c2_gecorrigeerdeProfielpunten.shp"
+# input_fl_lines = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\Tool_3d2_newWDB\TI18087_profiellijnen_rep_lengte.shp"
+# project = "testwdb"
+# wdb_path = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\Tool_3d2_newWDB\\newwdbfunction"
+# rep_length = True
+# afstand = ""
+
 # Testwaarden voor test zonder GUI:
 # import tempfile
 # import shutil
