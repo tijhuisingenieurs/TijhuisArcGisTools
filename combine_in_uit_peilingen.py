@@ -59,7 +59,7 @@ output_unscaled = arcpy.GetParameterAsText(15)
 # link_table = "K:\Tekeningen Amersfoort\\2018\TI18082 Inmeten baggerprofielen 2017 Wetterskip\Tekening\Bewerkingen\Data_mug\Metingen Cluster 22 metfiles\In\link_tabel_Testprofiel_AA_10.csv"
 # project = "Project,test"
 # order = "z2z1"
-# scale_threshold = 0.05
+# scale_threshold = 0.0000000001
 # scale_bank_distance = False
 # level_peiling = "Inpeiling"
 # shore_peiling = "Inpeiling"
@@ -145,8 +145,7 @@ if unscaled_points:
         for field in ['prof_ids', 'datum', 'code', 'tekencode']:
             row.setValue(field, p['properties'].get(field, ''))
 
-        for field in ['volgnr', 'afstand', 'x_coord', 'y_coord', '_bk_wp', '_bk_nap', '_ok_wp', '_ok_nap', 'uit_bk_nap',
-                      'uit_ok_nap']:
+        for field in ['volgnr', 'afstand', 'x_coord', 'y_coord', '_bk_wp', '_bk_nap', '_ok_wp', '_ok_nap']:
             value = get_float(p['properties'].get(field, ''))
             row.setValue(field, value)
 
