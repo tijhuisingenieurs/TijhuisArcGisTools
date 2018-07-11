@@ -50,22 +50,22 @@ width_peiling = arcpy.GetParameterAsText(13)
 output_file = arcpy.GetParameterAsText(14)
 output_unscaled = arcpy.GetParameterAsText(15)
 
-# input_inpeilingen = "K:\Tekeningen Amersfoort\\2018\TI18082 Inmeten baggerprofielen 2017 Wetterskip\Tekening\Bewerkingen\Data_mug\Metingen Cluster 22 metfiles\In\Inpeiling_Testprofiel_AA_10.met"
+# input_inpeilingen = "K:\Algemeen\\1_GIS\GEHEIM\VB_aan_uitpeiling_koppelen\TI17052_IP_Woerden.met"
 # order_in = "z2z1"
 # loc_in = "Eerste plaats"
-# input_uitpeilingen = "K:\Tekeningen Amersfoort\\2018\TI18082 Inmeten baggerprofielen 2017 Wetterskip\Tekening\Bewerkingen\Data_mug\Metingen Cluster 22 metfiles\Uit\Uitpeiling_Testprofiel_AA_10.met"
+# input_uitpeilingen = "K:\Algemeen\\1_GIS\GEHEIM\VB_aan_uitpeiling_koppelen\TI17052_UP_Woerden_zonder_VB.met"
 # order_uit = "z2z1"
 # loc_uit = "Tweede plaats"
-# link_table = "K:\Tekeningen Amersfoort\\2018\TI18082 Inmeten baggerprofielen 2017 Wetterskip\Tekening\Bewerkingen\Data_mug\Metingen Cluster 22 metfiles\In\link_tabel_Testprofiel_AA_10.csv"
-# project = "Project,test"
+# link_table = "K:\Algemeen\\1_GIS\GEHEIM\VB_aan_uitpeiling_koppelen\TI17052_tabel_IP_UP.csv"
+# project = "UP_Hartog"
 # order = "z2z1"
-# scale_threshold = 0.0000000001
+# scale_threshold = 15/100
 # scale_bank_distance = False
-# level_peiling = "Inpeiling"
+# level_peiling = "Uitpeiling"
 # shore_peiling = "Inpeiling"
 # width_peiling = "Uitpeiling"
-# output_file = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\Tool_d3_uitpeilingentool\output_shapes\Test_scaling.met"
-# output_unscaled = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\Tool_d3_uitpeilingentool\output_shapes\Unscaled_uitpeiling.shp"
+# output_file = "K:\Algemeen\\1_GIS\GEHEIM\VB_aan_uitpeiling_koppelen\TI17052_UP_Woerden_met_VB.met"
+# output_unscaled = "K:\Algemeen\\1_GIS\GEHEIM\VB_aan_uitpeiling_koppelen\TI17052_nietbehandeldeuitpeilingen.shp"
 
 # Print ontvangen input naar console
 arcpy.AddMessage('Ontvangen parameters:')
@@ -152,7 +152,7 @@ if unscaled_points:
         dataset.insertRow(row)
 
     # Add results to display
-    add_result_to_display(output_fl, output_name)
+    #add_result_to_display(output_fl, output_name)
 
 
 arcpy.AddMessage('Gereed')
