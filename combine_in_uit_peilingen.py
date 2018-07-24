@@ -42,7 +42,7 @@ loc_uit = arcpy.GetParameterAsText(5)
 link_table = arcpy.GetParameterAsText(6)
 project = arcpy.GetParameterAsText(7)
 order = arcpy.GetParameterAsText(8)
-scale_threshold = arcpy.GetParameter(9)/100
+scale_threshold = float(arcpy.GetParameter(9))/100
 scale_bank_distance = arcpy.GetParameter(10)
 level_peiling = arcpy.GetParameterAsText(11)
 shore_peiling = arcpy.GetParameterAsText(12)
@@ -59,7 +59,7 @@ output_unscaled = arcpy.GetParameterAsText(15)
 # link_table = "K:\Algemeen\\1_GIS\GEHEIM\VB_aan_uitpeiling_koppelen\TI17052_tabel_IP_UP.csv"
 # project = "UP_Hartog"
 # order = "z2z1"
-# scale_threshold = 15/100
+# scale_threshold = float(15)/100
 # scale_bank_distance = False
 # level_peiling = "Uitpeiling"
 # shore_peiling = "Inpeiling"
@@ -152,7 +152,7 @@ if unscaled_points:
         dataset.insertRow(row)
 
     # Add results to display
-    #add_result_to_display(output_fl, output_name)
+    add_result_to_display(output_fl, output_name)
 
 
 arcpy.AddMessage('Gereed')

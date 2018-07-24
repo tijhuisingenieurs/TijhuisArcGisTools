@@ -4,6 +4,7 @@ import logging
 import arcpy
 from utils.addresulttodisplay import add_result_to_display
 from utils.arcgis_logging import setup_logging
+# import random
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
 
@@ -29,13 +30,13 @@ output_file = arcpy.GetParameterAsText(3)
 output_split = arcpy.GetParameter(4)
 output_split_file = arcpy.GetParameterAsText(5)
 
-# random_nr = random.randint(0,100)
-# input_lines = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\\representative_length\lines_2.shp"
-# input_profiles = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\\representative_length\dwp_2.shp"
-# output_file = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\\representative_length\Test_splitLines{0}.shp".format(
+# random_nr = random.randint(0, 100)
+# input_lines = "C:\Users\eline\Documents\ArcGIS\Jolanda_1207\TI18135_type_plichtige_sp.shp"
+# input_profiles = "C:\Users\eline\Documents\ArcGIS\Jolanda_1207\TI18135_DWP_def.shp"
+# output_file = "C:\Users\eline\Documents\ArcGIS\Jolanda_1207\TI18135_DWP_def_rep_length_{0}.shp".format(
 #     random_nr
 # )
-# id_field = "prof_nr"
+# id_field = "DWPnr"
 
 # Print ontvangen input naar console
 log.info('Ontvangen parameters:')

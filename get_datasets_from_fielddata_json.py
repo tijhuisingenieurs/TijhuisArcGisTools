@@ -23,10 +23,10 @@ profile_plan_fl = arcpy.GetParameterAsText(2)
 profile_id_field = arcpy.GetParameterAsText(3)
 recalculate_distance = arcpy.GetParameter(4)
 
-# input_fl = "C:\Users\eline\Documents\GitHub\TijhuisArcGisTools\external\gistools\\test\data\projectdata_2.json"
-# output_file = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\Tool_3a1_fieldworkdatatoshape\meetplan_testen\Test_meetplan2"
-# profile_plan_fl = "C:\Users\eline\Documents\GitHub\TijhuisArcGisTools\\test\data\projectdata_meetplan.shp"
-# profile_id_field = "DWPstr"
+# input_fl = "K:\Projecten\\2018\TI18144 Stedelijk baggerwerk 2019 HHNK\Veldwerk\Blok_499\Uitgelezen\TI18144_ExportJSON_23072018_140720.json"
+# output_file = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\Tool_3a1_fieldworkdatatoshape\probleem_jolanda_2307\Test1"
+# profile_plan_fl = ""
+# profile_id_field = ""
 # recalculate_distance = False
 
 # Testwaarden voor test zonder GUI:
