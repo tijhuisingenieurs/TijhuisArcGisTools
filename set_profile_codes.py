@@ -43,35 +43,33 @@ arcpy.AddMessage('Bezig met voorbereiden van de data...')
 arcpy.AddMessage('Bezig met vullen punten collection...')
 
 input_point_col = MemCollection(geometry_type='MultiPoint')
+records2 = []
+rows2 = arcpy.SearchCursor(input_fl_points_shape)
+fields2 = arcpy.ListFields(input_fl_points_shape)
 
-if input_fl_points_shape != '':
-    records2 = []
-    rows2 = arcpy.SearchCursor(input_fl_points_shape)
-    fields2 = arcpy.ListFields(input_fl_points_shape)
-    
-    point = arcpy.Point()
-    
-    # vullen collection 
-    for row in rows2:
-        geom = row.getValue('SHAPE')
-        properties = {}
-        for field in fields2:
-            if field.name.lower() != 'shape':
-                if isinstance(field.name, unicode):
-                    key = field.name.encode('utf-8')
-                else:
-                    key = field.name
-                if isinstance(row.getValue(field.name), unicode):
-                    value = row.getValue(field.name).encode('utf-8')
-                else:
-                    value = row.getValue(field.name)
-                properties[key] = value
+point = arcpy.Point()
 
-        records2.append({'geometry': {'type': 'Point',
-                                      'coordinates': (geom.firstPoint.X, geom.firstPoint.Y)},
-                         'properties': properties})
-    
-    input_point_col.writerecords(records2)
+# vullen collection
+for row in rows2:
+    geom = row.getValue('SHAPE')
+    properties = {}
+    for field in fields2:
+        if field.name.lower() != 'shape':
+            if isinstance(field.name, unicode):
+                key = field.name.encode('utf-8')
+            else:
+                key = field.name
+            if isinstance(row.getValue(field.name), unicode):
+                value = row.getValue(field.name).encode('utf-8')
+            else:
+                value = row.getValue(field.name)
+            properties[key] = value
+
+    records2.append({'geometry': {'type': 'Point',
+                                  'coordinates': (geom.firstPoint.X, geom.firstPoint.Y)},
+                     'properties': properties})
+
+input_point_col.writerecords(records2)
 
 # aanroepen tool
 arcpy.AddMessage('Bezig met uitvoeren van get_veldwerk_output_shapes..')
