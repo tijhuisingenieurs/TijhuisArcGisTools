@@ -42,8 +42,9 @@ arcpy.AddMessage('Bezig met voorbereiden van de data...')
 # vullen collection punten
 arcpy.AddMessage('Bezig met vullen punten collection...')
 
+input_point_col = MemCollection(geometry_type='MultiPoint')
+
 if input_fl_points_shape != '':
-    input_point_col = MemCollection(geometry_type='MultiPoint')
     records2 = []
     rows2 = arcpy.SearchCursor(input_fl_points_shape)
     fields2 = arcpy.ListFields(input_fl_points_shape)
@@ -104,6 +105,7 @@ arcpy.AddField_management(output_fl_points, '_bk_wp', "DOUBLE")
 arcpy.AddField_management(output_fl_points, '_bk_nap', "DOUBLE")
 arcpy.AddField_management(output_fl_points, '_ok_wp', "DOUBLE")
 arcpy.AddField_management(output_fl_points, '_ok_nap', "DOUBLE")
+arcpy.AddField_management(output_fl_points, 'opm', "TEXT")
 
 dataset = arcpy.InsertCursor(output_fl_points)
                    
@@ -115,13 +117,11 @@ for p in output_point_col.filter():
 
     row.Shape = point
     
-    for field in ['prof_ids', 'datum', 'code', 'sub_code', 'code_oud', 'tekencode']:
+    for field in ['prof_ids', 'datum', 'code', 'sub_code', 'code_oud', 'tekencode', 'opm']:
         row.setValue(field, p['properties'].get(field, '')) 
     
     for field in ['afstand', 'x_coord', 'y_coord', '_bk_wp', '_bk_nap', '_ok_wp', '_ok_nap']:
-        value = get_float(p['properties'].get(field, None))
-        if value is None:
-            value = -9999
+        value = get_float(p['properties'].get(field, -9999))
         row.setValue(field, value)
 
     dataset.insertRow(row)
