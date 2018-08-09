@@ -42,35 +42,34 @@ arcpy.AddMessage('Bezig met voorbereiden van de data...')
 # vullen collection punten
 arcpy.AddMessage('Bezig met vullen punten collection...')
 
-if input_fl_points_shape != '':
-    input_point_col = MemCollection(geometry_type='MultiPoint')
-    records2 = []
-    rows2 = arcpy.SearchCursor(input_fl_points_shape)
-    fields2 = arcpy.ListFields(input_fl_points_shape)
-    
-    point = arcpy.Point()
-    
-    # vullen collection 
-    for row in rows2:
-        geom = row.getValue('SHAPE')
-        properties = {}
-        for field in fields2:
-            if field.name.lower() != 'shape':
-                if isinstance(field.name, unicode):
-                    key = field.name.encode('utf-8')
-                else:
-                    key = field.name
-                if isinstance(row.getValue(field.name), unicode):
-                    value = row.getValue(field.name).encode('utf-8')
-                else:
-                    value = row.getValue(field.name)
-                properties[key] = value
+input_point_col = MemCollection(geometry_type='MultiPoint')
+records2 = []
+rows2 = arcpy.SearchCursor(input_fl_points_shape)
+fields2 = arcpy.ListFields(input_fl_points_shape)
 
-        records2.append({'geometry': {'type': 'Point',
-                                      'coordinates': (geom.firstPoint.X, geom.firstPoint.Y)},
-                         'properties': properties})
-    
-    input_point_col.writerecords(records2)
+point = arcpy.Point()
+
+# vullen collection
+for row in rows2:
+    geom = row.getValue('SHAPE')
+    properties = {}
+    for field in fields2:
+        if field.name.lower() != 'shape':
+            if isinstance(field.name, unicode):
+                key = field.name.encode('utf-8')
+            else:
+                key = field.name
+            if isinstance(row.getValue(field.name), unicode):
+                value = row.getValue(field.name).encode('utf-8')
+            else:
+                value = row.getValue(field.name)
+            properties[key] = value
+
+    records2.append({'geometry': {'type': 'Point',
+                                  'coordinates': (geom.firstPoint.X, geom.firstPoint.Y)},
+                     'properties': properties})
+
+input_point_col.writerecords(records2)
 
 # aanroepen tool
 arcpy.AddMessage('Bezig met uitvoeren van get_veldwerk_output_shapes..')
@@ -104,6 +103,7 @@ arcpy.AddField_management(output_fl_points, '_bk_wp', "DOUBLE")
 arcpy.AddField_management(output_fl_points, '_bk_nap', "DOUBLE")
 arcpy.AddField_management(output_fl_points, '_ok_wp', "DOUBLE")
 arcpy.AddField_management(output_fl_points, '_ok_nap', "DOUBLE")
+arcpy.AddField_management(output_fl_points, 'opm', "TEXT")
 
 dataset = arcpy.InsertCursor(output_fl_points)
                    
@@ -115,13 +115,11 @@ for p in output_point_col.filter():
 
     row.Shape = point
     
-    for field in ['prof_ids', 'datum', 'code', 'sub_code', 'code_oud', 'tekencode']:
+    for field in ['prof_ids', 'datum', 'code', 'sub_code', 'code_oud', 'tekencode', 'opm']:
         row.setValue(field, p['properties'].get(field, '')) 
     
     for field in ['afstand', 'x_coord', 'y_coord', '_bk_wp', '_bk_nap', '_ok_wp', '_ok_nap']:
-        value = get_float(p['properties'].get(field, None))
-        if value is None:
-            value = -9999
+        value = get_float(p['properties'].get(field, -9999))
         row.setValue(field, value)
 
     dataset.insertRow(row)
