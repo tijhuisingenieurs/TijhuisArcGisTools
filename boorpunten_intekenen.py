@@ -18,8 +18,7 @@ monstervak_veld = arcpy.GetParameterAsText(2)
 monstervakken_doelbestand = arcpy.GetParameterAsText(3)
 aantal_boorpunten = arcpy.GetParameterAsText(4)
 minimale_afstand = arcpy.GetParameterAsText(5)
-velden_overnemen = [str(f) for f in arcpy.GetParameter(6)]
-doelbestand_boorpunten = arcpy.GetParameterAsText(7)
+doelbestand_boorpunten = arcpy.GetParameterAsText(6)
 
 # # Script arguments
 # watergang = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\Tool_d1_boorpuntenIntekenen\watergangen.shp"
