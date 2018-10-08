@@ -47,25 +47,27 @@ scale_bank_distance = arcpy.GetParameter(10)
 level_peiling = arcpy.GetParameterAsText(11)
 shore_peiling = arcpy.GetParameterAsText(12)
 width_peiling = arcpy.GetParameterAsText(13)
-output_file = arcpy.GetParameterAsText(14)
-output_unscaled = arcpy.GetParameterAsText(15)
+ID_peiling = arcpy.GetParameterAsText(14)
+output_file = arcpy.GetParameterAsText(15)
+output_unscaled = arcpy.GetParameterAsText(16)
 
-# input_inpeilingen = "K:\Algemeen\\1_GIS\GEHEIM\VB_aan_uitpeiling_koppelen\TI17052_IP_Woerden.met"
-# order_in = "z2z1"
+# input_inpeilingen = "K:\Tekeningen Amersfoort\\2018\TI18082 Inmeten baggerprofielen 2017 Wetterskip\Tekening\Bewerkingen\Verwerking\Cluster04\Metfile_Fryslan\TI18082_Metfile_voor_vastebodem.met"
+# order_in = "z1z2"
 # loc_in = "Eerste plaats"
-# input_uitpeilingen = "K:\Algemeen\\1_GIS\GEHEIM\VB_aan_uitpeiling_koppelen\TI17052_UP_Woerden_zonder_VB.met"
-# order_uit = "z2z1"
-# loc_uit = "Tweede plaats"
-# link_table = "K:\Algemeen\\1_GIS\GEHEIM\VB_aan_uitpeiling_koppelen\TI17052_tabel_IP_UP.csv"
-# project = "UP_Hartog"
+# input_uitpeilingen = "K:\Projecten\\2018\TI18082 Inmeten baggerprofielen 2017 - WF\Rapport\Cluster04\TI18082_Cluster04_nog_combineren_WIT_Opmaak.met"
+# order_uit = "z1z2"
+# loc_uit = "Eerste plaats"
+# link_table = "K:\Tekeningen Amersfoort\\2018\TI18082 Inmeten baggerprofielen 2017 Wetterskip\Tekening\Bewerkingen\Verwerking\Cluster04\Resultaat_Metfiles\Z1Z2\TI18082_04_Koppeltabel.csv"
+# project = "TI18082,Uipeiling_Combi_Cluster04_2018"
 # order = "z2z1"
-# scale_threshold = float(15)/100
+# scale_threshold = 99.0/100.0
 # scale_bank_distance = False
 # level_peiling = "Uitpeiling"
-# shore_peiling = "Inpeiling"
+# shore_peiling = "Uitpeiling"
 # width_peiling = "Uitpeiling"
-# output_file = "K:\Algemeen\\1_GIS\GEHEIM\VB_aan_uitpeiling_koppelen\TI17052_UP_Woerden_met_VB.met"
-# output_unscaled = "K:\Algemeen\\1_GIS\GEHEIM\VB_aan_uitpeiling_koppelen\TI17052_nietbehandeldeuitpeilingen.shp"
+# ID_peiling = "Uitpeiling"
+# output_file = "K:\Algemeen\\1_GIS\GEHEIM\Uitpeilingen_ws\TI178082_combi.met"
+# output_unscaled = "K:\Algemeen\\1_GIS\GEHEIM\Uitpeilingen_ws\TI18082_nietbehandeldeuitpeilingen.shp"
 
 # Print ontvangen input naar console
 arcpy.AddMessage('Ontvangen parameters:')
@@ -94,9 +96,11 @@ results_path = os.path.join(output_dir, output_name_results)
 
 # Process input data
 arcpy.AddMessage('Bezig met combineren van de peilingen...')
+id_peiling = 1 if ID_peiling == "Uitpeiling" else 0
 combined_points, results_list, unscaled_points = combine_peilingen(input_inpeilingen, input_uitpeilingen, order_in,
                                                                    order_uit, loc_in, loc_uit, link_table,
-                                                                   width_peiling, scale_threshold, scale_bank_distance)
+                                                                   width_peiling, id_peiling, scale_threshold,
+                                                                   scale_bank_distance)
 
 # Generate metfile
 arcpy.AddMessage('Bezig met genereren van metfile...')
