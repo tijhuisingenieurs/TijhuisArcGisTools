@@ -2,7 +2,6 @@ import os.path
 import sys
 import logging
 import arcpy
-from utils.addresulttodisplay import add_result_to_display
 from utils.arcgis_logging import setup_logging
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
