@@ -26,10 +26,9 @@ input_file = arcpy.GetParameterAsText(1)
 input_folder = arcpy.GetParameterAsText(2)
 output_folder = arcpy.GetParameterAsText(3)
 
-arcpy.AddMessage(folder_or_file)
-arcpy.AddMessage(input_file)
-arcpy.AddMessage(input_folder)
-arcpy.AddMessage(output_folder)
+arcpy.AddMessage('Input file voor metfile: ' + input_file)
+arcpy.AddMessage('Input folder voor meerdere metfiles: ' + input_folder)
+arcpy.AddMessage('Output folder: ' + output_folder)
 
 #folder_or_file = False
 #input_file = "C:\Users\elma\Documents\GitHub\TijhuisArcGisTools\external\gistools\\test\data\quick_view_metfile\quick_view_metfile.met"
@@ -40,7 +39,6 @@ arcpy.AddMessage(output_folder)
 # input_file = " "
 # input_folder = "C:\Users\elma\Documents\GitHub\TijhuisArcGisTools\external\gistools\\test\data\quick_view_metfile"
 # output_folder = "C:\Users\elma\Documents\GitHub\TijhuisArcGisTools\external\gistools\\test\data\quick_view_metfile"
-
 
 # Check if folder of only 1 metfile is given and make a list of the files
 if folder_or_file: # folder with metfiles
@@ -58,9 +56,6 @@ point_col = quickview_metfile_locaties(list_metfile_names)
 output_dir = output_folder
 output_file = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POINT', spatial_reference=28992)
 
-arcpy.AddMessage(point_col)
-arcpy.AddMessage(output_file)
-
 # op volgorde fields toevoegen en typeren
 arcpy.AddField_management(output_file, 'Metfile', 'TEXT')
 arcpy.AddField_management(output_file, 'P_naam', 'TEXT')
@@ -70,9 +65,6 @@ arcpy.AddField_management(output_file, 'x_coord', 'DOUBLE')
 arcpy.AddField_management(output_file, 'y_coord', 'DOUBLE')
 
 dataset = arcpy.InsertCursor(output_file)
-
-arcpy.AddMessage(output_file)
-arcpy.AddMessage(dataset)
 
 # Geef de velden weer die aan de keys van de properties zijn
 fields = next(point_col.filter())['properties'].keys()
