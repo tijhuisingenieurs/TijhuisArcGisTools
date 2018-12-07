@@ -31,25 +31,39 @@ log.setLevel(logging.INFO)
 #input_inpeil = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\\VP_02_points.shp'
 #input_uitpeil = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\\VP_02_points.shp'
 
-
-input_inpeil = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\\VDH_IBA080_201800216_points.shp'
+print('Start tool')
+print('Inlezen data...')
+#input_inpeil = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\\VDH_IBA080_201800216_points.shp'
 #input_inpeil = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\\VDH_IBA080_20170215_kortlang_points.shp'
 
-input_uitpeil = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\\VDH_IBA080_20170215_points.shp'
-
+#input_uitpeil = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\\VDH_IBA080_20170215_points.shp'
+#
 input_inpeil = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\\proj_slibaanwas_all\\20180718_IBA_meetjaar_2_points.shp'
 input_uitpeil = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\\proj_slibaanwas_all\\20181108_IBA_meetjaar_1_points.shp'
-output_folder = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\\proj_slibaanwas_all'
 
+# input_inpeil = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\\proj_slib_error_meetjaar2_0101.shp'
+# input_uitpeil = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\\proj_slib_error_meetjaar1_0101.shp'
+
+output_folder = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\\proj_slibaanwas_all'
+print('Datat ingelezen')
 # Aanroepen functies voor berekening slib:
+print('Middelpunten genereren...')
 point_col_in, point_col_uit, point_col_mid_in, point_col_mid_uit, profiel_namen_in, profiel_namen_uit = \
     GetProfielMiddelpunt(input_inpeil, input_uitpeil)
+
+print('Middelpunten gegenereerd')
+print('Buffer creeren...')
 buffer_mid_in = Createbuffer(point_col_mid_in)
+print('Buffer gecreeerd')
+print('Slibaanwas berekenen...')
 t = time.time()
 in_uit_combi, info_list = GetSlibaanwas(point_col_in,point_col_uit,point_col_mid_uit,buffer_mid_in)
 elapsed = time.time() - t
-
+print('Slibaanwas berekend')
 print('TIJD: ', elapsed)
 
 # Wegschrijven gegevens in shapefile
+print('Resultaat in shapefile wegschrijven...')
 WriteListtoCollection(output_folder, in_uit_combi, info_list)
+print('Resultaat weggeschreven')
+print('klaar')
