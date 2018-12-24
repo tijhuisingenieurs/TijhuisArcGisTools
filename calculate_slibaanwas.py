@@ -2,22 +2,19 @@ import logging
 import os.path
 import sys
 import time
-import numpy as np
 import arcpy
 
-from gistools.tools.calculate_slibaanwas_tool import get_profiel_middelpunt, create_buffer, \
-    get_slibaanwas
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
+
+from gistools.tools.calculate_slibaanwas_tool import get_profiel_middelpunt, create_buffer, get_slibaanwas
 from gistools.utils.collection import MemCollection
 from utils.addresulttodisplay import add_result_to_display
 from utils.arcgis_logging import setup_logging
 
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
 logging.basicConfig(level=logging.INFO)
 setup_logging(arcpy)
 log = logging.getLogger(__file__)
 log.setLevel(logging.INFO)
-
-
 
 # De functies om van arcgis naar python te gaan en terug
 def from_shape_to_memcollection_points(input_shape):
@@ -126,7 +123,7 @@ def write_list_to_collection(output_file, in_uit_combi, info_list):
         dataset.insertRow(row)
     # print('weggeschreven als file')
     arcpy.AddMessage('weggeschreven als file')
-    #add_result_to_display(output_file, output_name)
+    add_result_to_display(output_file, output_name)
 
 # Read the parameter values
 # 0: Meetpunten inpeiling (shapefile)
@@ -142,8 +139,6 @@ output_file = arcpy.GetParameterAsText(2)
 zoekafstand = arcpy.GetParameter(3)
 tolerantie_breedte = arcpy.GetParameter(4)
 tolerantie_wp = arcpy.GetParameter(5)
-
-
 
 # ------------- Spul om de functie zonder arcgis aan te roepen
 # print('Start tool')
