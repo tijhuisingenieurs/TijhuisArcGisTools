@@ -2,6 +2,7 @@ import logging
 import os.path
 import sys
 import time
+
 import arcpy
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
@@ -16,15 +17,17 @@ setup_logging(arcpy)
 log = logging.getLogger(__file__)
 log.setLevel(logging.INFO)
 
+
 # De functies om van arcgis naar python te gaan en terug
 def from_shape_to_memcollection_points(input_shape):
     """Deze functie zet de shape met informatie om naar een punten collectie
     input: shapefile met meetpunten erin (het kan elke puntenshape zijn. De kolominfo wordt overgezet
-    naar de properties en de coordinaten naar coordinates
+    naar de properties en de coordinaten naar coordinates)
     output: memcollection met deze punten erin"""
 
-    # ---------- Omzetten van shapefile input naar memcollection----------------
     import arcpy
+
+    # ---------- Omzetten van shapefile input naar memcollection----------------
     # --- Initialize point collection
     point_col = MemCollection(geometry_type='MultiPoint')
     records_in = []
@@ -53,6 +56,7 @@ def from_shape_to_memcollection_points(input_shape):
     point_col.writerecords(records_in)
     return point_col
 
+
 def write_list_to_collection(output_file, in_uit_combi, info_list):
     '''Hierin wordt de memcollectie (points) gevuld met de resultaten uit de get_slibaanwas tool
     Er wordt een shapefile gemaakt met per profiel het middelpunt en in GIS toegevoegd.
@@ -69,10 +73,11 @@ def write_list_to_collection(output_file, in_uit_combi, info_list):
     datum_uit,
     afstand =  deafstand tussen de middelpunten van de in- en uitpeiling,
     m_factor = aantal meters dat van de kant niet is meegenomen,
-    error = geeft aan door welke error er geen berekening heeft plaatsgevonden. Null wanneer alles goed ging.
+    error = geeft aan door welke error er geen berekening heeft plaatsgevonden.
     '''
 
     import arcpy
+
     # specific file name and data
     # output_name = 'slibaanwas_{0}.shp'.format(np.random.random_integers(1,100))
     output_name = os.path.basename(output_file).split('.')[0]
@@ -125,6 +130,7 @@ def write_list_to_collection(output_file, in_uit_combi, info_list):
     arcpy.AddMessage('weggeschreven als file')
     add_result_to_display(output_file, output_name)
 
+
 # Read the parameter values
 # 0: Meetpunten inpeiling (shapefile)
 # 1: Meetpunten uitpeiling (shapefile)
@@ -139,33 +145,6 @@ output_file = arcpy.GetParameterAsText(2)
 zoekafstand = arcpy.GetParameter(3)
 tolerantie_breedte = arcpy.GetParameter(4)
 tolerantie_wp = arcpy.GetParameter(5)
-
-# ------------- Spul om de functie zonder arcgis aan te roepen
-# print('Start tool')
-# print('Inlezen data...')
-# input_inpeil = 'C:\Users\\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\Test_tool_inpeiling_0101.shp'
-# input_uitpeil = 'C:\Users\\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\Test_tool_inpeiling_als_uitpeiling_0101.shp'
-# output_file = 'C:\Users\\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\Test_tool_resultaat_{0}.shp'.format(np.random.random_integers(1,100))
-# zoekafstand = 5
-# tolerantie_breedte = 0.7
-# tolerantie_wp = 0.15
-
-#input_inpeil = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\\VP_02_points.shp'
-#input_uitpeil = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\\VP_02_points.shp'
-#input_inpeil = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\\VDH_IBA080_201800216_points.shp'
-#input_inpeil = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\\VDH_IBA080_20170215_kortlang_points.shp'
-
-#input_uitpeil = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\\VDH_IBA080_20170215_points.shp'
-
-# input_inpeil = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\\proj_slibaanwas_all\\20180718_IBA_meetjaar_2_points.shp'
-# input_uitpeil = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\\proj_slibaanwas_all\\20181108_IBA_meetjaar_1_points.shp'
-
-# zoekafstand = 5
-# input_inpeil = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\\proj_slib_error_meetjaar2_0101.shp'
-# input_uitpeil = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\\proj_slib_error_meetjaar1_0101.shp'
-#
-# output_folder = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\\proj_slibaanwas_all'
-# ------------------
 
 # Overzicht inladen
 arcpy.AddMessage('Ontvangen parameters:')
@@ -191,8 +170,8 @@ arcpy.AddMessage('Buffer gecreeerd')
 
 arcpy.AddMessage('Slibaanwas berekenen...')
 t = time.time()
-in_uit_combi, info_list = get_slibaanwas(point_col_in,point_col_uit,point_col_mid_uit,buffer_mid_in,
-                                        tolerantie_breedte, tolerantie_wp)
+in_uit_combi, info_list = get_slibaanwas(point_col_in, point_col_uit, point_col_mid_uit, buffer_mid_in,
+                                         tolerantie_breedte, tolerantie_wp)
 elapsed = time.time() - t
 # print('Slibaanwas berekend')
 # print('TIJD: ', elapsed)
