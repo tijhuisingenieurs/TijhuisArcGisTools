@@ -7,7 +7,8 @@ import arcpy
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
 
-from gistools.tools.calculate_slibaanwas_tool import get_profiel_middelpunt, create_buffer, get_slibaanwas
+# from gistools.tools.calculate_slibaanwas_tool import get_profiel_middelpunt, create_buffer, get_slibaanwas
+from gistools.tools.calculate_slibaanwas_tool import get_profiel_middelpunt, get_slibaanwas
 from gistools.utils.collection import MemCollection
 from utils.addresulttodisplay import add_result_to_display
 from utils.arcgis_logging import setup_logging
@@ -146,6 +147,13 @@ zoekafstand = arcpy.GetParameter(3)
 tolerantie_breedte = arcpy.GetParameter(4)
 tolerantie_wp = arcpy.GetParameter(5)
 
+# input_inpeil = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\Test_inpeiling_midden_ver.shp'
+# input_uitpeil = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\Test_uitpeiling_midden_ver.shp'
+# output_file = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\\berekenen_slibaanwas\Test_resultaat_midden_ver.shp'
+# zoekafstand = 1
+# tolerantie_breedte = 0.7
+# tolerantie_wp = 0.15
+
 # Overzicht inladen
 arcpy.AddMessage('Ontvangen parameters:')
 arcpy.AddMessage('Bestand inpeiling = ' + input_inpeil)
@@ -160,19 +168,15 @@ point_col_uit = from_shape_to_memcollection_points(input_uitpeil)
 arcpy.AddMessage('Omgezet naar memcollection')
 
 arcpy.AddMessage('Middelpunten genereren...')
-point_col_mid_in, point_col_mid_uit, profiel_namen_in, profiel_namen_uit = \
-    get_profiel_middelpunt(point_col_in, point_col_uit)
+point_mid_in, point_mid_uit = get_profiel_middelpunt(point_col_in, point_col_uit)
 arcpy.AddMessage('Middelpunten gegenereerd')
-
-arcpy.AddMessage('Buffer creeren...')
-buffer_mid_in = create_buffer(point_col_mid_in, zoekafstand)
-arcpy.AddMessage('Buffer gecreeerd')
 
 arcpy.AddMessage('Slibaanwas berekenen...')
 t = time.time()
-in_uit_combi, info_list = get_slibaanwas(point_col_in, point_col_uit, point_col_mid_uit, buffer_mid_in,
+in_uit_combi, info_list = get_slibaanwas(point_col_in, point_col_uit, point_mid_in, point_mid_uit, zoekafstand,
                                          tolerantie_breedte, tolerantie_wp)
 elapsed = time.time() - t
+arcpy.AddMessage('Slibaanwas berekend')
 # print('Slibaanwas berekend')
 # print('TIJD: ', elapsed)
 
