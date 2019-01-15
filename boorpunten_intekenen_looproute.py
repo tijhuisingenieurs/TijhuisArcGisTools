@@ -37,7 +37,7 @@ arcpy.Delete_management("in_memory")
 # 6: Doelbestand monstervakken (dissolved)
 # 7: Doelbestand boorpunten
 
-# Script arguments
+# # Script arguments
 watergang = arcpy.GetParameterAsText(0)
 input_fl_route = arcpy.GetParameterAsText(1)
 bgt = arcpy.GetParameterAsText(2)
@@ -57,8 +57,8 @@ doelbestand_boorpunten = arcpy.GetParameterAsText(7)
 # aantal_boorpunten = 10
 # minimale_afstand = 0.1
 # doelbestand_boorpunten = "C:\Users\elma\Documents\GitHub\MAP_eline\Algemeen\GIS\Tooltesting\TestData\Tool_d1_boorpuntenIntekenen\Elma\\boorpunten_jan2019_{0}.shp".format(nummer_test)
-# input lijnen looptroute
-# input_fl_route = 'C:\Users\elma\Documents\GitHub\MAP_eline\Algemeen\GIS\Tooltesting\TestData\Tool_d1_boorpuntenIntekenen\\routelijn.shp'
+# # input lijnen looptroute
+# input_fl_route = 'C:\Users\elma\Documents\GitHub\MAP_eline\Algemeen\GIS\Tooltesting\TestData\Tool_d1_boorpuntenIntekenen\Elma\\routelijn.shp'
 #--------------------------------
 
 # input lijnen monstervakken
