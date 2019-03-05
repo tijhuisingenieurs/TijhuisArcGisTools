@@ -1,6 +1,7 @@
 import os.path
 import sys
 import arcpy
+import numpy as np
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
 
@@ -20,15 +21,16 @@ aantal_boorpunten = arcpy.GetParameterAsText(4)
 minimale_afstand = arcpy.GetParameterAsText(5)
 doelbestand_boorpunten = arcpy.GetParameterAsText(6)
 
-# # Script arguments
-# watergang = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\Tool_d1_boorpuntenIntekenen\watergangen.shp"
-# bgt = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\Tool_d1_boorpuntenIntekenen\\bgt.shp"
+# Script arguments
+# nummer_test = (np.random.random_integers(1,100))
+# watergang = "C:\Users\elma\Documents\GitHub\MAP_eline\Algemeen\GIS\Tooltesting\TestData\Tool_d1_boorpuntenIntekenen\watergangen_deel_elma.shp"
+# bgt = "C:\Users\elma\Documents\GitHub\MAP_eline\Algemeen\GIS\Tooltesting\TestData\Tool_d1_boorpuntenIntekenen\\bgt.shp"
 # monstervak_veld = "mv_code"
-# monstervakken_doelbestand = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\Tool_d1_boorpuntenIntekenen\monstervakken.shp"
+# monstervakken_doelbestand = "C:\Users\elma\Documents\GitHub\MAP_eline\Algemeen\GIS\Tooltesting\TestData\Tool_d1_boorpuntenIntekenen\monstervakken_jan2019_{0}.shp".format(nummer_test)
 # aantal_boorpunten = 10
 # minimale_afstand = 0.1
-# doelbestand_boorpunten = "C:\Users\eline\Documents\Algemeen\GIS\Tooltesting\TestData\Tool_d1_boorpuntenIntekenen\\boorpunten.shp"
-
+# doelbestand_boorpunten = "C:\Users\elma\Documents\GitHub\MAP_eline\Algemeen\GIS\Tooltesting\TestData\Tool_d1_boorpuntenIntekenen\\boorpunten_jan2019_{0}.shp".format(nummer_test)
+#
 # Clip de watergangen met de bgt and dissolve op monstervak
 temp_clip = "in_memory\clip_watergangen"
 clipped = arcpy.Clip_analysis(watergang, bgt, temp_clip)
@@ -63,7 +65,7 @@ output_name = os.path.basename(temp_points).split('.')[0]
 output_dir = os.path.dirname(temp_points)
 
 output_points = arcpy.CreateFeatureclass_management(output_dir, output_name, 'POINT',
-                                                spatial_reference=spatial_reference)
+                                                    spatial_reference=spatial_reference)
 
 for field in fields:
     if field.name == monstervak_veld:
