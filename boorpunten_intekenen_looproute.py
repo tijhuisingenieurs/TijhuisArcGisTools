@@ -48,7 +48,7 @@ monstervakken_doelbestand = arcpy.GetParameterAsText(6)
 doelbestand_boorpunten = arcpy.GetParameterAsText(7)
 
 #-------------------------------
-# Script arguments voor in GUI
+# # Script arguments voor in GUI
 # nummer_test = (np.random.random_integers(1,1000))
 # watergang = "C:\Users\elma\Documents\GitHub\MAP_eline\Algemeen\GIS\Tooltesting\TestData\Tool_d1_boorpuntenIntekenen\watergangen.shp"
 # bgt = "C:\Users\elma\Documents\GitHub\MAP_eline\Algemeen\GIS\Tooltesting\TestData\Tool_d1_boorpuntenIntekenen\\bgt.shp"
@@ -384,4 +384,3 @@ arcpy.Delete_management("in_memory")
 
 add_result_to_display(output_boorpunten, output_name)
 add_result_to_display(monstervakken_doelbestand, output_name)
-
