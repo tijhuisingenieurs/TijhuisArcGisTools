@@ -30,8 +30,11 @@ log.setLevel(logging.INFO)
 # 11: Take waterlevel from inpeiling or uitpeiling
 # 12: Take shore points from inpeiling or uitpeiling
 # 13: Take width waterway from inpeiling or uitpeiling
-# 14: Doelbestand voor metfile
-# 15: Doelbestand non-scaled uitpeilingen
+# 14: Take profielID form inpeilin or uitpeiling
+# 15: Past de vaste bodem aan, zodat die altijd laagste punt is. Geeft dus de nieuwe situatie weer wanneer er vaste
+# bodem is gebaggerd.
+# 16: Doelbestand voor metfile
+# 17: Doelbestand non-scaled uitpeilingen
  
 input_inpeilingen = arcpy.GetParameterAsText(0)
 order_in = arcpy.GetParameterAsText(1)
@@ -48,8 +51,9 @@ level_peiling = arcpy.GetParameterAsText(11)
 shore_peiling = arcpy.GetParameterAsText(12)
 width_peiling = arcpy.GetParameterAsText(13)
 ID_peiling = arcpy.GetParameterAsText(14)
-output_file = arcpy.GetParameterAsText(15)
-output_unscaled = arcpy.GetParameterAsText(16)
+vaste_bodem = arcpy.GetParameter(15)
+output_file = arcpy.GetParameterAsText(16)
+output_unscaled = arcpy.GetParameterAsText(17)
 
 # input_inpeilingen = "K:\Tekeningen Amersfoort\\2018\TI18082 Inmeten baggerprofielen 2017 Wetterskip\Tekening\Bewerkingen\Verwerking\Cluster04\Metfile_Fryslan\TI18082_Metfile_voor_vastebodem.met"
 # order_in = "z1z2"
@@ -65,9 +69,29 @@ output_unscaled = arcpy.GetParameterAsText(16)
 # level_peiling = "Uitpeiling"
 # shore_peiling = "Uitpeiling"
 # width_peiling = "Uitpeiling"
+# vaste_bodem = True
 # ID_peiling = "Uitpeiling"
 # output_file = "K:\Algemeen\\1_GIS\GEHEIM\Uitpeilingen_ws\TI178082_combi.met"
 # output_unscaled = "K:\Algemeen\\1_GIS\GEHEIM\Uitpeilingen_ws\TI18082_nietbehandeldeuitpeilingen.shp"
+
+# input_inpeilingen = "C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Combi_in_uit\TI18169_Metfile_Inpeiling.met"
+# order_in = "z2z1"
+# loc_in = "Eerste plaats"
+# input_uitpeilingen = "C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Combi_in_uit\TI18169_Metfile_Uitpeiling.met"
+# order_uit = "z2z1"
+# loc_uit = "Eerste plaats"
+# link_table = "C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Combi_in_uit\TI18169_Week07_Koppeltabel.csv"
+# project = "Test,Onveranderde vaste bodem"
+# order = "z2z1"
+# scale_threshold = 99.0/100.0
+# scale_bank_distance = False
+# level_peiling = "Inpeiling"
+# shore_peiling = "Inpeiling"
+# width_peiling = "Inpeiling"
+# vaste_bodem = True
+# ID_peiling = "Inpeiling"
+# output_file = "C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Combi_in_uit\Test_verander.met"
+# output_unscaled = "C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Combi_in_uit\Test_veranderd.shp"
 
 # Print ontvangen input naar console
 arcpy.AddMessage('Ontvangen parameters:')
@@ -85,8 +109,9 @@ arcpy.AddMessage('Oevers meeschalen? = ' + str(scale_bank_distance))
 arcpy.AddMessage('Waterpeil meenemen van = ' + level_peiling)
 arcpy.AddMessage('Oevers meenemen van = ' + shore_peiling)
 arcpy.AddMessage('Watergang breedte meenemen van = ' + str(width_peiling))
+arcpy.AddMessage('Aanpassen van de vaste bodem = ' + str(vaste_bodem))
 arcpy.AddMessage('Doelbestand metfile = ' + str(output_file))
-arcpy.AddMessage('Doelbestand niet behandelde uitpeilingen ' + str(output_unscaled))
+arcpy.AddMessage('Doelbestand niet behandelde uitpeilingen = ' + str(output_unscaled))
 
 # Define name for output results csv
 output_name = os.path.basename(output_file).split('.')[0]
@@ -105,7 +130,7 @@ combined_points, results_list, unscaled_points = combine_peilingen(input_inpeili
 # Generate metfile
 arcpy.AddMessage('Bezig met genereren van metfile...')
 results_list = convert_to_metfile(combined_points, project, output_file, results_list, order=order,
-                                  level_peiling=level_peiling, shore_peiling=shore_peiling)
+                                  level_peiling=level_peiling, shore_peiling=shore_peiling, vaste_bodem_aanpassen=vaste_bodem)
 results_dict_to_csv(results_list, results_path)
 
 # Generate shapefile with unscaled points
