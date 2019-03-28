@@ -46,8 +46,22 @@ output_bestand = arcpy.GetParameterAsText(4)
 # input_watergangen = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\waterbreedtes_BGT\watergangen.shp'
 # input_profielen = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\waterbreedtes_BGT\profielen.shp'
 # input_bgt = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\waterbreedtes_BGT\BGT.shp'
-# output_bestand = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\waterbreedtes_BGT\test33'
+# output_bestand = 'C:\Users\elma\Documents\GitHub\Test_data_werking_tools\waterbreedtes_BGT\\test33'
 # prof_id = 'profnaam'
+# #
+# input_watergangen = 'K:\Tekeningen Hoorn\\2019\TI19090 Peilen diverse locaties Sudwest Fryslan\Tekening\Bewerkingen\Voorbereiding\TI19090_Watergangen.shp'
+# input_profielen = 'K:\Tekeningen Hoorn\\2019\TI19090 Peilen diverse locaties Sudwest Fryslan\Tekening\Bewerkingen\Analyse\TI19090_DWP.shp'
+# input_bgt = 'K:\Tekeningen Hoorn\\2019\TI19090 Peilen diverse locaties Sudwest Fryslan\Tekening\Bewerkingen\Analyse\TI19090_Waterdeel_BGT.shp'
+# output_bestand = 'K:\Tekeningen Hoorn\\2019\TI19090 Peilen diverse locaties Sudwest Fryslan\Tekening\\test2002'
+# prof_id = 'DWPnr'
+
+# ---------------------------------------
+arcpy.AddMessage('Opgegeven bestanden: ')
+arcpy.AddMessage('Input watergangen: ' + input_watergangen)
+arcpy.AddMessage('Input profielen: ' + input_profielen)
+arcpy.AddMessage('Input bgt: ' + input_bgt)
+arcpy.AddMessage('Output bestand ' + output_bestand)
+
 
 # Zet de lijnen om naar een memcollection
 # --------Watergangen --------------
@@ -71,6 +85,7 @@ for row in rows:
                     'properties': properties})
 
 watergangen_col.writerecords(records)
+arcpy.AddMessage('Watergangen ingelezen')
 
 # ---------Profielen-------------
 profielen_input_col = MemCollection(geometry_type='MultiLinestring')
@@ -93,6 +108,7 @@ for row in rows:
                     'properties': properties})
 
 profielen_input_col.writerecords(records)
+arcpy.AddMessage('Profielen ingelezen')
 
 # ---------- Find intersection profielen en watergangen -------------
 # Initalize new point collection for the intersection points
@@ -130,7 +146,7 @@ for feature in watergangen_col:
         continue
 
     point_col.writerecords(points)
-
+arcpy.AddMessage('Maken haakse lijnen')
 # -------- maak haakse lijnen -----------
 haakselijnen_col = get_haakselijnen_on_points_on_line(watergangen_col, point_col, [prof_id],
                                                       default_length=100, length_field=None, source="points")
@@ -160,9 +176,9 @@ for p in point_col.filter():
     point.Y = p['geometry']['coordinates'][1]
     row.Shape = point
 
-    for field in fields:
-        if field == prof_id:  # dit bestaat nu niet meer, ergens anders toevoegen
-            row.setValue(field, p['properties'].get(field, None))
+    # for field in fields:
+    #     if field == prof_id:  # dit bestaat nu niet meer, ergens anders toevoegen
+    #         row.setValue(field, p['properties'].get(field, None))
 
     dataset.insertRow(row)
 
@@ -198,9 +214,10 @@ for l in haakselijnen_col.filter():
 
     for field in fields:
         if field == prof_id:
-            row.setValue(field, l['properties'].get(field, None))
-
+                row.setValue(field, str(l['properties'].get(field, None)))
     dataset.insertRow(row)
+
+arcpy.AddMessage('Clip lijnen op BGT')
 
 # Clip haakse lijnen op de BGT en maak het singleparts
 clip_haaks = "in_memory\\clip_haaks"
@@ -216,6 +233,8 @@ selected_haakselijnen = output_bestand + '.shp'
 # selected_haakselijnen = output_folder + haakse_lijnen_bestandsnaam
 selection = arcpy.SelectLayerByLocation_management(lay, "INTERSECT", temp_points, "", "NEW_SELECTION", "NOT_INVERT")
 arcpy.CopyFeatures_management(selection, selected_haakselijnen)
+
+arcpy.AddMessage('Bepaal de breedtes')
 
 # ------ Add field length -----------------------
 Geometry_Properties = "LENGTH"
