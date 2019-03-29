@@ -23,7 +23,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'extern
 import arcpy
 from utils.addresulttodisplay import add_result_to_display
 from collections import OrderedDict
-from shapely.geometry import MultiLineString, LineString
+from shapely.geometry import MultiLineString, LineString, MultiPoint
 from gistools.tools.dwp_tools import get_haakselijnen_on_points_on_line
 
 from gistools.utils.collection import MemCollection
@@ -54,6 +54,12 @@ output_bestand = arcpy.GetParameterAsText(4)
 # input_bgt = 'K:\Tekeningen Hoorn\\2019\TI19090 Peilen diverse locaties Sudwest Fryslan\Tekening\Bewerkingen\Analyse\TI19090_Waterdeel_BGT.shp'
 # output_bestand = 'K:\Tekeningen Hoorn\\2019\TI19090 Peilen diverse locaties Sudwest Fryslan\Tekening\\test2002'
 # prof_id = 'DWPnr'
+#
+# input_watergangen = 'K:\Tekeningen Hoorn\\2019\TI19054 OSW en baggerplan gemeente Dantumadiel\Tekening\Bewerkingen\Hoeveelheden_profielen\Test_watergang.shp'
+# input_profielen = 'K:\Tekeningen Hoorn\\2019\TI19054 OSW en baggerplan gemeente Dantumadiel\Tekening\Bewerkingen\Hoeveelheden_profielen\Test_profielen.shp'
+# input_bgt = 'K:\Tekeningen Hoorn\\2019\TI19054 OSW en baggerplan gemeente Dantumadiel\Tekening\Bewerkingen\Hoeveelheden_profielen\Test_bgt.shp'
+# output_bestand = 'K:\Tekeningen Hoorn\\2019\TI19054 OSW en baggerplan gemeente Dantumadiel\Tekening\Bewerkingen\Hoeveelheden_profielen\\test2002'
+# prof_id = 'prof_naam'
 
 # ---------------------------------------
 arcpy.AddMessage('Opgegeven bestanden: ')
@@ -134,6 +140,12 @@ for feature in watergangen_col:
 
         # Making an intersection of the profile with the line creates a point
         x = line.intersection(prof)
+
+        # If the profile intersects the watergang more than once
+        if isinstance(x, MultiPoint):
+            arcpy.AddMessage('Profiel {0} heeft meerdere intersecties met de onderliggende BGT. Er wordt geen '
+                             'breedte bepaald'.format(profile['properties'][prof_id]))
+            continue
 
         # If the profile has an intersect with the line, and thus a point is created
         if not x.is_empty:
