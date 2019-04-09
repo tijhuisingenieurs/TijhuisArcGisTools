@@ -10,6 +10,8 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'extern
 
 from gistools.utils.collection import MemCollection, OrderedDict
 from gistools.tools.representative_length import representative_length
+from gistools.utils.collection import MemCollection
+from gistools.utils.geometry import TLine, TMultiLineString
 
 logging.basicConfig(level=logging.INFO)
 setup_logging(arcpy)
