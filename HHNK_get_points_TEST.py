@@ -1,16 +1,18 @@
 # LIBRARIES FOR TOOL
 import arcpy
 import fiona
-from shapely import affinity
-from shapely.geometry import Point, LineString, shape, MultiPolygon, Polygon, MultiLineString, mapping
+import sys
+import os.path
+
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
+
+from shapely.geometry import Point, LineString, shape, MultiPolygon, mapping
 from gistools.tools.connect_start_end_points import get_points_on_line
 from gistools.tools.dwp_tools import get_haakselijnen_on_points_on_line
-from matplotlib.collections import PatchCollection
+from gistools.tools.validatie import get_angles
 import matplotlib.pyplot as plt
 from gistools.utils.collection import MemCollection
-from collections import OrderedDict
-import numpy
-
+from gistools.utils.geometry import TLine
 
 
 # FUNCTIONS
@@ -40,53 +42,103 @@ def closest(lst, K):
     """
     return lst[min(range(len(lst)), key=lambda i: abs(lst[i] - K))]
 
+
 ### CODE
+
+# waterloop_lines = "C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/test/TI19340_Te_peilen_Waterlopen_Waarland.shp"
+# shapes = "C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/test/waterdeel_waarland.shp"
+# output_point = "C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/test/test_output_point.shp"
+# output_line = "C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/test/test_output_line.shp"
+# output_point_plot = "C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/test/test_output_point_plot.shp"
+# fixed_distance_profile_int = 50.0
+# start_distance = 25
+# profile_width = 20
+
+arcpy.env.overwriteOutput = True
+
+# Input for ArcMap
+waterloop_lines = arcpy.GetParameterAsText(0)
+shapes = arcpy.GetParameterAsText(1)
+output_point = arcpy.GetParameterAsText(2)
+output_line = arcpy.GetParameterAsText(3)
+output_point_plot = arcpy.GetParameterAsText(4)
+
+# values for input
+fixed_distance_profile_int = arcpy.GetParameterAsText(5)
+start_distance = arcpy.GetParameterAsText(6)
+profile_width = arcpy.GetParameterAsText(7)
+
+# check voor bestandeninput
+arcpy.AddMessage('waterlijnen = ' + str(waterloop_lines))
+arcpy.AddMessage('watervlakken = ' + str(shapes))
+arcpy.AddMessage('lengte waterweg per te plaatsen dwarsprofiel (m) = ' + str(fixed_distance_profile_int))
+arcpy.AddMessage('startpositie eerste dwarsprofiel (m) = ' + str(start_distance))
+arcpy.AddMessage('lengte haakse lijn dwarsprofiel (m) = ' + str(profile_width))
 
 #TI19340_Te_peilen_Waterlopen_Tuitjenhorn.shp
 #waterloop_ingewikkeld.shp
 #TI19340_Te_peilen_Waterlopen_Waarland.shp
 #Waterlijnen_totaal.shp
-waterloop_lines = fiona.open("C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/test/waterlijn_clip_singlepart.shp")
+waterloop_lines = fiona.open(waterloop_lines)
 
 #waterdelen openen (importeren)
 #waterdeel_selection_test.shp
 #waterdeel_ingewikkeld.shp
 #waterdeel_waarland.shp
 #waterdeel_HHNK.shp
-shapes = MultiPolygon([shape(pol['geometry']) for pol in fiona.open("C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/test/waterdeel_HHNK_dissolved.shp")])
+#waterdeel_HHNK_dissolved.shp
+shapes = MultiPolygon([shape(pol['geometry']) for pol in fiona.open(shapes)])
 
 plt.figure(figsize=(20,20))
 
 #fixed distance between points
 fixed_distance = 1.0
-fixed_distance_profile = 50.0
+start_distance = int(start_distance)
+fixed_distance_profile = float(fixed_distance_profile_int)
 
 #looproutes openen (importeren)
 #waterloop_ingewikkeld.shp
 #TI19340_Te_peilen_Waterlopen_Tuitjenhorn.shp
 #TI19340_Te_peilen_Waterlopen_Waarland.shp
 #Waterlijnen_totaal.shp
+#waterlijn_clip_singlepart.shp
 point_list = []
+haakse_lijnen_list = []
+angle_list = []
+actual_angle_list = []
+plot_side = []
 counter = 1
-for waterloop_index, pol in enumerate(fiona.open("C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/test/waterlijn_clip_singlepart.shp")):
-    test_col = MemCollection(geometry_type='LineString')
+
+arcpy.AddMessage('calculating best profile location based on average width of waterway')
+
+for waterloop_index, lines in enumerate(waterloop_lines):
+    line_col = MemCollection(geometry_type='LineString')
     records = []
-    records.append(pol)
-    test_col.writerecords(records)
-    waterlijn = LineString(test_col[0]['geometry']['coordinates'])
+    records.append(lines)
+    line_col.writerecords(records)
+    line_col = get_angles(line_col)
+
+    actual_angle = line_col[0]['properties']['feature_angle']
+
+    if 135 > line_col[0]['properties']['feature_angle'] <= 45:
+        angle_waterloop = 0
+    else:
+        angle_waterloop = 90
+
+    waterlijn = LineString(line_col[0]['geometry']['coordinates'])
 
     # functie 1: punten intekenen op lijn
-    point_col = get_points_on_line(test_col,
+    point_col = get_points_on_line(line_col,
                                    fixed_distance=fixed_distance,
                                    all_lines=True)
 
     # functie 2: haakse lijnen tekenen
-    haakse_lijnen = get_haakselijnen_on_points_on_line(test_col, point_col, default_length=200.0)
+    haakse_lijnen = get_haakselijnen_on_points_on_line(line_col, point_col, default_length=200.0)
 
     # plot haakse lijnen
     for shape in shapes:
         if shape.intersects(waterlijn):
-            print("ID:", waterloop_index)
+            arcpy.AddMessage('water-line ID: {}'.format(waterloop_index))
 
             distance_list = []
             for i, line in enumerate(haakse_lijnen):
@@ -211,7 +263,7 @@ for waterloop_index, pol in enumerate(fiona.open("C:/Users/tom/_Python_projects/
                 elif len(slice) < 10 and i == 0:  # set minimum length of total line
                     pass
                 elif i == 0 and len(distance_list) >= 50:
-                    idx = 25
+                    idx = start_distance
                     idx_list.append(idx)
                 elif i == 0 and len(distance_list) < 50:
                     idx = len(slice) / 2
@@ -224,6 +276,8 @@ for waterloop_index, pol in enumerate(fiona.open("C:/Users/tom/_Python_projects/
 
                 i += int(profile_distance_transformed)
                 # print("mean:", mean_distance)
+                arcpy.AddMessage("mean width: {}, closest width: {}, index of closest (m): {}".format(closest_point, mean_distance, idx))
+
                 print("closest:", closest_point, "mean:", mean_distance, "index:", idx)
 
             point_list_x = []
@@ -235,6 +289,8 @@ for waterloop_index, pol in enumerate(fiona.open("C:/Users/tom/_Python_projects/
                     point_list_x.append(point_col[item]['geometry']['coordinates'][0])
                     point_list_y.append(point_col[item]['geometry']['coordinates'][1])
                     point_list.append(Point(point_col[item]['geometry']['coordinates']))
+                    angle_list.append(angle_waterloop)
+
 
             #plot points
             # plt.scatter(point_list_x, point_list_y, c='r', zorder=15, s=50)
@@ -268,23 +324,86 @@ for waterloop_index, pol in enumerate(fiona.open("C:/Users/tom/_Python_projects/
 #                     plt.plot(line_list_x, line_list_y, zorder=10)
 #
 # plt.show()
+arcpy.AddMessage("..Calculating points completed")
+arcpy.AddMessage("..Writing (profiles) points to shapefile")
 
-
-schema = {
+schema_point = {
     'geometry': 'Point',
-    'properties': {'id': 'int'},
+    'properties': {'id': 'int', 'angle': 'int'},
 }
 
 # Write a new Shapefile
-with fiona.open('C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/test/totaal_punten_clip_dissolve.shp', 'w', 'ESRI Shapefile', schema, crs_wkt=waterloop_lines.crs_wkt) as c:
+with fiona.open(output_point, 'w', 'ESRI Shapefile', schema_point, crs_wkt=waterloop_lines.crs_wkt) as c:
     ## If there are multiple geometries, put the "for" loop here
     for e, point in enumerate(point_list):
         c.write({
             'geometry': mapping(point),
-            'properties': {'id': e},
+            'properties': {'id': e, 'angle': angle_list[e]},
         })
+c.close()
+
+points_to_line = fiona.open(output_point)
 
 ### OVERIG
+arcpy.AddMessage("..Converting points to perpendicular lines")
+
+haakse_lijnen_final = get_haakselijnen_on_points_on_line(waterloop_lines, points_to_line, default_length=int(profile_width))
+for i, line in enumerate(haakse_lijnen_final):
+
+    # get angles of haakse lijnen
+    haakse_lijnen_final = get_angles(haakse_lijnen_final)
+    actual_angle = haakse_lijnen_final[i]['properties']['feature_angle']
+    actual_angle_list.append(actual_angle)
+
+    # add haakse lijnen to list
+    haaks = LineString(haakse_lijnen_final[i]["geometry"]["coordinates"])
+    haakse_lijnen_list.append(haaks)
+
+    # put all the points in the north/west
+    if angle_list[i] == 0 or angle_list[i] == 90:
+        xy_id = haaks.coords.xy[1].index(max(haaks.coords.xy[1]))
+        plot_point = Point(haaks.coords[xy_id])
+        plot_side.append(plot_point)
+
+    # if actual_angle < 45 or actual_angle > 135:
+    #     xy_id = haaks.coords.xy[1].index(max(haaks.coords.xy[1]))
+    #     plot_point = Point(haaks.coords[xy_id])
+    #     plot_side.append(plot_point)
+    # elif actual_angle == 90:
+    #     plot_point = Point(haaks.coords[0])
+    #     plot_side.append(plot_point)
+    # else:
+    #     xy_id = haaks.coords.xy[0].index(min(haaks.coords.xy[0]))
+    #     plot_point = Point(haaks.coords[xy_id])
+    #     plot_side.append(plot_point)
+
+schema_line = {
+    'geometry': 'LineString',
+    'properties': {'id': 'int', 'angle': 'int', 'actualangle': 'int'},
+}
+
+arcpy.AddMessage("..Writing profiles (lines) to shapefile")
+
+with fiona.open(output_line, 'w', 'ESRI Shapefile', schema_line, crs_wkt=waterloop_lines.crs_wkt) as c:
+    ## If there are multiple geometries, put the "for" loop here
+    for e, line in enumerate(haakse_lijnen_list):
+        c.write({
+            'geometry': mapping(line),
+            'properties': {'id': e, 'angle': angle_list[e], 'actualangle': actual_angle_list[e]},
+        })
+
+schema_point_plot = {
+    'geometry': 'Point',
+    'properties': {'id': 'int'},
+}
+
+with fiona.open(output_point_plot, 'w', 'ESRI Shapefile', schema_point_plot, crs_wkt=waterloop_lines.crs_wkt) as c:
+    ## If there are multiple geometries, put the "for" loop here
+    for e, point in enumerate(plot_side):
+        c.write({
+            'geometry': mapping(point),
+            'properties': {'id': e},
+        })
 
 # plot profielpunten
 # point_list_x = []
@@ -293,3 +412,5 @@ with fiona.open('C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/test/tot
 #     point_list_x.append(point_col[i]['geometry']['coordinates'][0])
 #     point_list_y.append(point_col[i]['geometry']['coordinates'][1])
 # plt.scatter(point_list_x, point_list_y)
+
+arcpy.AddMessage("Successfully completed run")
