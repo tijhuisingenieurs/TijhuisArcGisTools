@@ -1,71 +1,48 @@
-# LIBRARIES FOR TOOL
 import arcpy
 import fiona
 import sys
 import os.path
+from shapely.geometry import Point, LineString, shape, MultiPolygon, mapping
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
 
-from shapely.geometry import Point, LineString, shape, MultiPolygon, mapping
+# internal library
 from gistools.tools.connect_start_end_points import get_points_on_line
 from gistools.tools.dwp_tools import get_haakselijnen_on_points_on_line
 from gistools.tools.validatie import get_angles
 from gistools.utils.collection import MemCollection
-from gistools.utils.geometry import TLine
-
-# FUNCTIONS
-def create_polygon(list_x, list_y):
-    """
-    Function to create a tuple polygon based on two lists with x and y coordinates.
-
-    list_x: list with x coordinates
-    list_y: list with y coordinates
-    """
-
-    polygon = list(zip(list_x, list_y))
-
-    return polygon
-
-
-def all_same(items):
-    """
-    function to check if all items in list are the same. Input is list
-    """
-    return all(x == items[0] for x in items)
-
-
-def closest(lst, K):
-    """
-    Find closest K value in a list
-    """
-    return lst[min(range(len(lst)), key=lambda i: abs(lst[i] - K))]
-
-
-### CODE
+from gistools.utils.geometry import TLine, create_polygon
+from gistools.utils.lists import all_same, closest
 
 # input for testing or using the script without arcmap
-# waterloop_lines = "C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/test/TI19340_Te_peilen_Waterlopen_Waarland.shp"
-# shapes = "C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/test/waterdeel_waarland.shp"
-# output_point = "C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/test/output_point_waarland.shp"
-# output_line = "C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/test/output_line_waarland.shp"
-# output_point_plot = "C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/test/output_label_waarland.shp"
+# waterloop_lines = "C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/input/TI19340_Te_peilen_Waterlopen_Waarland.shp"
+# shapes = "C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/input/waterdeel_waarland.shp"
+# output_point = "C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/output/output_point_waarland.shp"
+# output_line = "C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/output/output_line_waarland.shp"
 # fixed_distance_profile_int = 50.0
-# start_distance = 25
+# start_distance = 15
 # profile_width = 20
+# label_north_south = 'west'
+# label_west_east = 'north'
 
 arcpy.env.overwriteOutput = True
 
-# Input for ArcMap
+# # Input for ArcMap
 waterloop_lines = arcpy.GetParameterAsText(0)
 shapes = arcpy.GetParameterAsText(1)
 output_point = arcpy.GetParameterAsText(2)
 output_line = arcpy.GetParameterAsText(3)
-output_point_plot = arcpy.GetParameterAsText(4)
 
 # values for input
-fixed_distance_profile_int = arcpy.GetParameterAsText(5)
-start_distance = arcpy.GetParameterAsText(6)
-profile_width = arcpy.GetParameterAsText(7)
+fixed_distance_profile_int = arcpy.GetParameterAsText(4)
+start_distance = arcpy.GetParameterAsText(5)
+profile_width = arcpy.GetParameterAsText(6)
+
+label_north_south = arcpy.GetParameterAsText(7)
+label_west_east = arcpy.GetParameterAsText(8)
+
+arcpy.AddMessage(str(label_north_south))
+arcpy.AddMessage(str(label_west_east))
 
 # check voor bestandeninput
 arcpy.AddMessage('waterlijnen = ' + str(waterloop_lines))
@@ -79,7 +56,7 @@ waterloop_lines = fiona.open(waterloop_lines)
 shapes = MultiPolygon([shape(pol['geometry']) for pol in fiona.open(shapes)])
 
 #fixed distance between points
-fixed_distance = 1.0
+fixed_distance = 1.0 # units in meters
 start_distance = int(start_distance)
 fixed_distance_profile = float(fixed_distance_profile_int)
 
@@ -87,9 +64,8 @@ fixed_distance_profile = float(fixed_distance_profile_int)
 point_list = []
 haakse_lijnen_list = []
 angle_list = []
+closest_point_list = []
 actual_angle_list = []
-plot_side = []
-counter = 1
 
 arcpy.AddMessage('calculating best profile location based on average width of waterway')
 
@@ -98,26 +74,26 @@ for waterloop_index, lines in enumerate(waterloop_lines):
     records = []
     records.append(lines)
     line_col.writerecords(records)
+
+    # determine angle of waterway
     line_col = get_angles(line_col)
-
     actual_angle = line_col[0]['properties']['feature_angle']
-
-    if 135 > line_col[0]['properties']['feature_angle'] <= 45:
+    if line_col[0]['properties']['feature_angle'] <= 45 or line_col[0]['properties']['feature_angle'] >=  135:
         angle_waterloop = 0
     else:
         angle_waterloop = 90
 
     waterlijn = LineString(line_col[0]['geometry']['coordinates'])
 
-    # functie 1: punten intekenen op lijn
+    # draw points on line
     point_col = get_points_on_line(line_col,
                                    fixed_distance=fixed_distance,
                                    all_lines=True)
 
-    # functie 2: haakse lijnen tekenen
+    #draw perpendicular line per point
     haakse_lijnen = get_haakselijnen_on_points_on_line(line_col, point_col, default_length=200.0)
 
-    # plot haakse lijnen
+    # calculate best profile locations per waterway
     for shape in shapes:
         if shape.intersects(waterlijn):
             arcpy.AddMessage('water-line ID: {}'.format(waterloop_index))
@@ -155,7 +131,7 @@ for waterloop_index, lines in enumerate(waterloop_lines):
                 intersections_x.append(x)
                 intersections_y.append(y)
 
-                # cehck to see if haakse lijn has a centroid point (which it should have)
+                # check to see if haakse lijn has a centroid point (which it should have)
                 if not haakse_lijn.centroid.xy:
                     raise Exception("no centroid point for intersection")
 
@@ -219,10 +195,11 @@ for waterloop_index, lines in enumerate(waterloop_lines):
                 closest_point = closest(slice, mean_distance)
                 idx = distance_list.index(closest_point)
 
-                if len(slice) < 10 and i != 0: # make sure that if end of line is smaller than 10 meter, no point is drawn
-                    pass
-                elif len(slice) < 10 and i == 0:  # set minimum length of total line
-                    pass
+                skip = 0
+                if len(slice) < 10 and i != 0:
+                    skip = 1 # make sure that if end of line is smaller than 10 meter, no point is drawn
+                elif len(slice) < 10 and i == 0:
+                    skip = 1 # set minimum length of total line
                 elif i == 0 and len(distance_list) >= 50:
                     idx = start_distance
                     idx_list.append(idx)
@@ -239,7 +216,11 @@ for waterloop_index, lines in enumerate(waterloop_lines):
                 # print("mean:", mean_distance)
                 arcpy.AddMessage("mean width: {}, closest width: {}, index of closest (m): {}".format(closest_point, mean_distance, idx))
 
-                print("closest:", closest_point, "mean:", mean_distance, "index:", idx)
+                if skip == 0:
+                    if closest_point < 15:
+                        closest_point_list.append(start_distance)
+                    else:
+                        closest_point_list.append(closest_point + 5)
 
             point_list_x = []
             point_list_y = []
@@ -251,6 +232,7 @@ for waterloop_index, lines in enumerate(waterloop_lines):
                     point_list_y.append(point_col[item]['geometry']['coordinates'][1])
                     point_list.append(Point(point_col[item]['geometry']['coordinates']))
                     angle_list.append(angle_waterloop)
+                    actual_angle_list.append(actual_angle)
 
 
 arcpy.AddMessage("..Calculating points completed")
@@ -258,7 +240,7 @@ arcpy.AddMessage("..Writing (profiles) points to shapefile")
 
 schema_point = {
     'geometry': 'Point',
-    'properties': {'id': 'int', 'angle': 'int'},
+    'properties': {'DWPnr': 'int', 'DWPcode': 'str', "length": 'float'},
 }
 
 # Write a new Shapefile
@@ -267,78 +249,86 @@ with fiona.open(output_point, 'w', 'ESRI Shapefile', schema_point, crs_wkt=water
     for e, point in enumerate(point_list):
         c.write({
             'geometry': mapping(point),
-            'properties': {'id': e, 'angle': angle_list[e]},
+            'properties': {'DWPnr': e, 'DWPcode': "", "length" : closest_point_list[e]},
         })
 c.close()
 
 points_to_line = fiona.open(output_point)
 
-### OVERIG
+#, length_field="length"
+# Create perpendicular lines
 arcpy.AddMessage("..Converting points to perpendicular lines")
-
-haakse_lijnen_flipped = []
-
 haakse_lijnen_final = get_haakselijnen_on_points_on_line(waterloop_lines, points_to_line, default_length=int(profile_width))
+
+# flip perpendicular lines based on the waterway orientation
+arcpy.AddMessage("..Flip line direction based on label orientation")
+haakse_lijnen_flipped = []
 for i, line in enumerate(haakse_lijnen_final):
 
     # get angles of haakse lijnen
     haakse_lijnen_final = get_angles(haakse_lijnen_final)
-    actual_angle = haakse_lijnen_final[i]['properties']['feature_angle']
-    actual_angle_list.append(actual_angle)
 
     # add haakse lijnen to list
     haaks = LineString(haakse_lijnen_final[i]["geometry"]["coordinates"])
     haakse_lijnen_list.append(haaks)
 
-    # put all the points in the north/west
-    if angle_list[i] == 0:
-        xy_id = haaks.coords.xy[0].index(min(haaks.coords.xy[0]))
-        plot_point = Point(haaks.coords[xy_id])
-        plot_side.append(plot_point)
-        if Point(haakse_lijnen_final[i]["geometry"]["coordinates"][0]) == plot_point:
-            haakse_lijnen_flipped.append(haaks)
-        else:
-            haaks = TLine(haaks)
-            haaks_flipped = TLine(haaks.get_flipped_line())
-            haakse_lijnen_flipped.append(haaks_flipped)
+    # put all the directions of the haakse_lijnen in the correct direction for north_south waterways
+    if label_north_south == 'west':
+        if angle_list[i] == 0:
+            xy_id = haaks.coords.xy[0].index(min(haaks.coords.xy[0]))
+            plot_point = Point(haaks.coords[xy_id])
+            if Point(haakse_lijnen_final[i]["geometry"]["coordinates"][0]) == plot_point:
+                haakse_lijnen_flipped.append(haaks)
+            else:
+                haaks = TLine(haaks)
+                haaks_flipped = TLine(haaks.get_flipped_line())
+                haakse_lijnen_flipped.append(haaks_flipped)
+    elif label_north_south == 'east':
+        if angle_list[i] == 0:
+            xy_id = haaks.coords.xy[0].index(max(haaks.coords.xy[0]))
+            plot_point = Point(haaks.coords[xy_id])
+            if Point(haakse_lijnen_final[i]["geometry"]["coordinates"][0]) == plot_point:
+                haakse_lijnen_flipped.append(haaks)
+            else:
+                haaks = TLine(haaks)
+                haaks_flipped = TLine(haaks.get_flipped_line())
+                haakse_lijnen_flipped.append(haaks_flipped)
 
-    elif angle_list[i] == 90:
-        xy_id = haaks.coords.xy[1].index(max(haaks.coords.xy[1]))
-        plot_point = Point(haaks.coords[xy_id])
-        plot_side.append(plot_point)
-        if Point(haakse_lijnen_final[i]["geometry"]["coordinates"][0]) == plot_point:
-            haakse_lijnen_flipped.append(haaks)
-        else:
-            haaks = TLine(haaks)
-            haaks_flipped = TLine(haaks.get_flipped_line())
-            haakse_lijnen_flipped.append(haaks_flipped)
+    # put all the directions of the haakse_lijnen in the correct direction for east_west waterways
+    if label_west_east == 'north':
+        if angle_list[i] == 90:
+            xy_id = haaks.coords.xy[1].index(max(haaks.coords.xy[1]))
+            plot_point = Point(haaks.coords[xy_id])
+            if Point(haakse_lijnen_final[i]["geometry"]["coordinates"][0]) == plot_point:
+                haakse_lijnen_flipped.append(haaks)
+            else:
+                haaks = TLine(haaks)
+                haaks_flipped = TLine(haaks.get_flipped_line())
+                haakse_lijnen_flipped.append(haaks_flipped)
+    elif label_west_east == 'south':
+        if angle_list[i] == 90:
+            xy_id = haaks.coords.xy[1].index(min(haaks.coords.xy[1]))
+            plot_point = Point(haaks.coords[xy_id])
+            if Point(haakse_lijnen_final[i]["geometry"]["coordinates"][0]) == plot_point:
+                haakse_lijnen_flipped.append(haaks)
+            else:
+                haaks = TLine(haaks)
+                haaks_flipped = TLine(haaks.get_flipped_line())
+                haakse_lijnen_flipped.append(haaks_flipped)
 
+# writing profile lines to ESRI shapefile
 schema_line = {
     'geometry': 'LineString',
-    'properties': {'id': 'int', 'angle': 'int', 'actualangle': 'int'},
+    'properties': {'DWPnr': 'int', 'DWPcode': 'str', 'angle': 'int', 'ActualAngle': 'int'},
 }
 
 arcpy.AddMessage("..Writing profiles (lines) to shapefile")
 
 with fiona.open(output_line, 'w', 'ESRI Shapefile', schema_line, crs_wkt=waterloop_lines.crs_wkt) as c:
-    ## If there are multiple geometries, put the "for" loop here
     for e, line in enumerate(haakse_lijnen_flipped):
         c.write({
             'geometry': mapping(line),
-            'properties': {'id': e, 'angle': angle_list[e], 'actualangle': actual_angle_list[e]},
+            'properties': {'DWPnr': e, 'DWPcode': "", 'angle': angle_list[e], 'ActualAngle': actual_angle_list[e]},
         })
-
-# schema_point_plot = {
-#     'geometry': 'Point',
-#     'properties': {'id': 'int'},
-# }
-#
-# with fiona.open(output_point_plot, 'w', 'ESRI Shapefile', schema_point_plot, crs_wkt=waterloop_lines.crs_wkt) as c:
-#     ## If there are multiple geometries, put the "for" loop here
-#     for e, point in enumerate(plot_side):
-#         c.write({
-#             'geometry': mapping(point),
-#             'properties': {'id': e},
-#         })
 
 arcpy.AddMessage("Successfully completed run")
