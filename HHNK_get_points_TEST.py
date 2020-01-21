@@ -10,10 +10,8 @@ from shapely.geometry import Point, LineString, shape, MultiPolygon, mapping
 from gistools.tools.connect_start_end_points import get_points_on_line
 from gistools.tools.dwp_tools import get_haakselijnen_on_points_on_line
 from gistools.tools.validatie import get_angles
-import matplotlib.pyplot as plt
 from gistools.utils.collection import MemCollection
 from gistools.utils.geometry import TLine
-
 
 # FUNCTIONS
 def create_polygon(list_x, list_y):
@@ -45,11 +43,12 @@ def closest(lst, K):
 
 ### CODE
 
+# input for testing or using the script without arcmap
 # waterloop_lines = "C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/test/TI19340_Te_peilen_Waterlopen_Waarland.shp"
 # shapes = "C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/test/waterdeel_waarland.shp"
-# output_point = "C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/test/test_output_point.shp"
-# output_line = "C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/test/test_output_line.shp"
-# output_point_plot = "C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/test/test_output_point_plot.shp"
+# output_point = "C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/test/output_point_waarland.shp"
+# output_line = "C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/test/output_line_waarland.shp"
+# output_point_plot = "C:/Users/tom/_Python_projects/HHNK_profielen_intekenen/test/output_label_waarland.shp"
 # fixed_distance_profile_int = 50.0
 # start_distance = 25
 # profile_width = 20
@@ -75,33 +74,16 @@ arcpy.AddMessage('lengte waterweg per te plaatsen dwarsprofiel (m) = ' + str(fix
 arcpy.AddMessage('startpositie eerste dwarsprofiel (m) = ' + str(start_distance))
 arcpy.AddMessage('lengte haakse lijn dwarsprofiel (m) = ' + str(profile_width))
 
-#TI19340_Te_peilen_Waterlopen_Tuitjenhorn.shp
-#waterloop_ingewikkeld.shp
-#TI19340_Te_peilen_Waterlopen_Waarland.shp
-#Waterlijnen_totaal.shp
+# open waterway lines (waterloop lines) and BGT water shapes (shapes)
 waterloop_lines = fiona.open(waterloop_lines)
-
-#waterdelen openen (importeren)
-#waterdeel_selection_test.shp
-#waterdeel_ingewikkeld.shp
-#waterdeel_waarland.shp
-#waterdeel_HHNK.shp
-#waterdeel_HHNK_dissolved.shp
 shapes = MultiPolygon([shape(pol['geometry']) for pol in fiona.open(shapes)])
-
-plt.figure(figsize=(20,20))
 
 #fixed distance between points
 fixed_distance = 1.0
 start_distance = int(start_distance)
 fixed_distance_profile = float(fixed_distance_profile_int)
 
-#looproutes openen (importeren)
-#waterloop_ingewikkeld.shp
-#TI19340_Te_peilen_Waterlopen_Tuitjenhorn.shp
-#TI19340_Te_peilen_Waterlopen_Waarland.shp
-#Waterlijnen_totaal.shp
-#waterlijn_clip_singlepart.shp
+# lists needed for collection
 point_list = []
 haakse_lijnen_list = []
 angle_list = []
@@ -157,12 +139,8 @@ for waterloop_index, lines in enumerate(waterloop_lines):
                 if shape.intersection(haakse_lijn).geom_type == "LineString":
                     x,y = shape.intersection(haakse_lijn).coords.xy
                 elif shape.intersection(haakse_lijn).geom_type == "MultiLineString":
-                    # polyline = LineString(list(shape.exterior.coords))
-                    # haakse_lijn.intersection(polyline)
-                    # x, y = shape.intersection(haakse_lijn).coords.xy
 
                     multiline_intersect = shape.intersection(haakse_lijn)
-                    # x,y = multiline_intersect[0].coords.xy
                     x = []
                     y = []
                     for i in range(len(multiline_intersect)):
@@ -174,17 +152,12 @@ for waterloop_index, lines in enumerate(waterloop_lines):
                 else:
                     continue
 
-
                 intersections_x.append(x)
                 intersections_y.append(y)
 
                 # cehck to see if haakse lijn has a centroid point (which it should have)
                 if not haakse_lijn.centroid.xy:
                     raise Exception("no centroid point for intersection")
-
-                # if waterloop_index == 371:
-                #     print(counter)
-                #     counter += 1
 
                 # searches two intersects closest to the centroid point
                 intersect_1 = []
@@ -204,8 +177,6 @@ for waterloop_index, lines in enumerate(waterloop_lines):
                                     intersect_1.append(intersection[i - 1])
                                     intersect_2.append(intersection[i + 1])
 
-                # if counter == 26:
-                #     print("here")
                 for intersection in intersections_y:
                     if len(intersections_y[0]) < 3:
                         pass
@@ -221,22 +192,12 @@ for waterloop_index, lines in enumerate(waterloop_lines):
                                     intersect_1.append(intersection[i - 1])
                                     intersect_2.append(intersection[i + 1])
 
-
                 # calculate distance between intersect points
                 try:
                     distance = Point(intersect_1).distance(Point(intersect_2))
                     distance_list.append(distance)
                 except:
                     print("no distance between points")
-
-                # plot haakse lijnen
-                # plt.plot(line_list_x, line_list_y, c='orange', zorder=0)
-                # plt.scatter(intersections_x, intersections_y)
-                # x, y = shape.exterior.xy
-
-                # plot BGT waterdelen
-                # plt.plot(x, y)
-                # plt.show()
 
             # transform distance to units for iteration purposes
             if fixed_distance_profile % fixed_distance == 0:
@@ -292,38 +253,6 @@ for waterloop_index, lines in enumerate(waterloop_lines):
                     angle_list.append(angle_waterloop)
 
 
-            #plot points
-            # plt.scatter(point_list_x, point_list_y, c='r', zorder=15, s=50)
-
-            # plot haakse lijnen of correct locations
-            # for i in range(len(haakse_lijnen_final)):
-            #     x,y = haakse_lijnen_final[i].xy
-            #     plt.plot(x,y, c="r")
-
-            # calculate BGT waterdelen
-            # for shape in shapes:
-            #     x,y = shape.exterior.xy
-            #
-            #   #plot BGT waterdelen
-            #     plt.plot(x,y, c='b', zorder=5)
-
-                # x,y = shape.interiors[0].xy
-                #
-                # # plot BGT waterdelen
-                # plt.plot(x, y, c='b', zorder=5)
-
-
-
-            # plot waterlooplijnen
-#             for line in waterloop_lines:
-#                 line_list_x = []
-#                 line_list_y = []
-#                 for i in range(len(line['geometry']['coordinates'])):
-#                     line_list_x.append(line['geometry']['coordinates'][i][0])
-#                     line_list_y.append(line['geometry']['coordinates'][i][1])
-#                     plt.plot(line_list_x, line_list_y, zorder=10)
-#
-# plt.show()
 arcpy.AddMessage("..Calculating points completed")
 arcpy.AddMessage("..Writing (profiles) points to shapefile")
 
@@ -347,6 +276,8 @@ points_to_line = fiona.open(output_point)
 ### OVERIG
 arcpy.AddMessage("..Converting points to perpendicular lines")
 
+haakse_lijnen_flipped = []
+
 haakse_lijnen_final = get_haakselijnen_on_points_on_line(waterloop_lines, points_to_line, default_length=int(profile_width))
 for i, line in enumerate(haakse_lijnen_final):
 
@@ -360,22 +291,27 @@ for i, line in enumerate(haakse_lijnen_final):
     haakse_lijnen_list.append(haaks)
 
     # put all the points in the north/west
-    if angle_list[i] == 0 or angle_list[i] == 90:
+    if angle_list[i] == 0:
+        xy_id = haaks.coords.xy[0].index(min(haaks.coords.xy[0]))
+        plot_point = Point(haaks.coords[xy_id])
+        plot_side.append(plot_point)
+        if Point(haakse_lijnen_final[i]["geometry"]["coordinates"][0]) == plot_point:
+            haakse_lijnen_flipped.append(haaks)
+        else:
+            haaks = TLine(haaks)
+            haaks_flipped = TLine(haaks.get_flipped_line())
+            haakse_lijnen_flipped.append(haaks_flipped)
+
+    elif angle_list[i] == 90:
         xy_id = haaks.coords.xy[1].index(max(haaks.coords.xy[1]))
         plot_point = Point(haaks.coords[xy_id])
         plot_side.append(plot_point)
-
-    # if actual_angle < 45 or actual_angle > 135:
-    #     xy_id = haaks.coords.xy[1].index(max(haaks.coords.xy[1]))
-    #     plot_point = Point(haaks.coords[xy_id])
-    #     plot_side.append(plot_point)
-    # elif actual_angle == 90:
-    #     plot_point = Point(haaks.coords[0])
-    #     plot_side.append(plot_point)
-    # else:
-    #     xy_id = haaks.coords.xy[0].index(min(haaks.coords.xy[0]))
-    #     plot_point = Point(haaks.coords[xy_id])
-    #     plot_side.append(plot_point)
+        if Point(haakse_lijnen_final[i]["geometry"]["coordinates"][0]) == plot_point:
+            haakse_lijnen_flipped.append(haaks)
+        else:
+            haaks = TLine(haaks)
+            haaks_flipped = TLine(haaks.get_flipped_line())
+            haakse_lijnen_flipped.append(haaks_flipped)
 
 schema_line = {
     'geometry': 'LineString',
@@ -386,31 +322,23 @@ arcpy.AddMessage("..Writing profiles (lines) to shapefile")
 
 with fiona.open(output_line, 'w', 'ESRI Shapefile', schema_line, crs_wkt=waterloop_lines.crs_wkt) as c:
     ## If there are multiple geometries, put the "for" loop here
-    for e, line in enumerate(haakse_lijnen_list):
+    for e, line in enumerate(haakse_lijnen_flipped):
         c.write({
             'geometry': mapping(line),
             'properties': {'id': e, 'angle': angle_list[e], 'actualangle': actual_angle_list[e]},
         })
 
-schema_point_plot = {
-    'geometry': 'Point',
-    'properties': {'id': 'int'},
-}
-
-with fiona.open(output_point_plot, 'w', 'ESRI Shapefile', schema_point_plot, crs_wkt=waterloop_lines.crs_wkt) as c:
-    ## If there are multiple geometries, put the "for" loop here
-    for e, point in enumerate(plot_side):
-        c.write({
-            'geometry': mapping(point),
-            'properties': {'id': e},
-        })
-
-# plot profielpunten
-# point_list_x = []
-# point_list_y = []
-# for i in range(len(point_col)):
-#     point_list_x.append(point_col[i]['geometry']['coordinates'][0])
-#     point_list_y.append(point_col[i]['geometry']['coordinates'][1])
-# plt.scatter(point_list_x, point_list_y)
+# schema_point_plot = {
+#     'geometry': 'Point',
+#     'properties': {'id': 'int'},
+# }
+#
+# with fiona.open(output_point_plot, 'w', 'ESRI Shapefile', schema_point_plot, crs_wkt=waterloop_lines.crs_wkt) as c:
+#     ## If there are multiple geometries, put the "for" loop here
+#     for e, point in enumerate(plot_side):
+#         c.write({
+#             'geometry': mapping(point),
+#             'properties': {'id': e},
+#         })
 
 arcpy.AddMessage("Successfully completed run")
