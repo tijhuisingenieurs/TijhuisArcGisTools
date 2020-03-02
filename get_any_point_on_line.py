@@ -3,11 +3,22 @@
 # are included in the output Point feature class. Points can be
 # created starting from the beginning, or end of the line.
 
-
-
 import arcpy
 
 arcpy.env.overwriteOutput = True
+arcpy.env.qualifiedFieldNames = False
+
+# stand alone bug fix version
+# polyline = "C:\\Users\\tom\\_Python_projects\\TOOLBOX_BUGFIXES\\POINTS_ON_LINE\\TI19302_Watergangen_Dissolve.shp"
+# choice = "INTERVAL BY DISTANCE"
+# start_from = "BEGINNING"
+# use_field_for_value = "NO"
+# field_with_value = None
+# distance = 50
+# start_distance = distance / 2
+# end_points = "NO"
+# output = "C:\\Users\\tom\\_Python_projects\\TOOLBOX_BUGFIXES\\POINTS_ON_LINE\\bugfix_test.shp"
+# distance = float(distance)
 
 polyline = arcpy.GetParameterAsText(0)
 choice = str(arcpy.GetParameterAsText(1))
@@ -15,8 +26,14 @@ start_from = str(arcpy.GetParameterAsText(2))
 use_field_for_value = str(arcpy.GetParameterAsText(3))
 field_with_value = str(arcpy.GetParameterAsText(4))
 distance = arcpy.GetParameterAsText(5)
-end_points = str(arcpy.GetParameterAsText(6))
-output = arcpy.GetParameterAsText(7)
+representative_distance = arcpy.GetParameter(6)
+start_distance = arcpy.GetParameterAsText(7)
+end_points = str(arcpy.GetParameterAsText(8))
+output = arcpy.GetParameterAsText(9)
+
+if start_distance:
+    start_distance = float(start_distance)
+
 distance = float(distance)
 spatial_ref = arcpy.Describe(polyline).spatialReference
 
@@ -45,10 +62,17 @@ with arcpy.da.SearchCursor(polyline, (search_fields)) as search:
             try:
                 line_geom = row[0]
                 length = float(line_geom.length)
-                count = distance
                 oid = str(row[1])
                 start = arcpy.PointGeometry(line_geom.firstPoint)
                 end = arcpy.PointGeometry(line_geom.lastPoint)
+
+                if representative_distance:
+                    start_distance = distance / 2
+
+                if start_distance:
+                    count = start_distance
+                else:
+                    count = distance
 
                 if reverse_line == True:
                    reversed_points = []
