@@ -25,11 +25,13 @@ input_fl_boringen_csv = arcpy.GetParameterAsText(3)
 output_file_lines = arcpy.GetParameterAsText(4)
 output_file_points = arcpy.GetParameterAsText(5)
 
-# input_fl_lines = "C:\\werk\\P2017\\2017.01 - Ondersteuning Tijhuis\\aangeleverd\\invoer bugfix #96\\TI17141_20170831_lines.shp"
-# input_fl_points_csv = "C:\\werk\\P2017\\2017.01 - Ondersteuning Tijhuis\\aangeleverd\\invoer bugfix #96\\TI17141_20170831_metingen_BEWERKT.csv"
+#
+# input_fl_lines = "C:\\Users\\tom\\_Python_projects\\TEST004_C2_veldwerk_shapes\\Input\\TI19170_TI17161_lines_DWP_Inpeiling_voor_c2tool.shp"
+# input_fl_points_csv = "C:\\Users\\tom\\_Python_projects\\TEST004_C2_veldwerk_shapes\\Input\\TI17161_Omzetten_Gegevens_voor_T.app.csv"
 # input_fl_points_shape = ""
-# output_file_lines = "c:\\tmp\\t10.shp"
-# output_file_points = "c:\\tmp\\t11.shp"
+# input_fl_boringen_csv = ""
+# output_file_lines = "C:\\Users\\tom\\_Python_projects\\TEST004_C2_veldwerk_shapes\\Output\\lijnen.shp"
+# output_file_points = "C:\\Users\\tom\\_Python_projects\\TEST004_C2_veldwerk_shapes\\Output\\punten.shp"
 #
 # Testwaarden voor test zonder GUI:
 # import tempfile
@@ -79,7 +81,7 @@ if input_fl_points_csv is None and input_fl_points_shape is None:
 # voorbereiden data typen en inlezen data
 arcpy.AddMessage('Bezig met voorbereiden van de data...')
 
-arcpy.AddMessage('Omzetten bronbestand profiel lijnen naar singel part shape...')
+arcpy.AddMessage('Omzetten bronbestand profiel lijnen naar single part shape...')
 output_dir_sp = os.path.dirname(output_file_lines)
 
 output_name_sp = os.path.basename(output_file_lines).split('.')[0]
@@ -108,6 +110,8 @@ for row in rows1:
                 value = row.getValue(field.name).encode('utf-8')
             else:
                 value = row.getValue(field.name)
+                if field.name == 'breedte' and value == 0:
+                    raise ValueError('Geen breedte lijnen opgegeven')
             properties[key] = value
 
     records1.append({'geometry': {'type': 'MultiLineString',
