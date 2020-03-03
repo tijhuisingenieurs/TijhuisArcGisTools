@@ -5,6 +5,8 @@ import numpy as np
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
 
+arcpy.env.overwriteOutput = True
+
 from collections import OrderedDict
 from gistools.utils.collection import MemCollection
 from gistools.tools.connect_start_end_points import get_points_on_line_amount
@@ -17,9 +19,10 @@ watergang = arcpy.GetParameterAsText(0)
 bgt = arcpy.GetParameterAsText(1)
 monstervak_veld = arcpy.GetParameterAsText(2)
 monstervakken_doelbestand = arcpy.GetParameterAsText(3)
-aantal_boorpunten = arcpy.GetParameterAsText(4)
-minimale_afstand = arcpy.GetParameterAsText(5)
-doelbestand_boorpunten = arcpy.GetParameterAsText(6)
+dissolve_zonder_bgt = arcpy.GetParameter(4)
+aantal_boorpunten = arcpy.GetParameterAsText(5)
+minimale_afstand = arcpy.GetParameterAsText(6)
+doelbestand_boorpunten = arcpy.GetParameterAsText(7)
 
 # Script arguments
 # nummer_test = (np.random.random_integers(1,100))
@@ -34,6 +37,7 @@ doelbestand_boorpunten = arcpy.GetParameterAsText(6)
 # Clip de watergangen met de bgt and dissolve op monstervak
 temp_clip = "in_memory\clip_watergangen"
 clipped = arcpy.Clip_analysis(watergang, bgt, temp_clip)
+
 dissolved = arcpy.Dissolve_management(temp_clip, monstervakken_doelbestand, monstervak_veld, "", "MULTI_PART", "DISSOLVE_LINES")
 
 # Create points on line and haakse lijnen
@@ -42,6 +46,10 @@ records = []
 rows = arcpy.SearchCursor(dissolved)
 fields = arcpy.ListFields(dissolved)
 point = arcpy.Point()
+
+# overwrite dissolve if one does not want a bgt-clip
+if dissolve_zonder_bgt:
+    dissolved = arcpy.Dissolve_management(watergang, monstervakken_doelbestand, monstervak_veld, "", "MULTI_PART", "DISSOLVE_LINES")
 
 for row in rows:
     geom = row.getValue('SHAPE')
