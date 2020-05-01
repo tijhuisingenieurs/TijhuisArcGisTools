@@ -33,8 +33,9 @@ log.setLevel(logging.INFO)
 # 14: Take profielID form inpeilin or uitpeiling
 # 15: Past de vaste bodem aan, zodat die altijd laagste punt is. Geeft dus de nieuwe situatie weer wanneer er vaste
 # bodem is gebaggerd.
-# 16: Doelbestand voor metfile
-# 17: Doelbestand non-scaled uitpeilingen
+# 16: keuze coordinaten uit in- of uitpeilingsbestand halen
+# 17: Doelbestand voor metfile
+# 18: Doelbestand non-scaled uitpeilingen
  
 input_inpeilingen = arcpy.GetParameterAsText(0)
 order_in = arcpy.GetParameterAsText(1)
@@ -52,8 +53,9 @@ shore_peiling = arcpy.GetParameterAsText(12)
 width_peiling = arcpy.GetParameterAsText(13)
 ID_peiling = arcpy.GetParameterAsText(14)
 vaste_bodem = arcpy.GetParameter(15)
-output_file = arcpy.GetParameterAsText(16)
-output_unscaled = arcpy.GetParameterAsText(17)
+in_geometry =  arcpy.GetParameter(16)
+output_file = arcpy.GetParameterAsText(17)
+output_unscaled = arcpy.GetParameterAsText(18)
 
 # input_inpeilingen = "K:\Tekeningen Amersfoort\\2018\TI18082 Inmeten baggerprofielen 2017 Wetterskip\Tekening\Bewerkingen\Verwerking\Cluster04\Metfile_Fryslan\TI18082_Metfile_voor_vastebodem.met"
 # order_in = "z1z2"
@@ -74,24 +76,25 @@ output_unscaled = arcpy.GetParameterAsText(17)
 # output_file = "K:\Algemeen\\1_GIS\GEHEIM\Uitpeilingen_ws\TI178082_combi.met"
 # output_unscaled = "K:\Algemeen\\1_GIS\GEHEIM\Uitpeilingen_ws\TI18082_nietbehandeldeuitpeilingen.shp"
 
-# input_inpeilingen = "C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Combi_in_uit\TI18169_Metfile_Inpeiling.met"
+# input_inpeilingen = "C:\Users\\tom\Documents\_Python_projects\TI20131_metfiles_combineren\TI20131_Metfile_Oude_Inpeiling.met"
 # order_in = "z2z1"
 # loc_in = "Eerste plaats"
-# input_uitpeilingen = "C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Combi_in_uit\TI18169_Metfile_Uitpeiling.met"
+# input_uitpeilingen = "C:\Users\\tom\Documents\_Python_projects\TI20131_metfiles_combineren\TI20131_Metfile_nieuwe_bovenkant_Zunderdorp.met"
 # order_uit = "z2z1"
 # loc_uit = "Eerste plaats"
-# link_table = "C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Combi_in_uit\TI18169_Week07_Koppeltabel.csv"
-# project = "Test,Onveranderde vaste bodem"
+# link_table = "C:\Users\\tom\Documents\_Python_projects\TI20131_metfiles_combineren\CSVvoorTool_Zunderdorp.csv"
+# project = "TI20131"
 # order = "z2z1"
-# scale_threshold = 99.0/100.0
+# scale_threshold = 100.0/100
 # scale_bank_distance = False
 # level_peiling = "Inpeiling"
-# shore_peiling = "Inpeiling"
-# width_peiling = "Inpeiling"
+# shore_peiling = "Uitpeiling"
+# width_peiling = "Uitpeiling"
 # vaste_bodem = True
-# ID_peiling = "Inpeiling"
-# output_file = "C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Combi_in_uit\Test_verander.met"
-# output_unscaled = "C:\Users\elma\Documents\GitHub\Test_data_werking_tools\Combi_in_uit\Test_veranderd.shp"
+# in_geometry = True
+# ID_peiling = "Uitpeiling"
+# output_file = "C:\Users\\tom\Documents\_Python_projects\TI20131_metfiles_combineren\Output.met"
+# output_unscaled = "C:\Users\\tom\Documents\_Python_projects\TI20131_metfiles_combineren\Output.shp"
 
 # Print ontvangen input naar console
 arcpy.AddMessage('Ontvangen parameters:')
@@ -110,6 +113,7 @@ arcpy.AddMessage('Waterpeil meenemen van = ' + level_peiling)
 arcpy.AddMessage('Oevers meenemen van = ' + shore_peiling)
 arcpy.AddMessage('Watergang breedte meenemen van = ' + str(width_peiling))
 arcpy.AddMessage('Aanpassen van de vaste bodem = ' + str(vaste_bodem))
+arcpy.AddMessage('Coordinaten profielen inpeiling = ' + str(in_geometry))
 arcpy.AddMessage('Doelbestand metfile = ' + str(output_file))
 arcpy.AddMessage('Doelbestand niet behandelde uitpeilingen = ' + str(output_unscaled))
 
@@ -125,7 +129,7 @@ id_peiling = 1 if ID_peiling == "Uitpeiling" else 0
 combined_points, results_list, unscaled_points = combine_peilingen(input_inpeilingen, input_uitpeilingen, order_in,
                                                                    order_uit, loc_in, loc_uit, link_table,
                                                                    width_peiling, id_peiling, scale_threshold,
-                                                                   scale_bank_distance)
+                                                                   scale_bank_distance, in_geometry)
 
 # Generate metfile
 arcpy.AddMessage('Bezig met genereren van metfile...')

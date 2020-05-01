@@ -12,3 +12,4 @@ test/data/Local_TestData/*
 external/*
 *.xml
 *.lock
+venv
