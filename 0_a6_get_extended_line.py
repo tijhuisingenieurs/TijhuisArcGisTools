@@ -160,6 +160,8 @@ for l in line_col.filter():
     
     dataset.insertRow(row)
 
+arcpy.DeleteField_management(output_file, ["Id"])
+
 add_result_to_display(output_fl, output_name) 
 
 arcpy.AddMessage('Gereed')

@@ -1,4 +1,4 @@
-import os.path
+import os
 import sys
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'external'))
@@ -19,29 +19,17 @@ from utils.addresulttodisplay import add_result_to_display
 input_fl_route = arcpy.GetParameterAsText(0)
 id_veld = arcpy.GetParameterAsText(1)
 input_fl_lijnen = arcpy.GetParameterAsText(2)
-output_file_points = arcpy.GetParameterAsText(3)
-output_file_lines = arcpy.GetParameterAsText(4)
+output_file_lines = arcpy.GetParameterAsText(3)
+output_file_points =  os.path.splitext(output_file_lines)[0]+'_controlepunten.shp'
+check_points = arcpy.GetParameterAsText(4)
 
 # Testwaarden voor test zonder GUI:
-# import tempfile
-# import shutil
-#    
-# # input_fl_route = os.path.join(os.path.dirname(__file__), 'test', 'data', 'Route.shp')
-# # id_veld = 'id'
-# # input_fl_lijnen = os.path.join(os.path.dirname(__file__), 'test', 'data', 'Test_kwaliteit.shp')
-# 
-# input_fl_route = os.path.join(os.path.dirname(__file__), 'test', 'data', 'TI16297_Route_Dissolved.shp')
-# id_veld = 'OBJECTID'
-# input_fl_lijnen = os.path.join(os.path.dirname(__file__), 'test', 'data', 'TI16297_hartlijnen_voor_puntpeilingen.shp')
-#      
-# test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
-# if os.path.exists(test_dir):
-#     # empty test directory
-#     shutil.rmtree(test_dir)
-# os.mkdir(test_dir)
-#       
-# output_file_points = os.path.join(test_dir, 'test_punten.shp')
-# output_file_lines = os.path.join(test_dir, 'test_lijnen.shp')
+# input_fl_route = './testdata/input/Testdata_looproute.shp'
+# id_veld = 'FID'
+# input_fl_lijnen = './testdata/input/Testdata_watergangen.shp'
+# output_file_lines = './testdata/output/2_b1_output/2_b1_output_test.shp'
+# output_file_points = os.path.splitext(output_file_lines)[0]+'_controlepunten.shp'
+# check_points = False
 
 # Print ontvangen input naar console
 arcpy.AddMessage('Ontvangen parameters:')
@@ -134,7 +122,8 @@ for p in point_col.filter():
    
     dataset.insertRow(row)
 
-add_result_to_display(output_fl_points, output_name)
+if check_points:
+    add_result_to_display(output_fl_points, output_name)
 
 arcpy.AddMessage('Bezig met het genereren van het doelbestand lijnen...')
 

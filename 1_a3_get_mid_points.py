@@ -18,20 +18,10 @@ input_fl = arcpy.GetParameterAsText(0)
 copy_velden = [str(f) for f in arcpy.GetParameter(1)]
 output_file = arcpy.GetParameterAsText(2)
 
-# Testwaarden voor test zonder GUI:
-# import tempfile
-# import shutil
-#  
-# input_fl = os.path.join(os.path.dirname(__file__), 'test', 'data', 'Test_kwaliteit.shp')
+# Read the parameter values
+# input_line_fl = './testdata/input/Testdata_watergangen.shp'
 # copy_velden = ['hydro_code', 'datum_km', '[ver_eind]']
-# test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
-# if os.path.exists(test_dir):
-#     # empty test directory
-#     shutil.rmtree(test_dir)
-# os.mkdir(test_dir)
-#     
-# output_file = os.path.join(test_dir, 'test_midpunten.shp')
-
+# output_file = './testdata/output/1_a3.shp'
 
 # Print ontvangen input naar console
 arcpy.AddMessage('Ontvangen parameters:')
@@ -101,6 +91,8 @@ for p in point_col.filter():
             row.setValue(field.name, p['properties'].get(field.name, None))
             
     dataset.insertRow(row)
+
+arcpy.DeleteField_management(output_file, ["Id"])
 
 add_result_to_display(output_fl, output_name)
 

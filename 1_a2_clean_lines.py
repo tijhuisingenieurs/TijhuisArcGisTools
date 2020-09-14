@@ -20,24 +20,19 @@ log.setLevel(logging.INFO)
 # Read the parameter values
 # 0: Lijnenbestand
 # 1: Split de lijnen op connecties
-# 2: Doelbestand
+# 2: Buffer (around vertex in m)
+# 3: Doelbestand
 
 input_line_fl = arcpy.GetParameterAsText(0)
 split_on_connections = arcpy.GetParameter(1)
-output_file = arcpy.GetParameterAsText(2)
+buffer_value = arcpy.GetParameter(2)
+output_file = arcpy.GetParameterAsText(3)
 
-# Testwaarden voor test zonder GUI:
-# import tempfile
-# import shutil
-# input_line_fl = os.path.join(os.path.dirname(__file__),'test', 'data', 'real_line_example.shp')
-# split_on_lines = True
-# test_dir = os.path.join(tempfile.gettempdir(), 'arcgis_test')
-# if os.path.exists(test_dir):
-#     # empty test directory
-#     shutil.rmtree(test_dir)
-# os.mkdir(test_dir)
-# output_file = os.path.join(test_dir, 'cleaned.shp')
-
+# Read the parameter values
+# input_line_fl = './testdata/input/Testdata_watergangen.shp'
+# split_on_connections = True
+# buffer_value = 2
+# output_file = './testdata/output/1_a2.shp'
 
 # voorbereiden data typen en inlezen data
 log.info('Bezig met voorbereiden van de data...')
@@ -68,7 +63,7 @@ log.info('Bezig met uitvoeren van cleanen van lijnen')
 
 arcpy.AddMessage('Bezig met uitvoeren van cleanen van lijnen')
 
-new_lines = connect_lines(line_col,
+new_lines = connect_lines(line_col, buffer_value,
               split_line_at_connection=split_on_connections)
 
 # wegschrijven tool resultaat
@@ -121,6 +116,8 @@ for l in new_lines:
     row.setValue('part', l['properties'].get('part', None))
 
     dataset.insertRow(row)
+
+arcpy.DeleteField_management(output_file, ["Id"])
 
 add_result_to_display(output_fl, output_name)
 
