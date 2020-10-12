@@ -5,45 +5,33 @@
 
 import arcpy
 import random
+from utils.addresulttodisplay import add_result_to_display
 
 arcpy.env.overwriteOutput = True
 arcpy.env.qualifiedFieldNames = False
 
-# stand alone bug fix version
-# polyline = "C:\\Users\\tom\\_Python_projects\\TOOLBOX_BUGFIXES\\POINTS_ON_LINE\\TI19302_Watergangen_Dissolve.shp"
-# choice = "INTERVAL BY DISTANCE"
+polyline = arcpy.GetParameterAsText(0)
+choice = str(arcpy.GetParameterAsText(1))
+start_from = str(arcpy.GetParameterAsText(2))
+use_field_for_value = str(arcpy.GetParameterAsText(3))
+field_with_value = str(arcpy.GetParameterAsText(4))
+distance = arcpy.GetParameter(5)  #percentage/distance/count
+representative_distance = arcpy.GetParameter(6)
+start_distance = arcpy.GetParameter(7)
+end_points = str(arcpy.GetParameterAsText(8))
+output = arcpy.GetParameterAsText(9)
+
+# Test script without GUI
+# polyline = './testdata/input/Testdata_watergangen.shp'
+# choice = "AANTAL RANDOM"
 # start_from = "BEGINNING"
 # use_field_for_value = "NO"
 # field_with_value = None
-# distance = 50
-# start_distance = distance / 2
+# distance = 4
+# representative_distance = False
+# start_distance = None
 # end_points = "NO"
-# output = "C:\\Users\\tom\\_Python_projects\\TOOLBOX_BUGFIXES\\POINTS_ON_LINE\\bugfix_test.shp"
-# distance = float(distance)
-
-# polyline = arcpy.GetParameterAsText(0)
-# choice = str(arcpy.GetParameterAsText(1))
-# start_from = str(arcpy.GetParameterAsText(2))
-# use_field_for_value = str(arcpy.GetParameterAsText(3))
-# field_with_value = str(arcpy.GetParameterAsText(4))
-# distance = arcpy.GetParameterAsText(5)  #percentage/distance/count
-# representative_distance = arcpy.GetParameter(6)
-# start_distance = arcpy.GetParameterAsText(7)
-# end_points = str(arcpy.GetParameterAsText(8))
-# output = arcpy.GetParameterAsText(9)
-
-# Test script without GUI
-polyline = './testdata/input/Testdata_watergangen.shp'
-choice = "AANTAL RANDOM"
-start_from = "BEGINNING"
-use_field_for_value = "NO"
-field_with_value = None
-distance = 4
-representative_distance = False
-start_distance = None
-end_points = "NO"
-output = './testdata/output/2_a5.shp'
-
+# output = './testdata/output/2_a5.shp'
 
 if start_distance:
     start_distance = float(start_distance)
@@ -108,7 +96,7 @@ with arcpy.da.SearchCursor(polyline, (search_fields)) as search:
                     point = line_geom.positionAlongLine(count, False)
                     insert.insertRow((point, oid, count))
 
-                elif choice == "AANTAL (1 PUNT)":
+                elif choice == "AANTAL":
                     point_iterator = 0
                     point_interval = length / distance
                     while point_iterator <= distance - 1:
@@ -129,8 +117,8 @@ with arcpy.da.SearchCursor(polyline, (search_fields)) as search:
                         point = line_geom.positionAlongLine(random_point, False)
                         insert.insertRow((point, oid, count))
 
-                elif choice == "PERCENTAGE":
-                    point = line_geom.positionAlongLine(count, True)
+                elif choice == "PERCENTAGE (1 PUNT)":
+                    point = line_geom.positionAlongLine((count/100), True)
                     insert.insertRow((point, oid, count))
 
                 elif choice == "INTERVAL OBV AFSTAND":
@@ -141,7 +129,7 @@ with arcpy.da.SearchCursor(polyline, (search_fields)) as search:
                         count += distance
 
                 elif choice == "INTERVAL OBV PERCENTAGE":
-                    percentage = float(count * 100.0)
+                    percentage = float(count)
                     total_runs = int(100.0 / percentage)
 
                     run = 1
@@ -189,6 +177,7 @@ if "in_memory" in output:
 
 else:
     arcpy.CopyFeatures_management(mem_point_fl, output)
+    add_result_to_display(mem_point_fl, output)
 
     arcpy.Delete_management(mem_point)
     arcpy.Delete_management(mem_point_fl)

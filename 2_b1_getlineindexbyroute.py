@@ -20,7 +20,7 @@ input_fl_route = arcpy.GetParameterAsText(0)
 id_veld = arcpy.GetParameterAsText(1)
 input_fl_lijnen = arcpy.GetParameterAsText(2)
 output_file_lines = arcpy.GetParameterAsText(3)
-output_file_points =  os.path.splitext(output_file_lines)[0]+'_controlepunten.shp'
+output_file_points = os.path.splitext(output_file_lines)[0]+'_controlepunten.shp'
 check_points = arcpy.GetParameterAsText(4)
 
 # Testwaarden voor test zonder GUI:
@@ -122,9 +122,6 @@ for p in point_col.filter():
    
     dataset.insertRow(row)
 
-if check_points:
-    add_result_to_display(output_fl_points, output_name)
-
 arcpy.AddMessage('Bezig met het genereren van het doelbestand lijnen...')
 
 spatial_reference = arcpy.Describe(input_fl_lijnen).spatialReference
@@ -160,7 +157,5 @@ for l in line_col_lijnen_indexed.filter():
     row.setValue('richting', 0)        
 
     dataset.insertRow(row)
-
-add_result_to_display(output_fl_lines, output_name)
 
 arcpy.AddMessage('Gereed')
