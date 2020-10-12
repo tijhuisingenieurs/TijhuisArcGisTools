@@ -1,4 +1,4 @@
-v1.1.0 (14-09-2020)
+v1.1.0 (12-10-2020)
 ------
 
 Major changes:
@@ -10,6 +10,11 @@ Major changes:
 - tool 2. a3 (new tool) developed to interpolate values between points (e.g. new profiles based on old profiles)
 - tool 3. d2 'genereer wdb bestanden' verwijderd. Wdb kan al in de server gemaakt worden. 
 - deleted tool z8 (0. b2 fotonamen naar kolommen)). Tool was obsolete.
+- Removed old example data (was cluttered) and added 'testdata' folder, which contains input data for each tool,
+  as well as expected outcomes of each tool. 
+- Added script to each tool in order to run said tools without using ArcMap. All tools are directly connected
+  to the example data folder.
+- Added archive folder for obsolete tools. 
 
 Minor changes
 - changed old names z1-z8 and individual tool names to better structure the toolbox. 
@@ -22,7 +27,7 @@ Bug fixes:
 - tool 1. a2 'cleanen van lijnen' split lines error fix. 
 - tool 1. b1 sludge and solid soil calculations reversed. Was z2z1, now is z1z2.
 - tool 1. b2 gave 'missing Openpyxl library' error. Instructions added to toolbox on how to install openpyxl.
-          See 'installatiehandleiding' Tijhuis Toolbox (need to be added to toolbox).
+          See 'README.md').
 - tool 2. d1 and 2. d2. Fixed issues with iterating through geometry, which caused an error.  
 - tool 3. e1 sludge and solid soil calculations reversed. Was z2z1, now is z1z2.
           
@@ -36,4 +41,4 @@ Known issues:
 v1.0.0 (till 13-09-2020)
 ------
 
-Original toolbox optimized for ArcMap 10.4.
+Original toolbox. 
