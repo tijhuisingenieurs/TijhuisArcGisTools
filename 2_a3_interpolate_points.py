@@ -41,9 +41,6 @@ for hydrovak in hydrovakken:
         dwp_profiles = list(r for r in dwp_rows)
         dwp_profiles_sorted = sorted(dwp_profiles, key=lambda tup: tup[0])
 
-        # if no value in dwp, give back 999
-
-
         previous_dwp = None
         for i, dwp_row in enumerate(dwp_profiles_sorted):
 
@@ -71,6 +68,14 @@ for hydrovak in hydrovakken:
                     rowmeter.append(r[0])
 
             previous_dwp = dwp_row
+
+        # if no value in dwp, give back 999
+        with arcpy.da.UpdateCursor(mem_points, [distance_field_meet, 'SHAPE@', column_to_interpolate, hydrovak_meet],
+                                   where_clause="{} = '{}'".format(hydrovak_meet, expr)) as rows:
+            for r in rows:
+                if r[2] == 0 or r[2] is None:
+                    r[2] = 999
+                    rows.updateRow(r)
 
 
 output_fl = arcpy.CopyFeatures_management(mem_points, output)

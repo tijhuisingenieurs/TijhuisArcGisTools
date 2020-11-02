@@ -53,8 +53,8 @@ shore_peiling = arcpy.GetParameterAsText(12)
 width_peiling = arcpy.GetParameterAsText(13)
 ID_peiling = arcpy.GetParameterAsText(14)
 vaste_bodem = arcpy.GetParameter(15)
-output_file = arcpy.GetParameterAsText(17)
-output_unscaled = arcpy.GetParameterAsText(18)
+output_file = arcpy.GetParameterAsText(16)
+output_unscaled = arcpy.GetParameterAsText(17)
 
 # test zonder GUI
 # input_inpeilingen = './testdata/input/Testdata_Metfile_Inpeiling.met'
